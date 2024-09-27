@@ -39,13 +39,16 @@
         min="1"
         max="56"
       />
+
+      <button @click="handleShowLabels">Labels</button>
     </article>
 
     <div class="chartCanvas" ref="canvas" id="canvas"></div>
-    <div ref="textDisplay" id="textDisplay">
-      <h2>{{ text.title }}</h2>
-      <h3>{{ text.description }}</h3>
-    </div>
+  </div>
+  <div ref="textDisplay" id="textDisplay">
+    <h2>{{ text.title }}</h2>
+    <small>{{ text.subtitle }}</small>
+    <h3>{{ text.description }}</h3>
   </div>
 </template>
 
@@ -57,8 +60,9 @@ const canvas = ref(null);
 const textDisplay = ref(null);
 
 const text = reactive({
-  title: "sd",
-  description: "23",
+  title: "",
+  subtitle: "",
+  description: "",
 });
 
 const labelsSettings = reactive({
@@ -66,6 +70,8 @@ const labelsSettings = reactive({
   left: -20,
   rotation: 45,
   fontSize: 12,
+  showLabels: true,
+  width: 100,
 });
 
 const { story } = defineProps({
@@ -85,6 +91,19 @@ onMounted(() => {
   drawChart();
 });
 
+const selectElement = (scene, act) => {
+  console.log(act);
+  text.subtitle = "";
+
+  if (scene) {
+    text.title = scene.title;
+    text.description = scene.description;
+    text.subtitle = act.title;
+  } else {
+    text.title = act.title;
+    text.description = act.description;
+  }
+};
 const drawChart = () => {
   canvas.value.innerHTML = ""; // Limpiar el contenido
 
@@ -102,7 +121,25 @@ const drawChart = () => {
     segment.classList.add("segment");
     segment.style.backgroundColor = colors[index % colors.length];
 
+    let actLabelContainer = document.createElement("div");
+
+    let actLabel = document.createElement("div");
+    actLabel.style.position = "absolute";
+    actLabel.style.padding = "1rem 0.5rem";
+
+    actLabel.textContent = act.title;
+    actLabelContainer.appendChild(actLabel);
+
+    actLabel.addEventListener("click", () => {
+      selectElement(null, act);
+    });
+
+    // actLabel.textContent = act.title;
+
+    segment.appendChild(actLabelContainer);
+
     // Crear el contenido dinámico para cada segmento (actos y escenas)
+
     let scenesHTML = ``;
 
     act.scenes.forEach((scene) => {
@@ -112,7 +149,13 @@ const drawChart = () => {
 
       let sceneElement = document.createElement("span");
       sceneElement.classList.add("scene");
-      sceneElement.textContent = scene.title;
+
+      if (labelsSettings.showLabels) {
+        sceneElement.textContent = scene.title + scene.duration;
+      } else {
+        sceneElement.textContent = "";
+      }
+      //    sceneElement.textContent = scene.title;
 
       sceneElement.style.position = "relative";
       sceneElement.style.fontSize = `${labelsSettings.fontSize}px`; // P
@@ -121,18 +164,23 @@ const drawChart = () => {
       sceneElement.style.left = `${labelsSettings.left}px`; // Posición X
       sceneElement.style.transform = `rotate(${labelsSettings.rotation}deg)`; // Rotación
 
+      sceneContainer.style.width = `${labelsSettings.width}%`;
+
       sceneContainer.addEventListener("click", () => {
-        text.value = scene.title + scene.description;
+        selectElement(scene, act);
       });
 
-      sceneContainer.appendChild(sceneElement);
+      sceneContainer.style.width = sceneContainer.appendChild(sceneElement);
 
       segment.appendChild(sceneContainer);
     });
 
-
     canvas.value.appendChild(segment); // Añadir cada segmento al canvas
   });
+};
+
+const handleShowLabels = () => {
+  labelsSettings.showLabels = !labelsSettings.showLabels;
 };
 
 const updateScenes = () => {
@@ -158,12 +206,21 @@ watch(
   border: 1px black solid;
 }
 
+.hide {
+  display: none;
+}
+
 .styleControls input {
   border: 1px black solid !important;
 }
 .sceneContainer {
-  border-left: 5px black dotted;
+  border-left: 1px black dotted;
   display: flex;
+  text-overflow: ellipsis;
+}
+
+.sceneContainer:hover {
+  background-color: rgba(167, 166, 166, 0.486);
 }
 .scene {
   transform: rotate(45deg);

@@ -4,13 +4,14 @@
   "acts": [
     {
       "title": "Acto 1",
+      "description": "descActo 1",
       "scenes": [
         {
           "title": "Back to Joel",
           "description": "Joel regresa a casa después de un largo viaje.",
-          "duration": 5
+          "duration": 1
         },
-         {
+        {
           "title": "The Storm Approaches",
           "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
           "duration": 10
@@ -18,7 +19,7 @@
         {
           "title": "Whispers in the Dark",
           "description": "Susurros inquietantes llenan la noche.",
-          "duration": 6
+          "duration": 20
         },
         {
           "title": "A Race Against Time",
@@ -64,6 +65,7 @@
     },
     {
       "title": "Acto 2",
+      "description": "descActo 2",
       "scenes": [
         {
           "title": "The Storm Approaches",
@@ -97,8 +99,9 @@
         }
       ]
     },
-     {
+    {
       "title": "Acto 2Bis",
+      "description": "descActo 3",
       "scenes": [
         {
           "title": "The Storm Approaches",
@@ -125,7 +128,6 @@
           "description": "Los personajes encuentran claridad en medio del caos.",
           "duration": 5
         },
-
         {
           "title": "The Turning Point",
           "description": "Un giro crucial en la historia que lleva a nuevos caminos.",
@@ -135,6 +137,7 @@
     },
     {
       "title": "Acto 3",
+      "description": "descActo 1",
       "scenes": [
         {
           "title": "The Final Confrontation",
