@@ -1,0 +1,172 @@
+{
+  "title": "El Gran Viaje",
+  "description": "Una emocionante historia de aventura y autodescubrimiento.",
+  "acts": [
+    {
+      "title": "Acto 1",
+      "scenes": [
+        {
+          "title": "Back to Joel",
+          "description": "Joel regresa a casa después de un largo viaje.",
+          "duration": 5
+        },
+         {
+          "title": "The Storm Approaches",
+          "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
+          "duration": 10
+        },
+        {
+          "title": "Whispers in the Dark",
+          "description": "Susurros inquietantes llenan la noche.",
+          "duration": 6
+        },
+        {
+          "title": "A Race Against Time",
+          "description": "Una carrera contra el tiempo para salvar a un amigo.",
+          "duration": 12
+        },
+        {
+          "title": "The Betrayal",
+          "description": "Una traición que nadie vio venir.",
+          "duration": 8
+        },
+        {
+          "title": "Finding Clarity",
+          "description": "Los personajes encuentran claridad en medio del caos.",
+          "duration": 5
+        },
+        {
+          "title": "Toothbrush",
+          "description": "Un momento cómico con un cepillo de dientes.",
+          "duration": 8
+        },
+        {
+          "title": "Joel on the train platform",
+          "description": "Joel espera el tren mientras reflexiona sobre su vida.",
+          "duration": 6
+        },
+        {
+          "title": "Mary pursues Howard",
+          "description": "Mary sigue a Howard en una carrera inesperada.",
+          "duration": 4
+        },
+        {
+          "title": "The Unexpected Encounter",
+          "description": "Un encuentro inesperado que cambia todo.",
+          "duration": 7
+        },
+        {
+          "title": "The Secret Revealed",
+          "description": "Se revela un secreto que altera las relaciones.",
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "title": "Acto 2",
+      "scenes": [
+        {
+          "title": "The Storm Approaches",
+          "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
+          "duration": 10
+        },
+        {
+          "title": "Whispers in the Dark",
+          "description": "Susurros inquietantes llenan la noche.",
+          "duration": 6
+        },
+        {
+          "title": "A Race Against Time",
+          "description": "Una carrera contra el tiempo para salvar a un amigo.",
+          "duration": 12
+        },
+        {
+          "title": "The Betrayal",
+          "description": "Una traición que nadie vio venir.",
+          "duration": 8
+        },
+        {
+          "title": "Finding Clarity",
+          "description": "Los personajes encuentran claridad en medio del caos.",
+          "duration": 5
+        },
+        {
+          "title": "The Turning Point",
+          "description": "Un giro crucial en la historia que lleva a nuevos caminos.",
+          "duration": 11
+        }
+      ]
+    },
+     {
+      "title": "Acto 2Bis",
+      "scenes": [
+        {
+          "title": "The Storm Approaches",
+          "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
+          "duration": 10
+        },
+        {
+          "title": "Whispers in the Dark",
+          "description": "Susurros inquietantes llenan la noche.",
+          "duration": 6
+        },
+        {
+          "title": "A Race Against Time",
+          "description": "Una carrera contra el tiempo para salvar a un amigo.",
+          "duration": 12
+        },
+        {
+          "title": "The Betrayal",
+          "description": "Una traición que nadie vio venir.",
+          "duration": 8
+        },
+        {
+          "title": "Finding Clarity",
+          "description": "Los personajes encuentran claridad en medio del caos.",
+          "duration": 5
+        },
+
+        {
+          "title": "The Turning Point",
+          "description": "Un giro crucial en la historia que lleva a nuevos caminos.",
+          "duration": 11
+        }
+      ]
+    },
+    {
+      "title": "Acto 3",
+      "scenes": [
+        {
+          "title": "The Final Confrontation",
+          "description": "El enfrentamiento final entre los protagonistas y el antagonista.",
+          "duration": 15
+        },
+        {
+          "title": "Truths Unveiled",
+          "description": "Se revelan verdades ocultas que transforman todo.",
+          "duration": 9
+        },
+        {
+          "title": "A New Dawn",
+          "description": "El amanecer de una nueva era después de la tormenta.",
+          "duration": 7
+        },
+        {
+          "title": "Reconciliation",
+          "description": "Un momento de reconciliación entre viejos amigos.",
+          "duration": 8
+        },
+        {
+          "title": "Hope Restored",
+          "description": "La esperanza se renueva en el corazón de todos.",
+          "duration": 6
+        },
+        {
+          "title": "The Journey Ahead",
+          "description": "Los personajes miran hacia el futuro con optimismo.",
+          "duration": 10
+        }
+      ]
+    }
+  ]
+}
