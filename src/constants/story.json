@@ -1,6 +1,20 @@
 {
   "title": "El Gran Viaje",
   "description": "Una emocionante historia de aventura y autodescubrimiento.",
+  "plots": [
+    {
+      "id": 1,
+      "title": "Amor"
+    },
+    {
+      "id": 2,
+      "title": "Secundaria"
+    },
+    {
+      "id": 3,
+      "title": "Comedia"
+    }
+  ],
   "acts": [
     {
       "title": "Acto 1",
@@ -9,60 +23,201 @@
         {
           "title": "Back to Joel",
           "description": "Joel regresa a casa después de un largo viaje.",
-          "duration": 1
+          "duration": 1,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "The Storm Approaches",
           "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
-          "duration": 10
+          "duration": 10,
+          "plots": [
+            1,
+            2
+          ],
+          "intensity": 6
         },
         {
           "title": "Whispers in the Dark",
           "description": "Susurros inquietantes llenan la noche.",
-          "duration": 20
+          "duration": 20,
+          "plots": [
+            1
+          ],
+          "intensity": 9
         },
         {
           "title": "A Race Against Time",
           "description": "Una carrera contra el tiempo para salvar a un amigo.",
-          "duration": 12
+          "duration": 12,
+          "plots": [
+            2
+          ],
+          "intensity": 7
         },
         {
           "title": "The Betrayal",
           "description": "Una traición que nadie vio venir.",
-          "duration": 8
+          "duration": 8,
+          "plots": [
+            3
+          ],
+          "intensity": 8
         },
         {
           "title": "Finding Clarity",
           "description": "Los personajes encuentran claridad en medio del caos.",
-          "duration": 5
+          "duration": 5,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "Toothbrush",
           "description": "Un momento cómico con un cepillo de dientes.",
-          "duration": 8
+          "duration": 8,
+          "plots": [
+            2
+          ],
+          "intensity": 3
         },
         {
           "title": "Joel on the train platform",
           "description": "Joel espera el tren mientras reflexiona sobre su vida.",
-          "duration": 6
+          "duration": 6,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "Mary pursues Howard",
           "description": "Mary sigue a Howard en una carrera inesperada.",
-          "duration": 4
+          "duration": 4,
+          "plots": [
+            1
+          ],
+          "intensity": 2
         },
         {
           "title": "The Unexpected Encounter",
           "description": "Un encuentro inesperado que cambia todo.",
-          "duration": 7
+          "duration": 7,
+          "plots": [
+            1,
+            3
+          ],
+          "intensity": 5
         },
         {
           "title": "The Secret Revealed",
           "description": "Se revela un secreto que altera las relaciones.",
-          "duration": 9
+          "duration": 9,
+          "plots": [
+            3
+          ],
+          "intensity": 10
         }
       ]
     },
+      {
+        "title": "Acto 1",
+        "description": "descActo 1",
+        "scenes": [
+          {
+            "title": "Back to Joel",
+            "description": "Joel regresa a casa después de un largo viaje.",
+            "duration": 1,
+            "plots": [],
+            "intensity": null
+          },
+          {
+            "title": "The Storm Approaches",
+            "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
+            "duration": 10,
+            "plots": [
+              1,
+              2
+            ],
+            "intensity": 6
+          },
+          {
+            "title": "Whispers in the Dark",
+            "description": "Susurros inquietantes llenan la noche.",
+            "duration": 20,
+            "plots": [
+              1
+            ],
+            "intensity": 9
+          },
+          {
+            "title": "A Race Against Time",
+            "description": "Una carrera contra el tiempo para salvar a un amigo.",
+            "duration": 12,
+            "plots": [
+              2
+            ],
+            "intensity": 7
+          },
+          {
+            "title": "The Betrayal",
+            "description": "Una traición que nadie vio venir.",
+            "duration": 8,
+            "plots": [
+              3
+            ],
+            "intensity": 8
+          },
+          {
+            "title": "Finding Clarity",
+            "description": "Los personajes encuentran claridad en medio del caos.",
+            "duration": 5,
+            "plots": [],
+            "intensity": null
+          },
+          {
+            "title": "Toothbrush",
+            "description": "Un momento cómico con un cepillo de dientes.",
+            "duration": 8,
+            "plots": [
+              2
+            ],
+            "intensity": 3
+          },
+          {
+            "title": "Joel on the train platform",
+            "description": "Joel espera el tren mientras reflexiona sobre su vida.",
+            "duration": 6,
+            "plots": [],
+            "intensity": null
+          },
+          {
+            "title": "Mary pursues Howard",
+            "description": "Mary sigue a Howard en una carrera inesperada.",
+            "duration": 4,
+            "plots": [
+              1
+            ],
+            "intensity": 2
+          },
+          {
+            "title": "The Unexpected Encounter",
+            "description": "Un encuentro inesperado que cambia todo.",
+            "duration": 7,
+            "plots": [
+              1,
+              3
+            ],
+            "intensity": 5
+          },
+          {
+            "title": "The Secret Revealed",
+            "description": "Se revela un secreto que altera las relaciones.",
+            "duration": 9,
+            "plots": [
+              3
+            ],
+            "intensity": 10
+          }
+        ]
+      },
     {
       "title": "Acto 2",
       "description": "descActo 2",
@@ -70,32 +225,54 @@
         {
           "title": "The Storm Approaches",
           "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
-          "duration": 10
+          "duration": 10,
+          "plots": [
+            2
+          ],
+          "intensity": 6
         },
         {
           "title": "Whispers in the Dark",
           "description": "Susurros inquietantes llenan la noche.",
-          "duration": 6
+          "duration": 6,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "A Race Against Time",
           "description": "Una carrera contra el tiempo para salvar a un amigo.",
-          "duration": 12
+          "duration": 12,
+          "plots": [
+            1,
+            2
+          ],
+          "intensity": 7
         },
         {
           "title": "The Betrayal",
           "description": "Una traición que nadie vio venir.",
-          "duration": 8
+          "duration": 8,
+          "plots": [
+            3
+          ],
+          "intensity": 8
         },
         {
           "title": "Finding Clarity",
           "description": "Los personajes encuentran claridad en medio del caos.",
-          "duration": 5
+          "duration": 5,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "The Turning Point",
           "description": "Un giro crucial en la historia que lleva a nuevos caminos.",
-          "duration": 11
+          "duration": 11,
+          "plots": [
+            1,
+            3
+          ],
+          "intensity": 9
         }
       ]
     },
@@ -106,32 +283,54 @@
         {
           "title": "The Storm Approaches",
           "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
-          "duration": 10
+          "duration": 10,
+          "plots": [
+            1,
+            2
+          ],
+          "intensity": 6
         },
         {
           "title": "Whispers in the Dark",
           "description": "Susurros inquietantes llenan la noche.",
-          "duration": 6
+          "duration": 6,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "A Race Against Time",
           "description": "Una carrera contra el tiempo para salvar a un amigo.",
-          "duration": 12
+          "duration": 12,
+          "plots": [
+            2
+          ],
+          "intensity": 7
         },
         {
           "title": "The Betrayal",
           "description": "Una traición que nadie vio venir.",
-          "duration": 8
+          "duration": 8,
+          "plots": [
+            3
+          ],
+          "intensity": 8
         },
         {
           "title": "Finding Clarity",
           "description": "Los personajes encuentran claridad en medio del caos.",
-          "duration": 5
+          "duration": 5,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "The Turning Point",
           "description": "Un giro crucial en la historia que lleva a nuevos caminos.",
-          "duration": 11
+          "duration": 11,
+          "plots": [
+            1,
+            3
+          ],
+          "intensity": 9
         }
       ]
     },
@@ -142,32 +341,55 @@
         {
           "title": "The Final Confrontation",
           "description": "El enfrentamiento final entre los protagonistas y el antagonista.",
-          "duration": 15
+          "duration": 15,
+          "plots": [
+            3
+          ],
+          "intensity": 10
         },
         {
           "title": "Truths Unveiled",
           "description": "Se revelan verdades ocultas que transforman todo.",
-          "duration": 9
+          "duration": 9,
+          "plots": [
+            1,
+            3
+          ],
+          "intensity": 5
         },
         {
           "title": "A New Dawn",
           "description": "El amanecer de una nueva era después de la tormenta.",
-          "duration": 7
+          "duration": 7,
+          "plots": [
+            1
+          ],
+          "intensity": 3
         },
         {
           "title": "Reconciliation",
           "description": "Un momento de reconciliación entre viejos amigos.",
-          "duration": 8
+          "duration": 8,
+          "plots": [],
+          "intensity": null
         },
         {
           "title": "Hope Restored",
           "description": "La esperanza se renueva en el corazón de todos.",
-          "duration": 6
+          "duration": 6,
+          "plots": [
+            1
+          ],
+          "intensity": 4
         },
         {
           "title": "The Journey Ahead",
           "description": "Los personajes miran hacia el futuro con optimismo.",
-          "duration": 10
+          "duration": 10,
+          "plots": [
+            2
+          ],
+          "intensity": 6
         }
       ]
     }
