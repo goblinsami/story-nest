@@ -1,47 +1,18 @@
 <template>
   <div id="canvas-container">
-    <article class="styleControls">
-      <label for="position">Y height</label>
-      <input
-        name="position"
-        type="range"
-        v-model="store.chartHeight"
-        min="25"
-        max="75"
-        step="1"
-      />
-
-      <button @click="setLineChartData()">Set data</button>
-      <button @click="resetZoom()">Reset zoom</button>
-      <button @click="handleShowLabels">Labels</button>
-      <button @click="store.toggleReader()">Reader</button>
-      <button @click="store.toggleReader()">Refresh</button>
-   </article>
-
-    <div class="chartWrapper" :style="{ height: store.chartHeight + 'vh' }">
-      <Line
-        class="plotChart"
-        :data="data"
-        :options="options"
-        ref="lineChart"
-        @mouseenter="handleClick"
-        :key="key"
-      />
+    <div style="width: 500px">
+      <Pie :data="pieData" :options="pieOptions" ref="pieChart" :key="key" />
+      {{ pieData }}
     </div>
-  </div>
-  <div ref="textDisplay" id="textDisplay" v-if="store.showReader">
-    <h2>{{ text.title }}</h2>
-    <small>{{ text.subtitle }}</small>
-    <h3>{{ text.description }}</h3>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, reactive, watch } from "vue";
+import jsonStory from "../constants/story.json";
 import { Line, Pie } from "vue-chartjs";
 import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
-import { useSettingsStore } from "../stores/settings";
 
 import {
   Chart as ChartJS,
@@ -56,6 +27,54 @@ import {
 } from "chart.js";
 
 // Registrar los componentes necesarios de Chart.js
+
+// Definir el plugin de Chart.js para agregar anotaciones personalizadas
+// Definir el plugin de Chart.js para agregar anotaciones personalizadas
+const customAnnotationsPlugin = {
+  id: "customAnnotationsPlugin",
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+
+    // Asegúrate de que la escala X esté disponible
+    if (!scales.x) {
+     // console.warn("La escala X no está disponible.");
+      return;
+    }
+
+    const scenes = chart.data.labels;
+
+    // Establecer estilo para las anotaciones
+    ctx.font = "12px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Dibujar las etiquetas para cada escena alineadas al borde de los círculos
+    scenes.forEach((scene, index) => {
+      const xPosition = scales.x.getPixelForValue(index);
+      const yPosition = scales.y.getPixelForValue(
+        chart.data.datasets[0].data[index]
+      );
+
+      // Calcular el radio del punto (puedes ajustar el valor del radio según tu estilo)
+      const radius = 5; // Ajusta este valor si tus puntos son más grandes o más pequeños
+
+      // Colocar la etiqueta ligeramente fuera del círculo
+      const labelYPosition = yPosition - radius - 10; // 10px por encima del círculo
+
+      ctx.fillText(scene, xPosition, labelYPosition); // Dibujar la etiqueta
+    });
+
+    // ANOTACIÓN DE PRUEBA
+    const testXPosition = scales.x.getPixelForValue(3); // X en la posición del índice 3
+    const testYPosition = scales.y.getPixelForValue(50); // Un valor arbitrario de Y
+
+    ctx.fillStyle = "red"; // Cambiar color para la anotación de prueba
+    ctx.fillText("Anotación de Prueba", testXPosition, testYPosition); // Dibujar anotación
+  },
+};
+
+
 ChartJS.register(
   Title,
   Tooltip,
@@ -66,17 +85,49 @@ ChartJS.register(
   LinearScale,
   annotationPlugin,
   zoomPlugin,
-  ArcElement
+  ArcElement,
 );
 
-const store = useSettingsStore();
+// Registrar el plugin personalizado con el nuevo nombre
+
+// Registrar el plugin personalizado con el nuevo nombre
 
 const canvas = ref(null);
 const textDisplay = ref(null);
 const lineChart = ref(null);
 const scenes = ref(null);
 const key = ref(0);
-const localData = ref({}); // Crear un contenedor para la copia local de los datos
+const pieData = ref({
+  labels: Array.from({ length: 100 }, (_, i) => `Escena ${i + 1}`), // Generar 100 etiquetas
+  datasets: [
+    {
+      backgroundColor: Array.from({ length: 100 }, (_, i) => {
+        const colors = ["#FF3784", "#36A2EB", "#4BC0C0", "#F77825", "#9966FF"];
+        return colors[Math.floor(i / 25)]; // Cambiar color cada 25 elementos
+      }),
+      data: Array.from({ length: 100 }, () => 1), // Todos los valores son 1
+    },
+  ],
+});
+
+
+// Opciones del gráfico con anotaciones
+const pieOptions = ref({
+  plugins: {
+    legend: false,
+    customAnnotationsPlugin: {},
+  },
+    scales: {
+    x: {
+      type: 'category',
+      labels: ['Escena 1', 'Escena 2', 'Escena 3'], // Asegúrate de que las etiquetas sean correctas
+    },
+    y: {
+      beginAtZero: true,
+    },
+  },
+
+});
 
 const data = ref({
   labels: ["1", "2", "3", "4", "5"], //escenas
@@ -204,11 +255,11 @@ const labelsSettings = reactive({
   width: 100,
 });
 
-/* const { story } = defineProps({
+const { story } = defineProps({
   story: {
     required: true,
   },
-}); */
+});
 const colors = [
   "rgba(255, 99, 132, 0.5)", // Color 1
   "rgba(54, 162, 235, 0.5)", // Color 2
@@ -218,10 +269,11 @@ const colors = [
   "rgba(255, 159, 64, 0.5)", // Color 6
 ];
 
+
 onMounted(() => {
   // drawChart();
 
-  setLineChartData();
+ // setPieChartData();
 });
 
 const resetZoom = () => {
@@ -230,7 +282,6 @@ const resetZoom = () => {
 const handleClick = (event, chart) => {
   const chartInstance = lineChart.value.chart; // Acceder a la instancia del gráfico
   const { x } = event; // Obtiene la posición x del clic
-  const xScale = chartInstance.scales.x; // Escala del eje X
 
   // Verificar en qué segmento ocurrió el clic
   const annotations = chartInstance.options.plugins.annotation.annotations;
@@ -241,28 +292,12 @@ const handleClick = (event, chart) => {
 
     if (x >= xMin && x <= xMax) {
       // El clic ocurrió dentro de este segmento
-      text.title = annotation.title;
     }
   }
-  chartInstance.data.labels.forEach((label, index) => {
-    const xPosition = xScale.getPixelForValue(index); // Obtener la posición de la etiqueta en el eje X
-
-    // Definir un rango de tolerancia para detectar el clic cerca de la etiqueta
-    const tolerance = 5; // Ajustar según sea necesario
-    if (x >= xPosition - tolerance && x <= xPosition + tolerance) {
-      text.title = label;
-    }
-  });
 };
 const setLineChartData = () => {
   // lineChart.value.style.height = '1200px'
-  if (!store.story || !store.story.acts) {
-    console.error("Story o acts no están definidos aún.");
-    return;
-  }
-
-  const acts = store.story.acts; // Usar la copia local de los actos
-
+  const acts = jsonStory.acts; // Datos de actos y escenas
   const scenes = [];
   const segments = [];
   const plotData = {}; // Objeto para almacenar los datos de cada trama
@@ -310,16 +345,13 @@ const setLineChartData = () => {
 
     // Actualizar el valor inicial para el próximo segmento
     startX += act.scenes.length;
-
-    key.value++
   });
 
   // Crear datasets dinámicos basados en el número de tramas
   const datasets = [];
   for (let i = 1; i <= maxPlotNumber; i++) {
-    console.log(store.story.plots[i-1].title)
     datasets.push({
-      label: store.story.plots[i-1].title,
+      label: `Trama ${i}`,
       data: plotData[i], // Usar los datos de la trama correspondiente
       borderColor: `rgba(${i * 50}, 99, 132, 1)`, // Color único para cada trama
       backgroundColor: `rgba(${i * 50}, 99, 132, 0.2)`,
@@ -336,7 +368,55 @@ const setLineChartData = () => {
   options.value.plugins.annotation.annotations = segments;
   key.value++;
 };
+const setPieChartData = () => {
+  const labels = [];
+  const data = [];
+  const annotations = [];
 
+  const acts = jsonStory.acts; // Datos de actos y escenas
+  let totalScenes = 0;
+
+  // Recorre los actos para llenar las etiquetas y los datos
+  acts.forEach((act) => {
+    labels.push(act.title); // Suponiendo que cada acto tiene un título
+    const sceneCount = act.scenes.length;
+    data.push(sceneCount); // Contamos las escenas en cada acto
+
+    // Recorre cada escena para crear anotaciones
+    act.scenes.forEach((scene) => {
+      // Cálculo de la posición angular para la anotación
+      const angle =
+        (totalScenes / acts.reduce((sum, a) => sum + a.scenes.length, 0)) * 360;
+
+      annotations.push({
+        type: "label",
+        content: scene.title, // El título de la escena
+        position: {
+          x: "50%", // Colocar en el borde radial
+          y: "50%",
+        },
+        rotation: angle, // Gira la anotación según el ángulo calculado
+        textAlign: "center",
+        font: {
+          size: 12,
+          style: "italic",
+        },
+        backgroundColor: "transparent", // Sin fondo para las anotaciones
+        borderColor: "transparent", // Sin borde para las anotaciones
+      });
+
+      totalScenes++;
+    });
+  });
+
+  pieData.value.labels = labels;
+
+  pieData.value.datasets[0].data = data;
+  // pieOptions.value.plugins.annotation.annotations = annotations;
+
+
+  key.value++;
+};
 const selectElement = (scene, act) => {
   text.subtitle = "";
 
@@ -349,7 +429,52 @@ const selectElement = (scene, act) => {
     text.description = act.description;
   }
 };
+/* const drawChart = () => {
+  const segmentsContainer = document.getElementById("dynamicSegments");
 
+  // Limpiar los segmentos antiguos, pero no el gráfico de líneas
+  segmentsContainer.innerHTML = "";
+
+  // Agregar los nuevos segmentos
+  jsonStory.acts.forEach((act, index) => {
+    let segment = document.createElement("div");
+    segment.setAttribute("id", index);
+    segment.classList.add("segment");
+    segment.style.backgroundColor = colors[index % colors.length];
+
+    let actLabelContainer = document.createElement("div");
+    let actLabel = document.createElement("div");
+    actLabel.style.position = "absolute";
+    actLabel.style.padding = "1rem 0.5rem";
+
+    actLabel.textContent = act.title;
+    actLabelContainer.appendChild(actLabel);
+    segment.appendChild(actLabelContainer);
+
+    act.scenes.forEach((scene) => {
+      let sceneContainer = document.createElement("div");
+      sceneContainer.classList.add("sceneContainer");
+
+      let sceneElement = document.createElement("span");
+      sceneElement.classList.add("scene");
+
+      if (labelsSettings.showLabels) {
+        sceneElement.textContent = scene.title;
+      }
+
+      sceneElement.style.fontSize = `${labelsSettings.fontSize}px`;
+      sceneElement.style.top = `${labelsSettings.top}px`;
+      sceneElement.style.left = `${labelsSettings.left}px`;
+      sceneElement.style.transform = `rotate(${labelsSettings.rotation}deg)`;
+
+      sceneContainer.appendChild(sceneElement);
+      segment.appendChild(sceneContainer);
+    });
+
+    segmentsContainer.appendChild(segment);
+  });
+};
+ */
 const handleShowLabels = () => {
   labelsSettings.showLabels = !labelsSettings.showLabels;
 };
@@ -357,28 +482,14 @@ const handleShowLabels = () => {
 const updateScenes = () => {
   drawChart();
 };
-watch(
-  () => store.story, // Observa cambios en toda la historia
-  (newStory) => {
-    if (newStory && newStory.acts && newStory.acts.length > 0) {
-            localData.value = { ...newStory }; // Copiar los datos del store a localData
 
-      setLineChartData(); // Actualiza el gráfico
-      console.log('CHANGE DETECTED')
-    }
+watch(
+  labelsSettings,
+  () => {
+    drawChart();
   },
-  { deep: true }, {immediate:true} // Necesario para observar objetos anidados como escenas
+  { deep: true }
 );
-/* watch(
-  () => store.story,
-  (newStory) => {
-    if (newStory) {
-      localData.value = { ...newStory }; // Copiar los datos del store a localData
-      setLineChartData(); // Actualizar el gráfico
-    }
-  },
-  { deep: true }, {immediate:true}
-); */
 </script>
 
 <style>
