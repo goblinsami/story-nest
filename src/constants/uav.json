@@ -1,0 +1,132 @@
+{
+  "title": "un alma virtuosa",
+  "description": "UAV",
+  "plots": [
+    {
+      "id": 1,
+      "title": "Amor"
+    },
+    {
+      "id": 2,
+      "title": "Secundaria"
+    },
+    {
+      "id": 3,
+      "title": "Comedia"
+    }
+  ],
+  "acts": [
+    {
+      "title": "Aventura pura",
+      "description": "descActo 1",
+      "scenes": [
+        {
+          "title": "Yanis conoce a FC",
+          "description": "en el parc de la Ciutadella",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 9
+        },
+        {
+          "title": "Yanis se declara a FC, es rechazado",
+          "description": "Nueva escena",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 2
+        }
+      ]
+    },
+    {
+      "title": "Rodaje",
+      "description": "nuevo acto",
+      "scenes": [
+        {
+          "title": "Carlos gana el casting",
+          "description": "Nueva escena",
+          "duration": 10,
+          "plots": [],
+          "intensity": null
+        },
+        {
+          "title": "Carlos conoce a Olympia en la Rueda de prensa",
+          "description": "",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Carlos y Olympia se besan",
+          "description": "Nueva escena",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 10
+        }
+      ]
+    },
+    {
+      "title": "Rodaje truncado",
+      "description": "nuevo acto",
+      "scenes": [
+        {
+          "title": "Carlos y Olympia se cuestionan el rodaje",
+          "description": "",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Carlos y Olimpya se lian con otros",
+          "description": "Nueva escena",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 3
+        },
+        {
+          "title": "Carlos es expulsado del rodaje",
+          "description": "Nueva escena",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 0
+        }
+      ]
+    },
+    {
+      "title": "Estreno",
+      "description": "nuevo acto",
+      "scenes": [
+        {
+          "title": "Carlos y Olympia se despiden",
+          "description": "",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Beso en el puerto de Santorini",
+          "description": "Nueva escena",
+          "duration": 10,
+          "plots": [
+            1
+          ],
+          "intensity": 15
+        }
+      ]
+    }
+  ]
+}

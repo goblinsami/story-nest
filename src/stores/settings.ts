@@ -7,7 +7,7 @@ import { maxRegisters } from "../constants/constants.json";
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     story: {},
-    showPlotChart: false,
+    showPlotChart: true,
     showPieChart: false,
     showEditor: true,
     showReader: false,
@@ -34,6 +34,44 @@ export const useSettingsStore = defineStore('settings', {
       // console.log('IN STORE updateStory', story)
       this.story = story
     },
+
+    addAct() {
+      let newAct = {
+        title: "Nuevo acto",
+        description: "nuevo acto",
+        scenes: [{
+          title: "Nueva Escena",
+          description: "",
+          duration: 10,
+          plots: [],
+          intensity: null
+        }]
+      }
+
+      this.story.acts.unshift(newAct)
+    },
+
+    deleteScene(actIndex, sceneIndex) {
+      console.log(actIndex, sceneIndex)
+
+      let act = this.story.acts[actIndex]
+      act.scenes.splice(sceneIndex, 1)
+
+    },
+
+    deleteAct(actIndex) {
+      this.story.acts.splice(actIndex, 1)
+    },
+
+    addPlotToScene(actIndex, sceneIndex) {
+      let act = this.story.acts[actIndex]
+
+      let scene = act.scenes[sceneIndex]
+
+      scene.plots.push(1)
+      scene.intensity = 5
+    },
+
     addScene(position, act, newScene) {
 
 

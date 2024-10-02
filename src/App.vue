@@ -15,7 +15,9 @@
 
 <script setup>
 import { ref, onMounted, reactive } from "vue";
-import jsonStory from './constants/story.json'
+//import jsonStory from './constants/story.json'
+import jsonStory from './constants/uav.json'
+
 import TextEditor from "./components/TextEditor.vue";
 import LineChart from "./components/LineChart.vue";
 import { useSettingsStore } from "./stores/settings";

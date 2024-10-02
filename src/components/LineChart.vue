@@ -16,24 +16,50 @@
       <button @click="handleShowLabels">Labels</button>
       <button @click="store.toggleReader()">Reader</button>
       <button @click="store.toggleReader()">Refresh</button>
-   </article>
-
+      <div class="color-pickers">
+        <div>
+          <div v-for="(el, index) in options.plugins.annotation.annotations">
+            <input
+              type="color"
+              :id="index"
+              name="head"
+              v-model="colorsHard[index]"
+              @input="setLineChartData()"
+            />
+            {{ el.title }}
+          </div>
+        </div>
+        <div>
+          <div v-for="(el, index) in data.datasets">
+            <input
+              type="color"
+              :id="index"
+              name="head"
+              v-model="plotColorsHard[index]"
+              @input="setLineChartData()"
+            />
+            {{ el.label }}
+          </div>
+        </div>
+      </div>
+    </article>
+    {{ data.datasets }}
     <div class="chartWrapper" :style="{ height: store.chartHeight + 'vh' }">
       <Line
         class="plotChart"
         :data="data"
         :options="options"
         ref="lineChart"
-        @mouseenter="handleClick"
+        @click="handleClick"
         :key="key"
       />
     </div>
   </div>
-  <div ref="textDisplay" id="textDisplay" v-if="store.showReader">
+<!--   <div ref="textDisplay" id="textDisplay" v-if="store.showReader">
     <h2>{{ text.title }}</h2>
     <small>{{ text.subtitle }}</small>
     <h3>{{ text.description }}</h3>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -70,6 +96,7 @@ ChartJS.register(
 );
 
 const store = useSettingsStore();
+const selectedColor = ref("#caafaf");
 
 const canvas = ref(null);
 const textDisplay = ref(null);
@@ -90,6 +117,48 @@ const data = ref({
     },
   ],
 });
+
+const opacity = ref(0);
+
+const colorsHard = ref([
+  "#FF5733", // Rojo anaranjado
+  "#33FF57", // Verde lima
+  "#3357FF", // Azul
+  "#F1C40F", // Amarillo
+  "#9B59B6", // Púrpura
+  "#E67E22", // Naranja
+  "#2ECC71", // Verde esmeralda
+  "#3498DB", // Azul claro
+  "#E74C3C", // Rojo
+  "#1ABC9C", // Verde aguamarina
+  "#8E44AD", // Púrpura oscuro
+  "#F39C12", // Amarillo anaranjado
+  "#D35400", // Naranja oscuro
+  "#2C3E50", // Azul oscuro
+  "#ECF0F1", // Gris claro
+  "#95A5A6", // Gris
+  "#7F8C8D", // Gris oscuro
+]);
+
+const plotColorsHard = ref([
+  "#FF5733", // Rojo anaranjado
+  "#33FF57", // Verde lima
+  "#3357FF", // Azul
+  "#F1C40F", // Amarillo
+  "#9B59B6", // Púrpura
+  "#E67E22", // Naranja
+  "#2ECC71", // Verde esmeralda
+  "#3498DB", // Azul claro
+  "#E74C3C", // Rojo
+  "#1ABC9C", // Verde aguamarina
+  "#8E44AD", // Púrpura oscuro
+  "#F39C12", // Amarillo anaranjado
+  "#D35400", // Naranja oscuro
+  "#2C3E50", // Azul oscuro
+  "#ECF0F1", // Gris claro
+  "#95A5A6", // Gris
+  "#7F8C8D", // Gris oscuro
+]);
 
 // Opciones del gráfico con anotaciones
 const options = ref({
@@ -242,6 +311,7 @@ const handleClick = (event, chart) => {
     if (x >= xMin && x <= xMax) {
       // El clic ocurrió dentro de este segmento
       text.title = annotation.title;
+      console.log(annotation);
     }
   }
   chartInstance.data.labels.forEach((label, index) => {
@@ -273,12 +343,13 @@ const setLineChartData = () => {
   acts.forEach((act, actIndex) => {
     const segmentLength = act.scenes.length;
 
+    let color = colorsHard.value[actIndex];
     // Crear los segmentos
     const segment = {
       xMin: startX,
       xMax: startX + segmentLength,
-      backgroundColor: `rgba(${actIndex * 50}, 99, 132, 0.2)`,
-      borderColor: `rgba(${actIndex * 50}, 99, 132, 1)`,
+      backgroundColor: color + "30",
+      borderColor: color + "99",
       borderWidth: 1,
       title: act.title,
       type: "box",
@@ -288,12 +359,12 @@ const setLineChartData = () => {
     // Recorrer las escenas del acto
     act.scenes.forEach((scene) => {
       scenes.push({
-        title: scene.title,
-        act: act.title,
+        title: scene?.title,
+        act: act?.title,
       });
 
       // Recorrer las tramas en la escena y actualizar el plotData
-      scene.plots.forEach((plot) => {
+      scene?.plots.forEach((plot) => {
         maxPlotNumber = Math.max(maxPlotNumber, plot); // Determinar el número máximo de tramas
         if (!plotData[plot]) plotData[plot] = []; // Crear array para la trama si no existe
         plotData[plot].push(scene.intensity); // Añadir intensidad a la trama
@@ -301,7 +372,7 @@ const setLineChartData = () => {
 
       // Para las tramas que no están en la escena, añadir `null`
       for (let i = 1; i <= maxPlotNumber; i++) {
-        if (!scene.plots.includes(i)) {
+        if (!scene?.plots.includes(i)) {
           if (!plotData[i]) plotData[i] = []; // Crear array si aún no existe
           plotData[i].push(null); // Añadir `null` si no está presente en la escena
         }
@@ -311,18 +382,20 @@ const setLineChartData = () => {
     // Actualizar el valor inicial para el próximo segmento
     startX += act.scenes.length;
 
-    key.value++
+    key.value++;
   });
 
   // Crear datasets dinámicos basados en el número de tramas
   const datasets = [];
   for (let i = 1; i <= maxPlotNumber; i++) {
-    console.log(store.story.plots[i-1].title)
+    let color = plotColorsHard.value[i - 1];
+
+    console.log(store.story.plots[i - 1].title);
     datasets.push({
-      label: store.story.plots[i-1].title,
+      label: store.story.plots[i - 1].title,
       data: plotData[i], // Usar los datos de la trama correspondiente
-      borderColor: `rgba(${i * 50}, 99, 132, 1)`, // Color único para cada trama
-      backgroundColor: `rgba(${i * 50}, 99, 132, 0.2)`,
+      backgroundColor: color + "30",
+      borderColor: color + "99",
       borderWidth: 2,
       fill: false, // No rellenar debajo de la línea
       tension: 0.4,
@@ -361,13 +434,14 @@ watch(
   () => store.story, // Observa cambios en toda la historia
   (newStory) => {
     if (newStory && newStory.acts && newStory.acts.length > 0) {
-            localData.value = { ...newStory }; // Copiar los datos del store a localData
+      localData.value = { ...newStory }; // Copiar los datos del store a localData
 
       setLineChartData(); // Actualiza el gráfico
-      console.log('CHANGE DETECTED')
+      console.log("CHANGE DETECTED");
     }
   },
-  { deep: true }, {immediate:true} // Necesario para observar objetos anidados como escenas
+  { deep: true },
+  { immediate: true } // Necesario para observar objetos anidados como escenas
 );
 /* watch(
   () => store.story,
@@ -385,6 +459,11 @@ watch(
 /* .plotChart {
 
 } */
+
+.color-pickers {
+  display: flex;
+  flex-direction: column;
+}
 .chartWrapper {
   height: 2000px;
 }

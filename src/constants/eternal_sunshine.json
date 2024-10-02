@@ -1,0 +1,25 @@
+{
+  "title": "empty",
+  "description": "empty",
+  "plots": [
+    {
+      "id": 1,
+      "title": "Amor"
+    },
+    {
+      "id": 2,
+      "title": "Secundaria"
+    },
+    {
+      "id": 3,
+      "title": "Comedia"
+    }
+  ],
+  "acts": [
+    {
+      "title": "Acto 1",
+      "description": "descActo 1",
+      "scenes": []
+    }
+  ]
+}
