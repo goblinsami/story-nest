@@ -2,7 +2,8 @@
 import { useSettingsStore } from "../stores/settings";
 import { VueDraggableNext } from "vue-draggable-next";
 import { defineComponent, ref, watch } from "vue";
-
+import SceneCreator from "./SceneCreator.vue";
+import PlotCreator from "./PlotCreator.vue";
 const store = useSettingsStore();
 
 const draggable = VueDraggableNext;
@@ -13,19 +14,22 @@ const dragging = ref(false);
 
 const localData = ref({});
 
-const newScene = ref({title: 'Añade nueva escena', description: 'Nueva escena'});
+const showPlotEditor = ref(false);
 
+
+const newScene = ref({
+  title: "Añade nueva escena",
+  description: "Nueva escena",
+});
 
 const createScene = (position, act) => {
-  store.addScene(position, act, newScene.value)
-  newScene.value.title = 'Añade nueva escena'
-  newScene.value.description = 'Nueva escena'
+  store.addScene(position, act, newScene.value);
+  newScene.value.title = "Añade nueva escena";
+  newScene.value.description = "Nueva escena";
 };
-const createAct = ( act) => {
-  store.addAct()
-
+const createAct = (act) => {
+  store.addAct();
 };
-
 
 // Función que se ejecuta al empezar a arrastrar
 const onStart = () => {
@@ -36,6 +40,10 @@ const onStart = () => {
 const onEnd = () => {
   dragging.value = false;
   store.updateStory(localData.value);
+};
+
+const handleShowPlotEditor = () => {
+  showPlotEditor.value = !showPlotEditor.value
 };
 
 watch(
@@ -59,62 +67,54 @@ watch(
   <main>
     <article>
       <div class="title-container">
-        <h1>
-          <input
-            type="text"
-            class="title"
-            v-model="localData.title"
-            maxlength="50"
-          />
-        </h1>
-        <textarea
-          type="textarea"
-          class="sub-title"
-          v-model="localData.description"
-        ></textarea>
-        <button @click="store.addAct()">+</button>
+        <div>
+          <h1>
+            <input
+              type="text"
+              class="title"
+              v-model="localData.title"
+              maxlength="50"
+            />
+          </h1>
+          <textarea
+            type="textarea"
+            class="sub-title"
+            v-model="localData.description"
+          ></textarea>
+        </div>
+        <span style="display: flex;">
+          <button @click="store.addAct()" class="addAct">Añadir acto</button>
+          <button @click="store.addNumeration()" class="addAct">numerar</button>
+          <button @click="handleShowPlotEditor()" class="addAct">plots</button>
+        </span>
+
+        <span v-if="localData.acts">{{ store.getScenesLength }}</span>
+        <div v-if="showPlotEditor">
+          <PlotCreator/>
+        </div>
       </div>
+
 
       <div class="">
         <draggable
-        v-model="localData.acts"
-        @start="onStart"
-        @end="onEnd"
-        class="acts-container"
-        group="acts"
+          v-model="localData.acts"
+          @start="onStart"
+          @end="onEnd"
+          class="acts-container"
+          group="acts"
         >
-        <ul v-for="(act, actIndex) in localData.acts" class="card">
-            <button @click="store.deleteAct(actIndex)">X</button>
+          <ul v-for="(act, actIndex) in localData.acts" class="card">
+            <button @click="store.deleteAct(actIndex)" class="deleteAct">
+              X
+            </button>
             <div class="act-header-container">
               <input type="text" class="title" v-model="act.title" />
               <h2>
-                <button>+</button><span>{{ act.scenes.length }}</span>
+                <span>{{ act.scenes.length }}</span>
               </h2>
             </div>
             <div class="act">
-              <div class="sceneClass card" id="createScene">
-                 <table>
-                   <tr>
-                     <td>
-                       + -
-                       <input
-                         type="text"
-                         class="description"
-                         v-model="newScene.title"
-                       />
-                     </td>
-                     <td>
-                       <textarea v-model="newScene.description" ype="text" class="description"></textarea>
-                     </td>
-                     <td>
-                       <div class="create-scene-button-container">
-                         <button @click="createScene('up', act)">&#8593</button>
-                         <button @click="createScene('down', act)">&#8595</button>
-                       </div>
-                     </td>
-                   </tr>
-                 </table>
-               </div>
+              <SceneCreator :act="act" />
               <draggable
                 v-model="act.scenes"
                 @start="onStart"
@@ -129,7 +129,7 @@ watch(
                   <table>
                     <tr>
                       <td>
-                        {{ sceneIndex + 1 }} -
+                        {{ scene.number }} -
                         <input
                           type="text"
                           class="description"
@@ -144,29 +144,47 @@ watch(
                         ></textarea>
                       </td>
                       <td>
-                        <button @click="store.deleteScene(actIndex)">X</button>
+                        <button
+                          @click="store.deleteScene(actIndex, sceneIndex)"
+                        >
+                          X
+                        </button>
                       </td>
                     </tr>
-                    <tr >
-                      {{scene.plots}}
-                      <button  @click="store.addPlotToScene(actIndex, sceneIndex)" v-if="!scene.plots.length > 0">Plot</button>
+                    <tr>
+                      {{
+                        scene.plots
+                      }}
+                      <button
+                        @click="store.addPlotToScene(actIndex, sceneIndex)"
+                        v-if="!scene.plots.length > 0"
+                      >
+                        Plot
+                      </button>
                       <td v-if="scene.plots.length > 0">
-                          <div v-for="(plot, index) in localData.plots" >
-                        <input type="checkbox" id="" name="" v-model="scene.plots" :value="index+1"/>
-                        <label for="">{{plot.title}}</label>
-                      </div>
-
+                        <div v-for="(plot, index) in localData.plots">
+                          <input
+                            type="checkbox"
+                            id=""
+                            name=""
+                            v-model="scene.plots"
+                            :value="index + 1"
+                          />
+                          <label for="">{{ plot.title }}</label>
+                        </div>
                       </td>
-                        <td>
-                          <input type="number" v-model="scene.intensity" class="plot-intensity">
-
-                        </td>
+                      <td>
+                        <input
+                          v-if="scene.intensity && scene.plots.length > 0"
+                          type="number"
+                          v-model="scene.intensity"
+                          class="plot-intensity"
+                        />
+                      </td>
                     </tr>
                   </table>
                 </li>
-
               </draggable>
-
             </div>
           </ul>
         </draggable>
@@ -175,13 +193,19 @@ watch(
   </main>
 </template>
 <style>
-
+.deleteAct {
+  margin: 0.5rem 0;
+}
+.addAct {
+  width: 100px;
+  margin: 0.5rem 0;
+}
 .plot-intensity {
-  border: 1px black solid!important;
+  border: 1px black solid !important;
   width: 3rem;
 }
 
-.create-scene-button-container{
+.create-scene-button-container {
   display: flex;
   flex-direction: column;
 }
@@ -192,10 +216,10 @@ watch(
 }
 .title-container {
   display: flex;
-  justify-content: center;
+  justify-content: start;
   flex-direction: column;
-  text-align: center;
-  width: 50%;
+  text-align: start;
+  width: 20%;
   margin: 0 auto;
 }
 .hand-closed {
@@ -224,6 +248,10 @@ watch(
   border: 1px rgba(105, 105, 105, 0.2) solid;
   box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2);
   padding: 0 1rem;
+}
+
+.create-scene {
+  box-shadow: 10px 5px 5px rgba(29, 199, 230, 0.2);
 }
 
 .grabbing {

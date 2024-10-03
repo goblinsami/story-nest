@@ -16,6 +16,8 @@ export const useSettingsStore = defineStore('settings', {
 
   }),
   actions: {
+
+    //TOGGLERS
     togglePlotChart() {
       this.showPlotChart = !this.showPlotChart
     },
@@ -30,11 +32,13 @@ export const useSettingsStore = defineStore('settings', {
     toggleReader() {
       this.showReader = !this.showReader
     },
+
+    //EDIT STORY
     updateStory(story) {
-      // console.log('IN STORE updateStory', story)
       this.story = story
     },
 
+    //ACTS
     addAct() {
       let newAct = {
         title: "Nuevo acto",
@@ -48,35 +52,20 @@ export const useSettingsStore = defineStore('settings', {
         }]
       }
 
-      this.story.acts.unshift(newAct)
-    },
-
-    deleteScene(actIndex, sceneIndex) {
-      console.log(actIndex, sceneIndex)
-
-      let act = this.story.acts[actIndex]
-      act.scenes.splice(sceneIndex, 1)
-
+      this.story.acts.push(newAct)
     },
 
     deleteAct(actIndex) {
       this.story.acts.splice(actIndex, 1)
     },
 
-    addPlotToScene(actIndex, sceneIndex) {
-      let act = this.story.acts[actIndex]
-
-      let scene = act.scenes[sceneIndex]
-
-      scene.plots.push(1)
-      scene.intensity = 5
-    },
+    //SCENES
 
     addScene(position, act, newScene) {
+      console.log('STOREE!!', position, act.title, newScene)
 
 
       let updatedAct = this.story.acts.find(el => el.title == act.title)
-      console.log(act.title, updatedAct)
 
       let newElement = {
         title: newScene.title || "Nueva Escena",
@@ -93,11 +82,61 @@ export const useSettingsStore = defineStore('settings', {
         updatedAct.scenes.unshift(newElement)
       }
 
-    }
+    },
+
+    deleteScene(actIndex, sceneIndex) {
+      console.log(actIndex, sceneIndex)
+
+      let act = this.story.acts[actIndex]
+      act.scenes.splice(sceneIndex, 1)
+
+    },
+
+    //PLOTS
+
+    createPlot(plotTitle) {
+      let lastId = 1
+      if (this.story.plots.length) {
+        lastId = this.story.plots[this.story.plots.length - 1].id
+      } 
+      let newPlot = { id: lastId, title: plotTitle }
+      this.story.plots.push(newPlot)
+    },
+
+    deletePlot(index) {
+      console.log('DELETE PLOT', this.story.plots)
+      this.story.plots.splice(index, 1)
+
+    },
+
+    addPlotToScene(actIndex, sceneIndex) {
+      let act = this.story.acts[actIndex]
+
+      let scene = act.scenes[sceneIndex]
+
+      scene.plots.push(1)
+      scene.intensity = 5
+    },
+    //EDIT SCENES
+    addNumeration(actIndex, sceneIndex) {
+      let sceneNumber = 1; // Inicializa el número de escena
+      this.story.acts.forEach(act => {
+        act.scenes.forEach(scene => {
+          scene.number = sceneNumber++; // Asigna el número de escena y lo incrementa
+        });
+      });
+
+    },
+
+
+
   },
   getters: {
-    getStory() {
-      return this.story; // Devolver el store completo
+    getScenesLength() {
+      if (this.story) {
+        return this.story.acts.reduce((total, act) => total + act.scenes.length, 0);
+
+      }
     },
   },
 });

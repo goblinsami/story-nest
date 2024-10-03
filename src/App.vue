@@ -1,6 +1,12 @@
 <template>
-<button @click="handleShowEditor">{{store.showEditor ? 'Hide': 'Show'}} Editor</button>
-<button @click="handleShowPlotChart">{{store.showPlotChart ? 'Hide': 'Show'}} Plot Chart</button>
+  <div class="header">
+  <h1 > Story Nest</h1><small>v 1.1</small>
+  <button @click="handleShowEditor">{{store.showEditor ? 'Hide': 'Show'}} Editor</button>
+  <button @click="handleShowPlotChart">{{store.showPlotChart ? 'Hide': 'Show'}} Plot Chart</button>
+  <button @click="exportStoryAsJSON">Exportar JSON</button>
+
+  </div>
+
 <!-- <button @click="handleShowPieChart">{{store.showPieChart ? 'Hide': 'Show'}} Pie Chart</button> -->
 
 
@@ -15,8 +21,8 @@
 
 <script setup>
 import { ref, onMounted, reactive } from "vue";
-//import jsonStory from './constants/story.json'
-import jsonStory from './constants/uav.json'
+import jsonStory from './constants/story.json'
+//import jsonStory from './constants/uav.json'
 
 import TextEditor from "./components/TextEditor.vue";
 import LineChart from "./components/LineChart.vue";
@@ -30,6 +36,7 @@ const showEditor = ref(false)
 onMounted(async () => {
   // Espera a que el updateStory complete su tarea
   await store.updateStory(jsonStory);
+  store.addNumeration()
   // Emitir un evento o realizar cualquier otra acción después de que el story esté cargado
 });
 const loadStoryToStore = () => {
@@ -48,9 +55,32 @@ const handleShowPieChart = () => {
 const handleShowEditor = () => {
   store.toggleEditor();
 }
-</script>
 
-<style scoped>
-.chartContainer {
+const exportStoryAsJSON = () => {
+    const json = JSON.stringify(store.story, null, 2); // Convierte el store a JSON
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${store.story.title}.json`
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // Libera la URL creada
+  }
+</script>
+<style>
+.header {
+  display: flex;
+  align-items: center;
+}
+
+.header h1 {
+  padding-right:1rem;
+  margin: 0;
+}
+
+.header small {
+  padding-right:1rem;
 }
 </style>

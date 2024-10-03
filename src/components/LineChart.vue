@@ -1,23 +1,21 @@
 <template>
   <div id="canvas-container">
     <article class="styleControls">
-      <label for="position">Y height</label>
-      <input
-        name="position"
-        type="range"
-        v-model="store.chartHeight"
-        min="25"
-        max="75"
-        step="1"
-      />
-
-      <button @click="setLineChartData()">Set data</button>
-      <button @click="resetZoom()">Reset zoom</button>
-      <button @click="handleShowLabels">Labels</button>
-      <button @click="store.toggleReader()">Reader</button>
-      <button @click="store.toggleReader()">Refresh</button>
+      <div class="chartControls">
+        <label for="position">Y height</label>
+        <input
+          name="position"
+          type="range"
+          v-model="store.chartHeight"
+          min="25"
+          max="75"
+          step="1"
+        />
+        <button @click="resetZoom()">Reset zoom</button>
+      </div>
       <div class="color-pickers">
         <div>
+          Actos
           <div v-for="(el, index) in options.plugins.annotation.annotations">
             <input
               type="color"
@@ -30,6 +28,7 @@
           </div>
         </div>
         <div>
+          Tramas
           <div v-for="(el, index) in data.datasets">
             <input
               type="color"
@@ -43,7 +42,6 @@
         </div>
       </div>
     </article>
-    {{ data.datasets }}
     <div class="chartWrapper" :style="{ height: store.chartHeight + 'vh' }">
       <Line
         class="plotChart"
@@ -55,11 +53,6 @@
       />
     </div>
   </div>
-<!--   <div ref="textDisplay" id="textDisplay" v-if="store.showReader">
-    <h2>{{ text.title }}</h2>
-    <small>{{ text.subtitle }}</small>
-    <h3>{{ text.description }}</h3>
-  </div> -->
 </template>
 
 <script setup>
@@ -273,11 +266,7 @@ const labelsSettings = reactive({
   width: 100,
 });
 
-/* const { story } = defineProps({
-  story: {
-    required: true,
-  },
-}); */
+
 const colors = [
   "rgba(255, 99, 132, 0.5)", // Color 1
   "rgba(54, 162, 235, 0.5)", // Color 2
@@ -311,7 +300,6 @@ const handleClick = (event, chart) => {
     if (x >= xMin && x <= xMax) {
       // El clic ocurrió dentro de este segmento
       text.title = annotation.title;
-      console.log(annotation);
     }
   }
   chartInstance.data.labels.forEach((label, index) => {
@@ -325,7 +313,9 @@ const handleClick = (event, chart) => {
   });
 };
 const setLineChartData = () => {
-  // lineChart.value.style.height = '1200px'
+  console.log("setLineChartData");
+
+  //comprobara si la data está definida
   if (!store.story || !store.story.acts) {
     console.error("Story o acts no están definidos aún.");
     return;
@@ -339,7 +329,7 @@ const setLineChartData = () => {
   let maxPlotNumber = 0; // Para determinar cuántas tramas distintas hay
   let startX = 0;
 
-  // Recorrer los actos y las escenas para construir los segmentos y los datos de las tramas
+  // Recorrer actos
   acts.forEach((act, actIndex) => {
     const segmentLength = act.scenes.length;
 
@@ -356,13 +346,15 @@ const setLineChartData = () => {
     };
     segments.push(segment);
 
-    // Recorrer las escenas del acto
+    // Recorrer escenas
     act.scenes.forEach((scene) => {
+      //crea las labels del eje X
       scenes.push({
         title: scene?.title,
         act: act?.title,
       });
-
+      maxPlotNumber = store.story.plots.length;
+      console.log("EP", maxPlotNumber);
       // Recorrer las tramas en la escena y actualizar el plotData
       scene?.plots.forEach((plot) => {
         maxPlotNumber = Math.max(maxPlotNumber, plot); // Determinar el número máximo de tramas
@@ -382,33 +374,44 @@ const setLineChartData = () => {
     // Actualizar el valor inicial para el próximo segmento
     startX += act.scenes.length;
 
-    key.value++;
+   // key.value++;
   });
 
   // Crear datasets dinámicos basados en el número de tramas
   const datasets = [];
-  for (let i = 1; i <= maxPlotNumber; i++) {
-    let color = plotColorsHard.value[i - 1];
+  if (store.story.plots.length > 0){
+    for (let i = 1; i <= maxPlotNumber; i++) {
+      let color = plotColorsHard.value[i - 1];
+      console.log("PLOTS COUNT", i);
 
-    console.log(store.story.plots[i - 1].title);
-    datasets.push({
-      label: store.story.plots[i - 1].title,
-      data: plotData[i], // Usar los datos de la trama correspondiente
-      backgroundColor: color + "30",
-      borderColor: color + "99",
-      borderWidth: 2,
-      fill: false, // No rellenar debajo de la línea
-      tension: 0.4,
-      spanGaps: true, // Permitir saltar puntos nulos
-    });
+      datasets.push({
+        label: store.story.plots[i - 1].title,
+        data: plotData[i], // Usar los datos de la trama correspondiente
+        backgroundColor: color + "30",
+        borderColor: color + "99",
+        borderWidth: 2,
+        fill: false, // No rellenar debajo de la línea
+        tension: 0.4,
+        spanGaps: true, // Permitir saltar puntos nulos
+      });
+    }
+  } else {
+    datasets.push(    {
+      label: "",
+      data: [],
+      borderColor: "rgba(75, 192, 192, 1)",
+      backgroundColor: "rgba(75, 192, 192, 0.2)",
+      tension: 0.4, // Controla la suavidad de la línea
+    },)
   }
 
-  // Actualizar los datos del gráfico
-  data.value.datasets = datasets;
-  data.value.labels = scenes.map((el, index) => `${index + 1} - ${el.title}`);
-  options.value.plugins.annotation.annotations = segments;
+    // Actualizar los datos del gráfico
+    data.value.datasets = datasets;
+    data.value.labels = scenes.map((el, index) => `${index + 1} - ${el.title}`);
+    options.value.plugins.annotation.annotations = segments;
+
   key.value++;
-};
+  }
 
 const selectElement = (scene, act) => {
   text.subtitle = "";
@@ -430,39 +433,33 @@ const handleShowLabels = () => {
 const updateScenes = () => {
   drawChart();
 };
+
 watch(
   () => store.story, // Observa cambios en toda la historia
   (newStory) => {
-    if (newStory && newStory.acts && newStory.acts.length > 0) {
+    if (newStory) {
       localData.value = { ...newStory }; // Copiar los datos del store a localData
 
       setLineChartData(); // Actualiza el gráfico
-      console.log("CHANGE DETECTED");
     }
   },
   { deep: true },
   { immediate: true } // Necesario para observar objetos anidados como escenas
 );
-/* watch(
-  () => store.story,
-  (newStory) => {
-    if (newStory) {
-      localData.value = { ...newStory }; // Copiar los datos del store a localData
-      setLineChartData(); // Actualizar el gráfico
-    }
-  },
-  { deep: true }, {immediate:true}
-); */
+
 </script>
 
 <style>
-/* .plotChart {
-
-} */
-
-.color-pickers {
+.chartControls {
   display: flex;
   flex-direction: column;
+  padding: 0.5rem;
+}
+.color-pickers {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 0.5rem;
 }
 .chartWrapper {
   height: 2000px;
@@ -488,6 +485,7 @@ watch(
 .styleControls {
   padding: 1rem;
   border: 1px black solid;
+  display: flex;
 }
 
 .hide {
