@@ -28,3 +28,9 @@ input:focus {
 body {
   font-family: 'Courier New', Courier, monospace;
 }
+
+
+.color-sample {
+  border: 1px black solid;
+  width: 20px;
+}

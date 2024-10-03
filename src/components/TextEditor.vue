@@ -1,21 +1,42 @@
 <script setup>
 import { useSettingsStore } from "../stores/settings";
 import { VueDraggableNext } from "vue-draggable-next";
-import { defineComponent, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import SceneCreator from "./SceneCreator.vue";
 import PlotCreator from "./PlotCreator.vue";
-const store = useSettingsStore();
+
 
 const draggable = VueDraggableNext;
 
+const store = useSettingsStore();
 const { story } = store;
 
 const dragging = ref(false);
-
 const localData = ref({});
-
 const showPlotEditor = ref(false);
 
+const menuVisible = ref(false); // Controla la visibilidad del menú
+const menuX = ref(0);           // Coordenada X donde aparecerá el menú
+const menuY = ref(0);           // Coordenada Y donde aparecerá el menú
+
+
+// Mostrar el menú en la posición del clic derecho
+const showMenu = (event) => {
+  menuVisible.value = true;
+  menuX.value = event.clientX;
+  menuY.value = event.clientY;
+};
+
+// Ocultar el menú
+const hideMenu = () => {
+  menuVisible.value = false;
+};
+
+// Manejar la opción seleccionada
+const handleOption = (option) => {
+  console.log('Seleccionaste:', option);
+  hideMenu(); // Ocultar el menú después de seleccionar
+};
 
 const newScene = ref({
   title: "Añade nueva escena",
@@ -66,6 +87,7 @@ watch(
 <template>
   <main>
     <article>
+
       <div class="title-container">
         <div>
           <h1>
@@ -86,6 +108,7 @@ watch(
           <button @click="store.addAct()" class="addAct">Añadir acto</button>
           <button @click="store.addNumeration()" class="addAct">numerar</button>
           <button @click="handleShowPlotEditor()" class="addAct">plots</button>
+          <button @click="store.deleteStory()" class="addAct">eliminar historia</button>
         </span>
 
         <span v-if="localData.acts">{{ store.getScenesLength }}</span>
@@ -120,6 +143,7 @@ watch(
                 @start="onStart"
                 @end="onEnd"
                 group="scenes"
+
               >
                 <li
                   v-for="(scene, sceneIndex) in act.scenes"
@@ -152,12 +176,9 @@ watch(
                       </td>
                     </tr>
                     <tr>
-                      {{
-                        scene.plots
-                      }}
                       <button
                         @click="store.addPlotToScene(actIndex, sceneIndex)"
-                        v-if="!scene.plots.length > 0"
+                        v-if="!scene.plots.length > 0 && localData.plots.length"
                       >
                         Plot
                       </button>
@@ -183,6 +204,10 @@ watch(
                       </td>
                     </tr>
                   </table>
+                  <div class="create-snippet">
+                    <button @click="store.insertScene('up', act, sceneIndex)">&#8593</button>
+                    <button @click="store.insertScene('down', act, sceneIndex)">&#8595</button>
+                  </div>
                 </li>
               </draggable>
             </div>
@@ -193,6 +218,16 @@ watch(
   </main>
 </template>
 <style>
+
+.create-snippet {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: -25px;
+  top: 25%;
+  opacity: 0.5;
+
+}
 .deleteAct {
   margin: 0.5rem 0;
 }
@@ -248,6 +283,8 @@ watch(
   border: 1px rgba(105, 105, 105, 0.2) solid;
   box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2);
   padding: 0 1rem;
+  position: relative;
+
 }
 
 .create-scene {

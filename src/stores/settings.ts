@@ -11,7 +11,46 @@ export const useSettingsStore = defineStore('settings', {
     showPieChart: false,
     showEditor: true,
     showReader: false,
-    chartHeight: 50
+    showChartSettings: true,
+    chartHeight: 50,
+    colorsHard: [
+      "#FF5733", // Rojo anaranjado
+      "#33FF57", // Verde lima
+      "#3357FF", // Azul
+      "#F1C40F", // Amarillo
+      "#9B59B6", // Púrpura
+      "#E67E22", // Naranja
+      "#2ECC71", // Verde esmeralda
+      "#3498DB", // Azul claro
+      "#E74C3C", // Rojo
+      "#1ABC9C", // Verde aguamarina
+      "#8E44AD", // Púrpura oscuro
+      "#F39C12", // Amarillo anaranjado
+      "#D35400", // Naranja oscuro
+      "#2C3E50", // Azul oscuro
+      "#ECF0F1", // Gris claro
+      "#95A5A6", // Gris
+      "#7F8C8D", // Gris oscuro
+    ],
+    plotColorsHard: [
+      "#FF5733", // Rojo anaranjado
+      "#33FF57", // Verde lima
+      "#3357FF", // Azul
+      "#F1C40F", // Amarillo
+      "#9B59B6", // Púrpura
+      "#E67E22", // Naranja
+      "#2ECC71", // Verde esmeralda
+      "#3498DB", // Azul claro
+      "#E74C3C", // Rojo
+      "#1ABC9C", // Verde aguamarina
+      "#8E44AD", // Púrpura oscuro
+      "#F39C12", // Amarillo anaranjado
+      "#D35400", // Naranja oscuro
+      "#2C3E50", // Azul oscuro
+      "#ECF0F1", // Gris claro
+      "#95A5A6", // Gris
+      "#7F8C8D", // Gris oscuro
+    ]
 
 
   }),
@@ -26,6 +65,10 @@ export const useSettingsStore = defineStore('settings', {
       this.showPieChart = !this.showPieChart
     },
 
+    toggleShowChartSettings() {
+      this.showChartSettings = !this.showChartSettings
+    },
+
     toggleEditor() {
       this.showEditor = !this.showEditor
     },
@@ -36,6 +79,24 @@ export const useSettingsStore = defineStore('settings', {
     //EDIT STORY
     updateStory(story) {
       this.story = story
+    },
+
+    deleteStory(story) {
+      let text = "Quieres eliminar la historia?";
+      if (confirm(text) == true) {
+        this.story = {
+          title: "",
+          description: "",
+          plots: [],
+          acts: [
+            {
+              title: "Acto 1",
+              description: "descActo 1",
+              scenes: []
+            }
+          ]
+        }
+      }
     },
 
     //ACTS
@@ -84,6 +145,28 @@ export const useSettingsStore = defineStore('settings', {
 
     },
 
+    insertScene(position, act, sceneIndex) {
+
+
+      let updatedAct = this.story.acts.find(el => el.title == act.title)
+      let newElement = {
+        title: "Nueva Escena",
+        description: "",
+        duration: 10,
+        plots: [],
+        intensity: null
+      }
+
+
+      if (position == 'down') {
+        updatedAct.scenes.splice(sceneIndex + 1, 0, newElement);
+      } else {
+        updatedAct.scenes.splice(sceneIndex, 0, newElement);
+      }
+
+    },
+
+
     deleteScene(actIndex, sceneIndex) {
       console.log(actIndex, sceneIndex)
 
@@ -98,7 +181,7 @@ export const useSettingsStore = defineStore('settings', {
       let lastId = 1
       if (this.story.plots.length) {
         lastId = this.story.plots[this.story.plots.length - 1].id
-      } 
+      }
       let newPlot = { id: lastId, title: plotTitle }
       this.story.plots.push(newPlot)
     },

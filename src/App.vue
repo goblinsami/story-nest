@@ -1,86 +1,104 @@
 <template>
   <div class="header">
-  <h1 > Story Nest</h1><small>v 1.1</small>
-  <button @click="handleShowEditor">{{store.showEditor ? 'Hide': 'Show'}} Editor</button>
-  <button @click="handleShowPlotChart">{{store.showPlotChart ? 'Hide': 'Show'}} Plot Chart</button>
-  <button @click="exportStoryAsJSON">Exportar JSON</button>
-
+    <div style="display: flex; align-items: center;">
+      <h1>Story Nest</h1>
+      <small>v 1.1</small>
+      <button @click="handleShowEditor">
+        {{ store.showEditor ? "Hide" : "Show" }} Editor
+      </button>
+      <button @click="handleShowPlotChart">
+        {{ store.showPlotChart ? "Hide" : "Show" }} Plot Chart
+      </button>
+        <button @click="store.toggleShowChartSettings()">
+        {{ store.showPlotChart ? "Hide" : "Show" }} Chart Settings
+      </button>
+    </div>
+    <div>
+      <button @click="store.t">Exportar JSON</button>
+      <input type="file" @change="importJSON" accept=".json" />
+    </div>
   </div>
 
-<!-- <button @click="handleShowPieChart">{{store.showPieChart ? 'Hide': 'Show'}} Pie Chart</button> -->
-
-
-<article class="chartContainer">
-  <LineChart v-if="store.showPlotChart"></LineChart>
-  <TextEditor v-if="store.showEditor && store.story"></TextEditor>
-  <PieChart :story="story" v-if="store.showPieChart"></PieChart>
-</article>
-<main id="mainContainer">
-</main>
+  <article class="chartContainer">
+    <LineChart v-if="store.showPlotChart"></LineChart>
+    <TextEditor v-if="store.showEditor && store.story"></TextEditor>
+  </article>
 </template>
 
 <script setup>
 import { ref, onMounted, reactive } from "vue";
-import jsonStory from './constants/story.json'
-//import jsonStory from './constants/uav.json'
-
+import jsonStory from "./constants/story.json";
 import TextEditor from "./components/TextEditor.vue";
 import LineChart from "./components/LineChart.vue";
 import { useSettingsStore } from "./stores/settings";
-import PieChart from "./components/PieChart.vue";
+//import jsonStory from './constants/uav.json'
 
 const store = useSettingsStore();
-const showEditor = ref(false)
-//const story = reactive({})
 
-onMounted(async () => {
-  // Espera a que el updateStory complete su tarea
-  await store.updateStory(jsonStory);
-  store.addNumeration()
-  // Emitir un evento o realizar cualquier otra acción después de que el story esté cargado
+const showEditor = ref(false);
+
+onMounted(() => {
+  store.updateStory(jsonStory);
+  store.addNumeration();
 });
-const loadStoryToStore = () => {
-  store.updateStory(jsonStory)
 
-}
 const handleShowPlotChart = () => {
   store.togglePlotChart();
-
-}
+};
 const handleShowPieChart = () => {
   store.togglePieChart();
-
-}
+};
 
 const handleShowEditor = () => {
   store.toggleEditor();
-}
-
-const exportStoryAsJSON = () => {
-    const json = JSON.stringify(store.story, null, 2); // Convierte el store a JSON
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${store.story.title}.json`
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url); // Libera la URL creada
+};
+const importJSON = (event) => {
+  const file = event.target.files[0]; // Tomar el primer archivo seleccionado
+  if (file && file.type === "application/json") {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const jsonData = JSON.parse(e.target.result);
+        console.log(jsonData); // Aquí procesas el JSON como necesites
+        processJSON(jsonData);
+      } catch (error) {
+        console.error("Error al parsear el archivo JSON", error);
+      }
+    };
+    reader.readAsText(file); // Leer el archivo como texto
+  } else {
+    console.error("Por favor selecciona un archivo JSON válido.");
   }
+};
+const processJSON = (data) => {
+  store.updateStory(data);
+};
+const exportStoryAsJSON = () => {
+  const json = JSON.stringify(store.story, null, 2); // Convierte el store a JSON
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${store.story.title}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url); // Libera la URL creada
+};
 </script>
 <style>
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .header h1 {
-  padding-right:1rem;
+  padding-right: 1rem;
   margin: 0;
 }
 
 .header small {
-  padding-right:1rem;
+  padding-right: 1rem;
 }
 </style>

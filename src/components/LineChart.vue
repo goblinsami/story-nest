@@ -1,6 +1,6 @@
 <template>
   <div id="canvas-container">
-    <article class="styleControls">
+<!--      <article class="styleControls">
       <div class="chartControls">
         <label for="position">Y height</label>
         <input
@@ -21,15 +21,15 @@
               type="color"
               :id="index"
               name="head"
-              v-model="colorsHard[index]"
+              v-model="store.colorsHard[index]"
               @input="setLineChartData()"
             />
             {{ el.title }}
           </div>
         </div>
-        <div>
+        <div style="padding: 0 1rem">
           Tramas
-          <div v-for="(el, index) in data.datasets">
+          <div v-for="(el, index) in data.datasets" v-if=" data.datasets[0] && data.datasets[0].data.length" >
             <input
               type="color"
               :id="index"
@@ -41,7 +41,8 @@
           </div>
         </div>
       </div>
-    </article>
+    </article> -->
+  <LineChartSettings v-if="store.showChartSettings" :data="data" :options="options"@changeSettings="setLineChartData()" @resetZoom="resetZoom()"></LineChartSettings>
     <div class="chartWrapper" :style="{ height: store.chartHeight + 'vh' }">
       <Line
         class="plotChart"
@@ -61,7 +62,7 @@ import { Line, Pie } from "vue-chartjs";
 import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { useSettingsStore } from "../stores/settings";
-
+import LineChartSettings from "./LineChartSettings.vue";
 import {
   Chart as ChartJS,
   Title,
@@ -97,7 +98,6 @@ const lineChart = ref(null);
 const scenes = ref(null);
 const key = ref(0);
 const localData = ref({}); // Crear un contenedor para la copia local de los datos
-
 const data = ref({
   labels: ["1", "2", "3", "4", "5"], //escenas
   datasets: [
@@ -252,32 +252,9 @@ const text = reactive({
   subtitle: "",
   description: "",
 });
-const customSettings = reactive({
-  height: 50,
-  width: 1450,
-});
 
-const labelsSettings = reactive({
-  top: 120,
-  left: -20,
-  rotation: 45,
-  fontSize: 12,
-  showLabels: true,
-  width: 100,
-});
-
-
-const colors = [
-  "rgba(255, 99, 132, 0.5)", // Color 1
-  "rgba(54, 162, 235, 0.5)", // Color 2
-  "rgba(255, 206, 86, 0.5)", // Color 3
-  "rgba(75, 192, 192, 0.5)", // Color 4
-  "rgba(153, 102, 255, 0.5)", // Color 5
-  "rgba(255, 159, 64, 0.5)", // Color 6
-];
 
 onMounted(() => {
-  // drawChart();
 
   setLineChartData();
 });
@@ -333,7 +310,7 @@ const setLineChartData = () => {
   acts.forEach((act, actIndex) => {
     const segmentLength = act.scenes.length;
 
-    let color = colorsHard.value[actIndex];
+    let color = store.colorsHard[actIndex];
     // Crear los segmentos
     const segment = {
       xMin: startX,
@@ -381,7 +358,7 @@ const setLineChartData = () => {
   const datasets = [];
   if (store.story.plots.length > 0){
     for (let i = 1; i <= maxPlotNumber; i++) {
-      let color = plotColorsHard.value[i - 1];
+      let color = store.plotColorsHard[i - 1];
       console.log("PLOTS COUNT", i);
 
       datasets.push({
@@ -484,7 +461,7 @@ watch(
 }
 .styleControls {
   padding: 1rem;
-  border: 1px black solid;
+ /*  border: 1px black solid; */
   display: flex;
 }
 
