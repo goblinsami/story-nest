@@ -204,10 +204,12 @@ watch(
                       </td>
                       <td>
                         <input
-                          v-if="scene.intensity && scene.plots.length > 0"
+                          v-if="scene.intensity >= 0 && scene.plots.length > 0"
                           type="number"
                           v-model="scene.intensity"
                           class="plot-intensity"
+                          min="0"
+                          max="11"
                         />
                       </td>
                     </tr>
