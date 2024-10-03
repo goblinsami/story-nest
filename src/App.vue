@@ -14,7 +14,7 @@
       </button>
     </div>
     <div>
-      <button @click="store.t">Exportar JSON</button>
+      <button @click="exportStoryAsJSON">Exportar JSON</button>
       <input type="file" @change="importJSON" accept=".json" />
     </div>
   </div>

@@ -34,3 +34,17 @@ body {
   border: 1px black solid;
   width: 20px;
 }
+
+.act-color-sample {
+  border: 1px black solid;
+  width: 25px;
+  height: 25px;
+  margin-right: 1rem;
+
+}
+.plot-color-sample {
+  border: 1px black solid;
+  width: 25px;
+  height: auto;
+
+}

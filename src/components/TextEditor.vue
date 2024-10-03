@@ -110,7 +110,6 @@ watch(
           <button @click="handleShowPlotEditor()" class="addAct">plots</button>
           <button @click="store.deleteStory()" class="addAct">eliminar historia</button>
         </span>
-
         <span v-if="localData.acts">{{ store.getScenesLength }}</span>
         <div v-if="showPlotEditor">
           <PlotCreator/>
@@ -131,6 +130,14 @@ watch(
               X
             </button>
             <div class="act-header-container">
+          <input
+            type="color"
+            :id="actIndex"
+            name="head"
+            v-model="store.colorsHard[actIndex]"
+            class="act-color-sample"
+          />
+
               <input type="text" class="title" v-model="act.title" />
               <h2>
                 <span>{{ act.scenes.length }}</span>
@@ -154,11 +161,11 @@ watch(
                     <tr>
                       <td>
                         {{ scene.number }} -
-                        <input
+                        <textarea
                           type="text"
                           class="description"
                           v-model="scene.title"
-                        />
+                        ></textarea>
                       </td>
                       <td>
                         <textarea
@@ -190,6 +197,7 @@ watch(
                             name=""
                             v-model="scene.plots"
                             :value="index + 1"
+                            :style="{ accentColor: store.plotColorsHard[index] }"
                           />
                           <label for="">{{ plot.title }}</label>
                         </div>
@@ -248,6 +256,7 @@ watch(
   display: flex;
   justify-content: space-between;
   padding: 0 2rem;
+  align-items: center;
 }
 .title-container {
   display: flex;

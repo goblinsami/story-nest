@@ -423,6 +423,22 @@ watch(
   { deep: true },
   { immediate: true } // Necesario para observar objetos anidados como escenas
 );
+watch(
+  () => store.colorsHard, // Observa cambios en toda la historia
+  () => {
+
+      setLineChartData(); // Actualiza el gráfico
+  },
+  { deep: true },
+);
+watch(
+  () => store.plotColorsHard, // Observa cambios en toda la historia
+  () => {
+
+      setLineChartData(); // Actualiza el gráfico
+  },
+  { deep: true },
+);
 
 </script>
 

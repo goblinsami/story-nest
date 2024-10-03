@@ -35,7 +35,13 @@ const plotColorsHard = ref([
 
       <div v-for="(plot, index) in store.story.plots" class="plot-container">
        <input type="text" v-model="plot.title" class="plotName">
-       <div class="color-sample":style="{backgroundColor: store.plotColorsHard[index]}"></div>
+                 <input
+            type="color"
+            :id="actIndex"
+            name="head"
+            v-model="store.plotColorsHard[index]"
+            class="plot-color-sample"
+          />
        <button @click="store.deletePlot(index)">X</button>
       </div>
 </template>
