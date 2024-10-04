@@ -4,12 +4,13 @@ import { VueDraggableNext } from "vue-draggable-next";
 import { ref, watch } from "vue";
 import SceneCreator from "./SceneCreator.vue";
 import PlotCreator from "./PlotCreator.vue";
-
+import Act from "./Act.vue";
 
 const draggable = VueDraggableNext;
 
 const store = useSettingsStore();
 const { story } = store;
+const showEditorSettings = ref(false);
 
 const dragging = ref(false);
 const localData = ref({});
@@ -42,6 +43,10 @@ const newScene = ref({
   title: "Añade nueva escena",
   description: "Nueva escena",
 });
+
+const toggleShowEditorSettings = () => {
+  showEditorSettings.value = !showEditorSettings.value
+}
 
 const createScene = (position, act) => {
   store.addScene(position, act, newScene.value);
@@ -87,32 +92,39 @@ watch(
 <template>
   <main>
     <article>
-
       <div class="title-container">
-        <div>
-          <h1>
-            <input
-              type="text"
-              class="title"
-              v-model="localData.title"
-              maxlength="50"
-            />
-          </h1>
-          <textarea
-            type="textarea"
-            class="sub-title"
-            v-model="localData.description"
-          ></textarea>
+        <button @click="toggleShowEditorSettings()" >Hide settings</button>
+      </div>
+      <div class="settings-container" v-if="showEditorSettings">
+        <div class="title-block">
+          <div >
+            <h1>
+              <input
+                type="text"
+                class="title"
+                v-model="localData.title"
+                maxlength="50"
+              />
+            </h1>
+            <textarea
+              type="textarea"
+              class="sub-title"
+              v-model="localData.description"
+            ></textarea>
+          </div>
+
+          <span class="d-flex">
+            <button @click="store.addAct()" class="addAct">Añadir acto</button>
+            <button @click="store.addNumeration()" class="addAct">numerar</button>
+            <button @click="handleShowPlotEditor()" class="addAct">plots</button>
+            <button @click="store.deleteStory()" class="addAct">eliminar historia</button>
+          </span>
+          <span v-if="localData.acts">{{ store.getScenesLength }}</span>
         </div>
-        <span style="display: flex;">
-          <button @click="store.addAct()" class="addAct">Añadir acto</button>
-          <button @click="store.addNumeration()" class="addAct">numerar</button>
-          <button @click="handleShowPlotEditor()" class="addAct">plots</button>
-          <button @click="store.deleteStory()" class="addAct">eliminar historia</button>
-        </span>
-        <span v-if="localData.acts">{{ store.getScenesLength }}</span>
-        <div v-if="showPlotEditor">
-          <PlotCreator/>
+
+
+        <div class="plot-block">
+          <PlotCreator v-if="showPlotEditor"/>
         </div>
       </div>
 
@@ -124,8 +136,10 @@ watch(
           @end="onEnd"
           class="acts-container"
           group="acts"
+          handle=".drag-handle"
         >
-          <ul v-for="(act, actIndex) in localData.acts" class="card">
+       <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
+<!--            <ul v-for="(act, actIndex) in localData.acts" class="card">
             <button @click="store.deleteAct(actIndex)" class="deleteAct">
               X
             </button>
@@ -137,6 +151,7 @@ watch(
             v-model="store.colorsHard[actIndex]"
             class="act-color-sample"
           />
+
 
               <input type="text" class="title" v-model="act.title" />
               <h2>
@@ -221,14 +236,18 @@ watch(
                 </li>
               </draggable>
             </div>
-          </ul>
+          </ul> -->
         </draggable>
       </div>
     </article>
   </main>
 </template>
 <style>
-
+.title-block {
+}
+.plot-block {
+  width:25%;
+}
 .create-snippet {
   display: flex;
   flex-direction: column;
@@ -259,6 +278,12 @@ watch(
   justify-content: space-between;
   padding: 0 2rem;
   align-items: center;
+}
+.settings-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
 }
 .title-container {
   display: flex;

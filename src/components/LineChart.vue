@@ -331,7 +331,6 @@ const setLineChartData = () => {
         act: act?.title,
       });
       maxPlotNumber = store.story.plots.length;
-      console.log("EP", maxPlotNumber);
       // Recorrer las tramas en la escena y actualizar el plotData
       scene?.plots.forEach((plot) => {
         maxPlotNumber = Math.max(maxPlotNumber, plot); // Determinar el número máximo de tramas
@@ -359,7 +358,6 @@ const setLineChartData = () => {
   if (store.story.plots.length > 0){
     for (let i = 1; i <= maxPlotNumber; i++) {
       let color = store.plotColorsHard[i - 1];
-      console.log("PLOTS COUNT", i);
 
       datasets.push({
         label: store.story.plots[i - 1].title,
@@ -415,8 +413,8 @@ watch(
   () => store.story, // Observa cambios en toda la historia
   (newStory) => {
     if (newStory) {
-      localData.value = { ...newStory }; // Copiar los datos del store a localData
-
+//      localData.value = { ...newStory }; // Copiar los datos del store a localData
+      console.log('CHANGE DETECTED IN LINE CHART')
       setLineChartData(); // Actualiza el gráfico
     }
   },

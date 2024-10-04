@@ -48,3 +48,37 @@ body {
   height: auto;
 
 }
+
+.d-flex {
+  display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #333;
+  background-color: #ddd;
+  padding: 5px;
+  opacity: 0.5;
+}
+.drag-scene-handle {
+  cursor: grab;
+  color: #333;
+  background-color: #ddd;
+  padding: 5px;
+  width: 37px;
+  opacity: 0.5;
+
+}
+
+
+/* .no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+ */

@@ -1,6 +1,13 @@
 {
   "title": "El Gran Viaje",
   "description": "Una emocionante historia de aventura y autodescubrimiento.",
+  "characters": [
+      {
+        "id": 1,
+        "title": "Joel",
+        "description": "a good man"
+      }
+    ],
   "plots": [
     {
       "id": 1,

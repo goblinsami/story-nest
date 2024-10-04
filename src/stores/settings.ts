@@ -9,9 +9,10 @@ export const useSettingsStore = defineStore('settings', {
     story: {},
     showPlotChart: true,
     showPieChart: false,
-    showEditor: true,
+    showEditor: false,
     showReader: false,
     showChartSettings: true,
+    showCarousel: true,
     chartHeight: 50,
     colorsHard: [
       "#FF5733", // Rojo anaranjado
@@ -60,6 +61,11 @@ export const useSettingsStore = defineStore('settings', {
     togglePlotChart() {
       this.showPlotChart = !this.showPlotChart
     },
+
+    toggleShowCarousel() {
+      this.showCarousel = !this.showCarousel
+    },
+
 
     togglePieChart() {
       this.showPieChart = !this.showPieChart
@@ -145,10 +151,10 @@ export const useSettingsStore = defineStore('settings', {
 
     },
 
-    insertScene(position, act, sceneIndex) {
+    insertScene(position, actIndex, sceneIndex) {
 
 
-      let updatedAct = this.story.acts.find(el => el.title == act.title)
+      let updatedAct = this.story.acts[actIndex]
       let newElement = {
         title: "Nueva Escena",
         description: "",
@@ -172,6 +178,24 @@ export const useSettingsStore = defineStore('settings', {
 
       let act = this.story.acts[actIndex]
       act.scenes.splice(sceneIndex, 1)
+
+    },
+
+    editScene(newScene) {
+      let updatedAct = this.story.acts[newScene.actIndex]
+      let updatedScene = updatedAct.scenes.find(element => element.number == newScene.number)
+
+      updatedScene.title = newScene.title
+      updatedScene.description = newScene.description
+      updatedScene.plots = newScene.plots
+      updatedScene.intensity = newScene.intensity
+      if (!updatedScene.plots.length) {
+        updatedScene.plots.push(1)
+        updatedScene.intensity = 5
+      }
+
+
+    //  console.log('EDIT SCENE STORE', updatedScene, scene)
 
     },
 
@@ -221,5 +245,26 @@ export const useSettingsStore = defineStore('settings', {
 
       }
     },
+    getAllScenes() {
+      if (this.story.acts) {
+        // Obtener todas las escenas de todos los actos, añadiendo la propiedad 'actIndex'
+        const scenesArray = this.story.acts.reduce((allScenes, act, actIndex) => {
+          // Agregar la propiedad 'actIndex' a cada escena
+          const updatedScenes = act.scenes.map(scene => ({
+            ...scene,           // Copia las propiedades originales de la escena
+            actIndex            // Añade la propiedad 'actIndex' con el índice del acto
+          }));
+
+          return [...allScenes, ...updatedScenes];
+        }, []);
+
+        // Si es necesario, ordena las escenas por algún criterio
+      //  return scenesArray.sort((a, b) => a.number - b.number); // Suponiendo que cada escena tiene un "number"
+        return scenesArray
+      }
+      return [];
+    }
+
+
   },
 });

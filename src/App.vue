@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <div style="display: flex; align-items: center;">
+    <div style="display: flex; align-items: center">
       <h1>Story Nest</h1>
       <small>v 1.1</small>
       <button @click="handleShowEditor">
@@ -9,8 +9,11 @@
       <button @click="handleShowPlotChart">
         {{ store.showPlotChart ? "Hide" : "Show" }} Plot Chart
       </button>
-        <button @click="store.toggleShowChartSettings()">
+      <button @click="store.toggleShowChartSettings()">
         {{ store.showPlotChart ? "Hide" : "Show" }} Chart Settings
+      </button>
+      <button @click="store.toggleShowCarousel()">
+        {{ store.showCarousel ? "Hide" : "Show" }} Scene Carousel
       </button>
     </div>
     <div>
@@ -21,6 +24,8 @@
 
   <article class="chartContainer">
     <LineChart v-if="store.showPlotChart"></LineChart>
+    {{ store.showCarousel }}
+    <SceneCarousel v-if="store.story && store.showCarousel"></SceneCarousel>
     <TextEditor v-if="store.showEditor && store.story"></TextEditor>
   </article>
 </template>
@@ -31,6 +36,7 @@ import jsonStory from "./constants/story.json";
 import TextEditor from "./components/TextEditor.vue";
 import LineChart from "./components/LineChart.vue";
 import { useSettingsStore } from "./stores/settings";
+import SceneCarousel from "./components/SceneCarousel.vue";
 //import jsonStory from './constants/uav.json'
 
 const store = useSettingsStore();
