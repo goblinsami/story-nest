@@ -18,7 +18,7 @@ const createScene = (position, act) => {
 </script>
 
 <template>
-  <div class="sceneClass card create-scene" id="createScene">
+  <div class="scene-creator card create-scene" id="createScene">
       <table>
         <tr>
           <td>
@@ -42,3 +42,13 @@ const createScene = (position, act) => {
       </table>
     </div>
 </template>
+<style>
+.create-scene-button-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-scene {
+  box-shadow: 10px 5px 5px rgba(29, 199, 230, 0.2);
+}
+</style>

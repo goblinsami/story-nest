@@ -5,6 +5,8 @@ import { ref, watch } from "vue";
 import SceneCreator from "./SceneCreator.vue";
 import PlotCreator from "./PlotCreator.vue";
 import Scene from "./Scene.vue";
+import CollapseButtons from "./CollapseButtons.vue";
+
 const draggable = VueDraggableNext;
 
 const localData = ref({});
@@ -41,7 +43,8 @@ watch(
 <template>
   <ul>
     <div class="d-flex justify-between">
-      <div class="drag-handle">Drag</div>
+      <button class="drag-handle">Drag</button>
+        <CollapseButtons mode='act' :actIndex="props.actIndex" />
 
       <button @click="store.deleteAct(props.actIndex)" class="deleteAct">
         X
@@ -52,96 +55,53 @@ watch(
         type="color"
         :id="props.actIndex"
         name="head"
-        v-model="store.colorsHard[props.actIndex]"
+        v-model="props.act.color"
         class="act-color-sample"
       />
-
       <input type="text" class="title" v-model="props.act.title" />
       <h2>
         <span>{{ act.scenes.length }}</span>
       </h2>
     </div>
     <div class="act">
-      <SceneCreator :act="act" />
+      <SceneCreator :act="act" class="card"/>
       <draggable
         v-model="act.scenes"
         @start="onStart"
         @end="onEnd"
         group="scenes"
         handle=".drag-scene-handle">
-        <Scene v-for="(scene, sceneIndex) in act.scenes" :scene="scene" :sceneIndex="sceneIndex" :actIndex="props.actIndex"> </Scene>
-<!--         <li
-          v-for="(scene, sceneIndex) in act.scenes"
-          class="sceneClass card"
-          :class="dragging ? 'grabbing' : ''"
-            :key="sceneIndex"
-        >
-          <table>
-            <tr>
-            <div class="drag-scene-handle">Drag </div>
-
-              <td>
-                {{ scene.number }} -
-                <textarea
-                  type="text"
-                  class="description"
-                  v-model="scene.title"
-                ></textarea>
-              </td>
-              <td>
-                <textarea
-                  type="text"
-                  class="description"
-                  v-model="scene.description"
-                ></textarea>
-              </td>
-              <td>
-                <button @click="store.deleteScene(props.actIndex, sceneIndex)">
-                  X
-                </button>
-              </td>
-            </tr>
-            {{
-              scene.plots.length
-            }}
-            <tr>
-              <button
-                @click="store.addPlotToScene(props.actIndex, sceneIndex)"
-                v-if="!scene.plots.length > 0 && localData.plots.length"
-              >
-                Plot
-              </button>
-              <td v-if="scene.plots.length > 0">
-                <div v-for="(plot, index) in localData.plots">
-                  <input
-                    type="checkbox"
-                    id=""
-                    name=""
-                    v-model="scene.plots"
-                    :value="index + 1"
-                    :style="{ accentColor: store.plotColorsHard[index] }"
-                  />
-                  <label for="">{{ plot.title }}</label>
-                </div>
-              </td>
-              <td>
-                <input
-                  v-if="scene.intensity >= 0 && scene.plots.length > 0"
-                  type="number"
-                  v-model="scene.intensity"
-                  class="plot-intensity"
-                  min="0"
-                  max="11"
-                />
-              </td>
-            </tr>
-          </table>
-          <div class="create-snippet">
-                    <button @click="store.insertScene('up', act, sceneIndex)">&#8593</button>
-                    <button @click="store.insertScene('down', act, sceneIndex)">&#8595</button>
-          </div>
-        </li> -->
+        <Scene v-for="(scene, sceneIndex) in act.scenes" :scene="scene" :sceneIndex="sceneIndex" :actIndex="props.actIndex" :act="act"> </Scene>
       </draggable>
     </div>
   </ul>
 </template>
+<style>
+
+.act button, .drag, .deleteAct {
+height: 24px;
+padding: 0 8px;
+}
+.act {
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 0 1rem;
+
+/*       display: flex;
+  flex-direction: row;
+  overflow-x: scroll;*/
+}
+
+/* .deleteAct {
+  margin: 0.5rem 0;
+} */
+
+.act-header-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2rem;
+  align-items: center;
+}
+</style>

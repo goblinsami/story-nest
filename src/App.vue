@@ -1,16 +1,18 @@
 <template>
-  <div class="header">
-    <div style="display: flex; align-items: center">
+  <div class="d-flex items-center justify-between">
+    <div class="header d-flex items-center">
       <h1>Story Nest</h1>
-      <small>v 1.1</small>
+      <small>v 1.2</small>
+    </div>
+    <div class="d-flex justify-center items-center settings">
       <button @click="handleShowEditor">
         {{ store.showEditor ? "Hide" : "Show" }} Editor
       </button>
-      <button @click="handleShowPlotChart">
+      <button @click="store.togglePlotChart()">
         {{ store.showPlotChart ? "Hide" : "Show" }} Plot Chart
       </button>
       <button @click="store.toggleShowChartSettings()">
-        {{ store.showPlotChart ? "Hide" : "Show" }} Chart Settings
+        {{ store.showChartSettings ? "Hide" : "Show" }} Chart Settings
       </button>
       <button @click="store.toggleShowCarousel()">
         {{ store.showCarousel ? "Hide" : "Show" }} Scene Carousel
@@ -18,25 +20,54 @@
     </div>
     <div>
       <button @click="exportStoryAsJSON">Exportar JSON</button>
-      <input type="file" @change="importJSON" accept=".json" />
+      <button class="custom-file-upload">
+        <label for="file-upload" class="custom-button">Importar json</label>
+        <input
+          type="file"
+          id="file-upload"
+          @change="importJSON"
+          accept=".json"
+        />
+      </button>
     </div>
   </div>
 
   <article class="chartContainer">
-    <LineChart v-if="store.showPlotChart"></LineChart>
-    {{ store.showCarousel }}
-    <SceneCarousel v-if="store.story && store.showCarousel"></SceneCarousel>
-    <TextEditor v-if="store.showEditor && store.story"></TextEditor>
+    <div
+      class="app-chart-container"
+      :class="store.showPlotChart ? 'expand' : ''"
+    >
+      <LineChart />
+    </div>
+    <div
+    class="app-carousel-container"
+    :class="store.showCarousel ? 'expand' : ''"
+    >
+      <CollapseButtons mode="carousel" />
+      <SceneCarousel></SceneCarousel>
+    </div>
+
+      <div
+        class="app-text-editor-container"
+        :class="store.showEditor ? 'expand' : ''"
+      >
+        <CollapseButtons />
+        <TextEditor></TextEditor>
+      </div>
   </article>
 </template>
 
 <script setup>
+import { nextTick } from "vue";
+
 import { ref, onMounted, reactive } from "vue";
 import jsonStory from "./constants/story.json";
 import TextEditor from "./components/TextEditor.vue";
 import LineChart from "./components/LineChart.vue";
 import { useSettingsStore } from "./stores/settings";
 import SceneCarousel from "./components/SceneCarousel.vue";
+import CollapseButtons from "./components/CollapseButtons.vue";
+import TComponent from "./components/TComponent.vue";
 //import jsonStory from './constants/uav.json'
 
 const store = useSettingsStore();
@@ -46,10 +77,15 @@ const showEditor = ref(false);
 onMounted(() => {
   store.updateStory(jsonStory);
   store.addNumeration();
+  store.addColorToActs();
+  store.checkCharactersInScene();
+ // handleShowPlotChart();
+
+
 });
 
 const handleShowPlotChart = () => {
-  store.togglePlotChart();
+ // store.togglePlotChart();
 };
 const handleShowPieChart = () => {
   store.togglePieChart();
@@ -77,7 +113,10 @@ const importJSON = (event) => {
   }
 };
 const processJSON = (data) => {
+  //store.togglePlotChart();
   store.updateStory(data);
+  store.addColorToActs();
+  //store.togglePlotChart();
 };
 const exportStoryAsJSON = () => {
   const json = JSON.stringify(store.story, null, 2); // Convierte el store a JSON
@@ -93,18 +132,48 @@ const exportStoryAsJSON = () => {
 };
 </script>
 <style>
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.app-text-editor-container {
+  transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
 }
 
+.app-text-editor-container.expand {
+  opacity: 1;
+  height: 1000px;
+}
+.app-carousel-container {
+  transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+  opacity: 0;
+  height: 0;
+}
+
+.app-carousel-container.expand {
+  opacity: 1;
+  height: 350px;
+}
+.app-chart-container {
+  transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+  overflow: hidden;
+  opacity: 0;
+  height: 0;
+}
+
+.app-chart-container.expand {
+  opacity: 1;
+  height: 500px;
+}
 .header h1 {
   padding-right: 1rem;
   margin: 0;
 }
 
 .header small {
-  padding-right: 1rem;
+  padding: 0 1rem;
+}
+
+.custom-file-upload {
+  margin-left: 10px;
 }
 </style>

@@ -4,27 +4,27 @@ import { useSettingsStore } from "../stores/settings";
 
 const store = useSettingsStore();
 
-const newPlot = ref({title: 'New Plot'})
+const newCharacter = ref({title: 'New character', color: "#ff0000"})
 
 
 </script>
 
 <template>
   <div class="container">
-    <textarea  name="plot-name" v-model="newPlot.title"></textarea>
-    <button @click="store.createPlot(newPlot.title)">Crear</button>
+    <textarea  name="plot-name" v-model="newCharacter.title"></textarea>
+    <button @click="store.createCharacter(newCharacter.title)">Crear</button>
   </div>
 
-      <div v-for="(plot, index) in store.story.plots" class="plot-container">
-       <input type="text" v-model="plot.title" class="plotName">
-                 <input
+      <div v-for="(character, index) in store.story.characters" class="plot-container">
+       <input type="text" v-model="character.title" class="plotName">
+           <input
             type="color"
             :id="actIndex"
             name="head"
-            v-model="store.plotColorsHard[index]"
+            v-model="character.color"
             class="plot-color-sample"
           />
-       <button @click="store.deletePlot(index)">X</button>
+       <button @click="store.deleteCharacter(index)">X</button>
       </div>
 </template>
 <style>

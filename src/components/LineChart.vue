@@ -1,55 +1,19 @@
 <template>
   <div id="canvas-container">
-<!--      <article class="styleControls">
-      <div class="chartControls">
-        <label for="position">Y height</label>
-        <input
-          name="position"
-          type="range"
-          v-model="store.chartHeight"
-          min="25"
-          max="75"
-          step="1"
-        />
-        <button @click="resetZoom()">Reset zoom</button>
-      </div>
-      <div class="color-pickers">
-        <div>
-          Actos
-          <div v-for="(el, index) in options.plugins.annotation.annotations">
-            <input
-              type="color"
-              :id="index"
-              name="head"
-              v-model="store.colorsHard[index]"
-              @input="setLineChartData()"
-            />
-            {{ el.title }}
-          </div>
-        </div>
-        <div style="padding: 0 1rem">
-          Tramas
-          <div v-for="(el, index) in data.datasets" v-if=" data.datasets[0] && data.datasets[0].data.length" >
-            <input
-              type="color"
-              :id="index"
-              name="head"
-              v-model="plotColorsHard[index]"
-              @input="setLineChartData()"
-            />
-            {{ el.label }}
-          </div>
-        </div>
-      </div>
-    </article> -->
-  <LineChartSettings v-if="store.showChartSettings" :data="data" :options="options"@changeSettings="setLineChartData()" @resetZoom="resetZoom()"></LineChartSettings>
     <div class="chartWrapper" :style="{ height: store.chartHeight + 'vh' }">
+      <div class="chart-settings-container" :class="store.showChartSettings ? 'expand' : ''">
+        <LineChartSettings class="debug" :data="data" :options="options"@changeSettings="setLineChartData()" @resetZoom="resetZoom()"></LineChartSettings>
+      </div>
+
+<br>
+<br>
+
+<h1>
+</h1>
       <Line
-        class="plotChart"
         :data="data"
         :options="options"
         ref="lineChart"
-        @click="handleClick"
         :key="key"
       />
     </div>
@@ -113,46 +77,32 @@ const data = ref({
 
 const opacity = ref(0);
 
-const colorsHard = ref([
-  "#FF5733", // Rojo anaranjado
-  "#33FF57", // Verde lima
-  "#3357FF", // Azul
-  "#F1C40F", // Amarillo
-  "#9B59B6", // Púrpura
-  "#E67E22", // Naranja
-  "#2ECC71", // Verde esmeralda
-  "#3498DB", // Azul claro
-  "#E74C3C", // Rojo
-  "#1ABC9C", // Verde aguamarina
-  "#8E44AD", // Púrpura oscuro
-  "#F39C12", // Amarillo anaranjado
-  "#D35400", // Naranja oscuro
-  "#2C3E50", // Azul oscuro
-  "#ECF0F1", // Gris claro
-  "#95A5A6", // Gris
-  "#7F8C8D", // Gris oscuro
-]);
+/* const beforeEnter = (el) => {
+  el.style.height = '0';
+  el.style.opacity = '0';
+};
 
-const plotColorsHard = ref([
-  "#FF5733", // Rojo anaranjado
-  "#33FF57", // Verde lima
-  "#3357FF", // Azul
-  "#F1C40F", // Amarillo
-  "#9B59B6", // Púrpura
-  "#E67E22", // Naranja
-  "#2ECC71", // Verde esmeralda
-  "#3498DB", // Azul claro
-  "#E74C3C", // Rojo
-  "#1ABC9C", // Verde aguamarina
-  "#8E44AD", // Púrpura oscuro
-  "#F39C12", // Amarillo anaranjado
-  "#D35400", // Naranja oscuro
-  "#2C3E50", // Azul oscuro
-  "#ECF0F1", // Gris claro
-  "#95A5A6", // Gris
-  "#7F8C8D", // Gris oscuro
-]);
+const enter = (el, done) => {
+  // Forzar el cálculo de la altura inicial correcta usando `getBoundingClientRect()`
+  const initialHeight = el.getBoundingClientRect().height;
+  el.style.transition = 'none'; // Desactivar transición temporalmente
+  el.style.height = initialHeight + 'px'; // Establecer la altura inicial
 
+  //el.offsetHeight; // Forzar un reflujo para que el navegador reconozca el cambio de estilo
+
+  el.style.transition = 'all 0.5s ease'; // Volver a habilitar la transición
+  el.style.height = el.scrollHeight + 'px'; // Aplicar la altura completa
+  el.style.opacity = '1'; // Restaurar opacidad
+
+  el.addEventListener('transitionend', done);
+};
+
+const leave = (el, done) => {
+  el.style.transition = 'all 0.5s ease';
+  el.style.height = '0';
+  el.style.opacity = '0';
+ // el.addEventListener('transitionend', done);
+}; */
 // Opciones del gráfico con anotaciones
 const options = ref({
   responsive: true,
@@ -177,6 +127,9 @@ const options = ref({
       ticks: {
         maxRotation: 45, // Rotación máxima
         minRotation: 45, // Rotación mínima
+        font: {
+            size: 16,  // Ajusta el tamaño de la fuente para las etiquetas del eje X
+          }
       },
     },
   },
@@ -184,6 +137,8 @@ const options = ref({
   plugins: {
     legend: {
       display: true,
+      position: 'top', // Cambia la posición de la leyenda
+
     },
     annotation: {
       annotations: {
@@ -255,14 +210,13 @@ const text = reactive({
 
 
 onMounted(() => {
-
   setLineChartData();
 });
 
 const resetZoom = () => {
   lineChart.value.chart.resetZoom();
 };
-const handleClick = (event, chart) => {
+/* const handleClick = (event, chart) => {
   const chartInstance = lineChart.value.chart; // Acceder a la instancia del gráfico
   const { x } = event; // Obtiene la posición x del clic
   const xScale = chartInstance.scales.x; // Escala del eje X
@@ -288,7 +242,7 @@ const handleClick = (event, chart) => {
       text.title = label;
     }
   });
-};
+}; */
 const setLineChartData = () => {
   console.log("setLineChartData");
 
@@ -310,7 +264,7 @@ const setLineChartData = () => {
   acts.forEach((act, actIndex) => {
     const segmentLength = act.scenes.length;
 
-    let color = store.colorsHard[actIndex];
+    let color = act.color;
     // Crear los segmentos
     const segment = {
       xMin: startX,
@@ -384,7 +338,9 @@ const setLineChartData = () => {
     data.value.datasets = datasets;
     data.value.labels = scenes.map((el, index) => `${index + 1} - ${el.title}`);
     options.value.plugins.annotation.annotations = segments;
+    options.value.scales.x.ticks.font.size = store.chartFontSize
 
+console.log(store.chartFontSize)
   key.value++;
   }
 
@@ -425,7 +381,15 @@ watch(
   () => store.colorsHard, // Observa cambios en toda la historia
   () => {
 
-      setLineChartData(); // Actualiza el gráfico
+    setLineChartData(); // Actualiza el gráfico
+  },
+  { deep: true },
+);
+watch(
+  () => store.chartFontSize, // Observa cambios en toda la historia
+  () => {
+
+    setLineChartData(); // Actualiza el gráfico
   },
   { deep: true },
 );
@@ -434,113 +398,38 @@ watch(
   () => {
 
       setLineChartData(); // Actualiza el gráfico
-  },
+    },
   { deep: true },
 );
 
 </script>
 
 <style>
-.chartControls {
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem;
-}
-.color-pickers {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 0.5rem;
-}
-.chartWrapper {
-  height: 2000px;
-}
-.grid {
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr; /* 3 filas de igual altura */
-  height: auto; /* Ajustar la altura de la cuadrícula */
-}
-
-.grid-item {
-  background-color: rgba(150, 150, 150, 0.2);
-  padding: 20px;
-  text-align: center;
-  font-size: 20px;
-  border-top: 1px rgba(150, 150, 150, 0.2) solid;
-}
-
-#textDisplay {
-  border: 1px rgb(255, 0, 0) solid;
-  height: 100px;
-}
-.styleControls {
-  padding: 1rem;
- /*  border: 1px black solid; */
-  display: flex;
-}
-
-.hide {
-  display: none;
-}
-
-.styleControls input {
-  border: 1px black solid !important;
-}
-.sceneContainer {
-  border-left: 1px black dotted;
-  display: flex;
-  text-overflow: ellipsis;
-}
-
-.sceneContainer:hover {
-  background-color: rgba(167, 166, 166, 0.486);
-}
-.scene {
-  transform: rotate(45deg);
-  white-space: nowrap;
-  height: auto;
-  position: relative;
-  top: 120px;
-  left: -20px;
-}
 #canvas-container {
   width: 100%; /* Ancho total del contenedor */
-  height: 100%; /* Altura fija para hacer scroll */
+/*   height: 100%;  */
   overflow-x: auto; /* Scroll horizontal */
-  border: 1px solid #ccc; /* Borde opcional para distinguir el área */
+/*   border: 1px solid #ccc; */
 }
-.chartCanvas {
-  display: flex; /* Hacer que los segmentos se alineen en una fila */
-  height: 300px; /* Altura fija para el gráfico y los segmentos */
-  overflow-x: auto; /* Permitir el desplazamiento horizontal */
-  position: relative;
+.chartWrapper {
+ /*  height: 2000px; */
+  padding-top: 1rem
 }
-.line {
-  border-top: 1px black solid;
+.chart-settings-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  opacity: 0;
+  height: 0;
+  transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+
 }
 
-.segment {
-  min-width: 150px; /* Establece un ancho mínimo para cada segmento, ajustable */
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px; /* Espacio entre segmentos */
-  background-color: black;
-  position: relative;
+.chart-settings-container.expand{
+
+  opacity: 1;
+  height: 200px;
+
 }
-#dynamicSegments {
-  display: flex;
-  width: max-content; /* Ajusta el ancho según el contenido */
-  justify-content: space-between;
-}
-.segment p {
-  position: absolute;
-  top: -20px; /* Posiciona el texto por encima de la línea */
-  width: 100%;
-  margin: 0;
-  font-size: 12px;
-  text-align: center;
-  color: black;
-}
+
 </style>

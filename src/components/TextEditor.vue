@@ -1,25 +1,39 @@
 <script setup>
 import { useSettingsStore } from "../stores/settings";
 import { VueDraggableNext } from "vue-draggable-next";
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import SceneCreator from "./SceneCreator.vue";
 import PlotCreator from "./PlotCreator.vue";
 import Act from "./Act.vue";
-
+import CharacterCreator from "./CharacterCreator.vue";
+import FilterScenes from "./FilterScenes.vue";
 const draggable = VueDraggableNext;
+onMounted(() => {
+if (isCarousel) {
+  toggleShowEditorSettings()
 
+}
+
+});
+const props = defineProps({
+  mode: {
+    required: false,
+    default: 'text-editor'
+  },
+});
 const store = useSettingsStore();
 const { story } = store;
 const showEditorSettings = ref(false);
+const isCarousel = computed(() => props.mode === "carousel");
 
 const dragging = ref(false);
 const localData = ref({});
 const showPlotEditor = ref(false);
+const showCharacterEditor = ref(false);
 
 const menuVisible = ref(false); // Controla la visibilidad del menú
-const menuX = ref(0);           // Coordenada X donde aparecerá el menú
-const menuY = ref(0);           // Coordenada Y donde aparecerá el menú
-
+const menuX = ref(0); // Coordenada X donde aparecerá el menú
+const menuY = ref(0); // Coordenada Y donde aparecerá el menú
 
 // Mostrar el menú en la posición del clic derecho
 const showMenu = (event) => {
@@ -35,7 +49,7 @@ const hideMenu = () => {
 
 // Manejar la opción seleccionada
 const handleOption = (option) => {
-  console.log('Seleccionaste:', option);
+  console.log("Seleccionaste:", option);
   hideMenu(); // Ocultar el menú después de seleccionar
 };
 
@@ -45,8 +59,8 @@ const newScene = ref({
 });
 
 const toggleShowEditorSettings = () => {
-  showEditorSettings.value = !showEditorSettings.value
-}
+  showEditorSettings.value = !showEditorSettings.value;
+};
 
 const createScene = (position, act) => {
   store.addScene(position, act, newScene.value);
@@ -69,7 +83,7 @@ const onEnd = () => {
 };
 
 const handleShowPlotEditor = () => {
-  showPlotEditor.value = !showPlotEditor.value
+  showPlotEditor.value = !showPlotEditor.value;
 };
 
 watch(
@@ -87,48 +101,101 @@ watch(
   },
   { deep: true } // Necesitas deep para observar objetos anidados
 );
+/* const beforeEnter = (el) => {
+  el.style.height = "0";
+  el.style.opacity = "0";
+};
+
+const enter = (el, done) => {
+  // Forzar el cálculo de la altura inicial correcta usando `getBoundingClientRect()`
+  const initialHeight = el.getBoundingClientRect().height;
+  el.style.transition = "none"; // Desactivar transición temporalmente
+  el.style.height = initialHeight + "px"; // Establecer la altura inicial
+
+  //el.offsetHeight; // Forzar un reflujo para que el navegador reconozca el cambio de estilo
+
+  el.style.transition = "all 0.5s ease"; // Volver a habilitar la transición
+  el.style.height = el.scrollHeight + "px"; // Aplicar la altura completa
+  el.style.opacity = "1"; // Restaurar opacidad
+
+  el.addEventListener("transitionend", done);
+};
+
+const leave = (el, done) => {
+  el.style.transition = "all 0.5s ease";
+  el.style.height = "0";
+  el.style.opacity = "0";
+  el.addEventListener("transitionend", done);
+}; */
 </script>
 
 <template>
   <main>
     <article>
+      <!--       <FilterScenes /> -->
       <div class="title-container">
-        <button @click="toggleShowEditorSettings()" >Hide settings</button>
+        <button @click="toggleShowEditorSettings()" v-if="!isCarousel">Ocultar ajustes</button>
       </div>
-      <div class="settings-container" v-if="showEditorSettings">
-        <div class="title-block">
-          <div >
-            <h1>
-              <input
-                type="text"
-                class="title"
-                v-model="localData.title"
-                maxlength="50"
-              />
-            </h1>
-            <textarea
-              type="textarea"
-              class="sub-title"
-              v-model="localData.description"
-            ></textarea>
+      <Transition
+        name="fade-height"
+        @before-enter="beforeEnter"
+        @enter="enter"
+        @leave="leave"
+      >
+        <div class="settings-container" v-if="showEditorSettings && !isCarousel">
+          <div class="title-block">
+            <div>
+              <h1>
+                <input
+                  type="text"
+                  class="title"
+                  v-model="localData.title"
+                  maxlength="50"
+
+                />
+              </h1>
+              <textarea
+                type="textarea"
+                class="sub-title"
+                v-model="localData.description"
+              ></textarea>
+            </div>
+
+            <div class="d-flex settings">
+              <button @click="store.addAct()" class="addAct">
+                Añadir acto
+              </button>
+              <button @click="store.addNumeration()" class="addAct">
+                Numerar
+              </button>
+              <button
+                @click="handleShowPlotEditor(), (showCharacterEditor = false)"
+                class="addAct"
+              >
+                Tramas
+              </button>
+              <button
+                @click="
+                  (showCharacterEditor = !showCharacterEditor),
+                    (showPlotEditor = false)
+                "
+                class="addAct"
+              >
+                Personajes
+              </button>
+              <button @click="store.deleteStory()" class="addAct">
+                Borrar todo
+              </button>
+            </div>
+            <span v-if="localData.acts">{{ store.getScenesLength }}</span>
           </div>
 
-          <span class="d-flex">
-            <button @click="store.addAct()" class="addAct">Añadir acto</button>
-            <button @click="store.addNumeration()" class="addAct">numerar</button>
-            <button @click="handleShowPlotEditor()" class="addAct">plots</button>
-            <button @click="store.deleteStory()" class="addAct">eliminar historia</button>
-          </span>
-          <span v-if="localData.acts">{{ store.getScenesLength }}</span>
+          <div class="plot-block">
+            <PlotCreator v-if="showPlotEditor" />
+            <CharacterCreator v-if="showCharacterEditor" />
+          </div>
         </div>
-
-
-        <div class="plot-block">
-          <PlotCreator v-if="showPlotEditor"/>
-        </div>
-      </div>
-
-
+      </Transition>
       <div class="">
         <draggable
           v-model="localData.acts"
@@ -138,152 +205,45 @@ watch(
           group="acts"
           handle=".drag-handle"
         >
-       <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
-<!--            <ul v-for="(act, actIndex) in localData.acts" class="card">
-            <button @click="store.deleteAct(actIndex)" class="deleteAct">
-              X
-            </button>
-            <div class="act-header-container">
-          <input
-            type="color"
-            :id="actIndex"
-            name="head"
-            v-model="store.colorsHard[actIndex]"
-            class="act-color-sample"
-          />
-
-
-              <input type="text" class="title" v-model="act.title" />
-              <h2>
-                <span>{{ act.scenes.length }}</span>
-              </h2>
-            </div>
-            <div class="act">
-              <SceneCreator :act="act" />
-              <draggable
-                v-model="act.scenes"
-                @start="onStart"
-                @end="onEnd"
-                group="scenes"
-
-              >
-                <li
-                  v-for="(scene, sceneIndex) in act.scenes"
-                  class="sceneClass card"
-                  :class="dragging ? 'grabbing' : ''"
-                >
-                  <table>
-                    <tr>
-                      <td>
-                        {{ scene.number }} -
-                        <textarea
-                          type="text"
-                          class="description"
-                          v-model="scene.title"
-                        ></textarea>
-                      </td>
-                      <td>
-                        <textarea
-                          type="text"
-                          class="description"
-                          v-model="scene.description"
-                        ></textarea>
-                      </td>
-                      <td>
-                        <button
-                          @click="store.deleteScene(actIndex, sceneIndex)"
-                        >
-                          X
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <button
-                        @click="store.addPlotToScene(actIndex, sceneIndex)"
-                        v-if="!scene.plots.length > 0 && localData.plots.length"
-                      >
-                        Plot
-                      </button>
-                      <td v-if="scene.plots.length > 0">
-                        <div v-for="(plot, index) in localData.plots">
-                          <input
-                            type="checkbox"
-                            id=""
-                            name=""
-                            v-model="scene.plots"
-                            :value="index + 1"
-                            :style="{ accentColor: store.plotColorsHard[index] }"
-                          />
-                          <label for="">{{ plot.title }}</label>
-                        </div>
-                      </td>
-                      <td>
-                        <input
-                          v-if="scene.intensity >= 0 && scene.plots.length > 0"
-                          type="number"
-                          v-model="scene.intensity"
-                          class="plot-intensity"
-                          min="0"
-                          max="11"
-                        />
-                      </td>
-                    </tr>
-                  </table>
-                  <div class="create-snippet">
-                    <button @click="store.insertScene('up', act, sceneIndex)">&#8593</button>
-                    <button @click="store.insertScene('down', act, sceneIndex)">&#8595</button>
-                  </div>
-                </li>
-              </draggable>
-            </div>
-          </ul> -->
+          <Act
+            v-for="(act, actIndex) in localData.acts"
+            class="card no-select"
+            :act="act"
+            :actIndex="actIndex"
+          ></Act>
         </draggable>
       </div>
     </article>
   </main>
 </template>
 <style>
+.title {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.sub-title {
+  font-size: 1.5em;
+}
+
+.description {
+  font-size: 1rem;
+}
 .title-block {
 }
 .plot-block {
-  width:25%;
+  width: 25%;
 }
-.create-snippet {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  right: -25px;
-  top: 25%;
-  opacity: 0.5;
 
-}
-.deleteAct {
-  margin: 0.5rem 0;
-}
 .addAct {
   width: 100px;
   margin: 0.5rem 0;
 }
-.plot-intensity {
-  border: 1px black solid !important;
-  width: 3rem;
-}
 
-.create-scene-button-container {
-  display: flex;
-  flex-direction: column;
-}
-.act-header-container {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 2rem;
-  align-items: center;
-}
 .settings-container {
   display: flex;
   flex-direction: row;
   justify-content: center;
-
 }
 .title-container {
   display: flex;
@@ -297,49 +257,17 @@ watch(
   cursor: grabbing; /* Cambia el cursor a una mano cerrada */
 }
 .acts-container {
-  display: flex;
+/*   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  justify-content: space-evenly; */
+
+    display: flex;
+  flex-direction: row;
+  overflow-x: scroll;
+  height: 50%;
 }
-
-.act {
-  width: auto;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-}
-
-.sceneClass {
-  padding: 0.5rem;
-  margin: 0.5rem;
-}
-
-.card {
-  border: 1px rgba(105, 105, 105, 0.2) solid;
-  box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2);
-  padding: 0 1rem;
-  position: relative;
-
-}
-
-.create-scene {
-  box-shadow: 10px 5px 5px rgba(29, 199, 230, 0.2);
-}
-
 .grabbing {
   cursor: grabbing;
-}
-
-ul {
-  list-style: none;
-  padding: none;
-}
-
-textarea {
-  height: auto;
-  min-width: 100px;
-  max-width: 200px;
-  max-height: 300px;
 }
 </style>

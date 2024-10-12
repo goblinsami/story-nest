@@ -5,7 +5,14 @@
       {
         "id": 1,
         "title": "Joel",
-        "description": "a good man"
+        "description": "a good man",
+        "color": "#ff0000"
+      },
+      {
+        "id": 2,
+        "title": "Clementine",
+        "description": "#a6ff00",
+        "color": "#5c2f8b"
       }
     ],
   "plots": [
@@ -35,8 +42,8 @@
           "intensity": null
         },
         {
-          "title": "The Storm Approaches",
-          "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos.",
+          "title": "The Storm Approaches with Clementine",
+          "description": "Una tormenta se avecina mientras los personajes enfrentan sus miedos",
           "duration": 10,
           "plots": [
             1,
