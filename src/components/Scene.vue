@@ -128,15 +128,16 @@ const onLeaveScene = () => {
   isHovered.value = false;
 };
 let handleCollapse = computed(() => {
-  let isCarousel = props.mode == 'carousel'
+/*   let isCarousel = props.mode == 'carousel' */
 /*   if (localCollapse) {
     return localCollapse
   } */
-  if (isCarousel) {
+/*   if (isCarousel) {
     return props.scene.collapsedCarousel
   } else {
     return props.scene.collapsed
-  }
+  } */
+return props.scene.collapsed
 });
 
 
@@ -164,8 +165,6 @@ watch(
   >
     <div class="act-tag drag-scene-handle carousel-scene-handle" :style="dynamicBackgroundStyle" @click="store.collapseScene(props.scene), localCollapse = !localCollapse">
       <h3 style="padding-left: 1rem"><p v-html="highlightNamesInTitle"></p></h3>
-<!--            {{ handleCollapse }} //local {{ localCollapse }}
-           {{ props.scene }} -->
     </div>
       <div class="box-container" :class="handleCollapse ? 'expand' : ''" >
         <div class="debug left-box">
@@ -197,7 +196,7 @@ watch(
           >
             Plot
           </button>
-          <div v-if="!handleCollapse" class="plot-editor-container">
+          <div class="plot-editor-container">
             <button
               style="margin-bottom: 0.25rem"
               @click="

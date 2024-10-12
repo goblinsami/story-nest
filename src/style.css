@@ -13,6 +13,7 @@ input:focus {
 
 body {
   font-family: "Courier New", Courier, monospace;
+  overflow: hidden;
 }
 
 .color-sample {

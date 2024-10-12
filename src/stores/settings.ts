@@ -10,12 +10,16 @@ export const useSettingsStore = defineStore('settings', {
     story: {},
     showPlotChart: true,
     showPieChart: false,
-    showEditor: false,
+    showEditor: true,
     showReader: false,
     showChartSettings: false,
     showCarousel: true,
+    expandChart: false,
     chartFontSize: 15,
     chartHeight: 40,
+    chartwidtht: 55,
+    editorWidth: 45,
+
     originalStory: {},
     colorsHard: [
       "#FF5733", // Rojo anaranjado
@@ -173,7 +177,14 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
 
-
+    toggleExpandChart() {
+      this.expandChart = !this.expandChart
+      if (this.expandChart == true) {
+        this.chartHeight = 60
+      } else {
+        this.chartHeight = 40
+      }
+    },
     //TOGGLERS
     togglePlotChart() {
       this.showPlotChart = !this.showPlotChart
@@ -344,7 +355,7 @@ export const useSettingsStore = defineStore('settings', {
       // Alert opcional para verificar resultados
     },
 
-    addScene(position, act, newScene) {
+/*     addScene(position, act, newScene) {
       console.log('STOREE!!', position, act.title, newScene)
 
 
@@ -355,7 +366,9 @@ export const useSettingsStore = defineStore('settings', {
         description: newScene.description || "",
         duration: 10,
         plots: [],
-        intensity: null
+        intensity: null,
+        collapsed: true,
+
       }
 
 
@@ -366,19 +379,22 @@ export const useSettingsStore = defineStore('settings', {
       }
 
     },
-
+ */
 
     insertScene(position, actIndex, sceneIndex) {
-
-
+      const uniqueId = uuidv4(); // Genera un UUID por cada escena
       let updatedAct = this.story.acts[actIndex]
+      let previousScene = updatedAct.scenes[sceneIndex]
+      previousScene.collapsed = false
       let newElement = {
-        title: "Nueva Escena",
+        title: "d Escena",
         description: "",
         duration: 10,
         plots: [],
-        intensity: null
+        intensity: null,
       }
+      //newElement.id = uniqueId;
+      newElement.collapsed = true
 
 
       if (position == 'down') {
@@ -386,7 +402,7 @@ export const useSettingsStore = defineStore('settings', {
       } else {
         updatedAct.scenes.splice(sceneIndex, 0, newElement);
       }
-
+      this.addNumeration()
     },
 
 
@@ -524,8 +540,8 @@ export const useSettingsStore = defineStore('settings', {
           scene.number = sceneNumber++; // Asigna el número de escena y lo incrementa
           scene.actIndex = actIndex; // Asigna el índice del acto
           scene.sceneIndex = sceneIndex; // Asigna el índice de la escena
-          scene.collapsed = false
-          scene.collapsedCarousel = false
+          //scene.collapsed = false
+          //scene.collapsedCarousel = false
         });
       });
     }

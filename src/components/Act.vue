@@ -14,13 +14,10 @@ const dragging = ref(false);
 
 const store = useSettingsStore();
 const { story } = store;
-const onStart = () => {
-};
+const onStart = () => {};
 
 // Función que se ejecuta cuando termina el arrastre
-const onEnd = () => {
-
-};
+const onEnd = () => {};
 const props = defineProps({
   act: {
     required: true,
@@ -41,55 +38,75 @@ watch(
 </script>
 
 <template>
-  <ul>
-    <div class="d-flex justify-between">
-      <button class="drag-handle">Drag</button>
-        <CollapseButtons mode='act' :actIndex="props.actIndex" />
+  <div class="act">
+    <div class="act-info">
+      <div class="d-flex justify-between">
+        <button class="drag-handle">Drag</button>
+        <CollapseButtons mode="act" :actIndex="props.actIndex" />
 
-      <button @click="store.deleteAct(props.actIndex)" class="deleteAct">
-        X
-      </button>
+        <button @click="store.deleteAct(props.actIndex)" class="deleteAct">
+          X
+        </button>
+      </div>
+      <div class="act-header-container">
+        <input
+          type="color"
+          :id="props.actIndex"
+          name="head"
+          v-model="props.act.color"
+          class="act-color-sample"
+        />
+        <input type="text" class="title" v-model="props.act.title" />
+        <h2>
+          <span>{{ act.scenes.length }}</span>
+        </h2>
+      </div>
     </div>
-    <div class="act-header-container">
-      <input
-        type="color"
-        :id="props.actIndex"
-        name="head"
-        v-model="props.act.color"
-        class="act-color-sample"
-      />
-      <input type="text" class="title" v-model="props.act.title" />
-      <h2>
-        <span>{{ act.scenes.length }}</span>
-      </h2>
-    </div>
-    <div class="act">
-      <SceneCreator :act="act" class="card"/>
-      <draggable
-        v-model="act.scenes"
-        @start="onStart"
-        @end="onEnd"
-        group="scenes"
-        handle=".drag-scene-handle">
-        <Scene v-for="(scene, sceneIndex) in act.scenes" :scene="scene" :sceneIndex="sceneIndex" :actIndex="props.actIndex" :act="act"> </Scene>
-      </draggable>
-    </div>
-  </ul>
+    <!--       <SceneCreator :act="act" class="card"/> -->
+    <draggable
+      v-model="act.scenes"
+      @start="onStart"
+      @end="onEnd"
+      group="scenes"
+      handle=".drag-scene-handle"
+    >
+      <Scene
+        v-for="(scene, sceneIndex) in act.scenes"
+        :scene="scene"
+        :sceneIndex="sceneIndex"
+        :actIndex="props.actIndex"
+        :act="act"
+      >
+      </Scene>
+    </draggable>
+  </div>
 </template>
 <style>
 
-.act button, .drag, .deleteAct {
-height: 24px;
-padding: 0 8px;
+.act-info {
+  opacity: 0.5;
+}
+
+.act-info:hover {
+  opacity: 1;
+}
+ul .card.no-select {
+  padding: none;
+}
+.act button,
+.drag,
+.deleteAct {
+  height: 24px;
+  padding: 0 8px;
 }
 .act {
   width: auto;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
-  padding: 0 1rem;
+  height: 100%;
 
-/*       display: flex;
+  /*       display: flex;
   flex-direction: row;
   overflow-x: scroll;*/
 }

@@ -9,11 +9,11 @@ import CharacterCreator from "./CharacterCreator.vue";
 import FilterScenes from "./FilterScenes.vue";
 const draggable = VueDraggableNext;
 onMounted(() => {
-if (isCarousel) {
+/* if (isCarousel) {
   toggleShowEditorSettings()
 
 }
-
+ */
 });
 const props = defineProps({
   mode: {
@@ -134,14 +134,9 @@ const leave = (el, done) => {
     <article>
       <!--       <FilterScenes /> -->
       <div class="title-container">
-        <button @click="toggleShowEditorSettings()" v-if="!isCarousel">Ocultar ajustes</button>
+        <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="padding: 1rem">Ocultar ajustes</button>
       </div>
-      <Transition
-        name="fade-height"
-        @before-enter="beforeEnter"
-        @enter="enter"
-        @leave="leave"
-      >
+
         <div class="settings-container" v-if="showEditorSettings && !isCarousel">
           <div class="title-block">
             <div>
@@ -195,7 +190,6 @@ const leave = (el, done) => {
             <CharacterCreator v-if="showCharacterEditor" />
           </div>
         </div>
-      </Transition>
       <div class="">
         <draggable
           v-model="localData.acts"
@@ -232,7 +226,7 @@ const leave = (el, done) => {
 .title-block {
 }
 .plot-block {
-  width: 25%;
+
 }
 
 .addAct {
@@ -244,6 +238,8 @@ const leave = (el, done) => {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  flex-wrap: wrap;
+  padding-bottom: 2rem;
 }
 .title-container {
   display: flex;
@@ -257,17 +253,24 @@ const leave = (el, done) => {
   cursor: grabbing; /* Cambia el cursor a una mano cerrada */
 }
 .acts-container {
-/*   display: flex;
+   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-evenly; */
+  justify-content: space-evenly;
 
-    display: flex;
-  flex-direction: row;
-  overflow-x: scroll;
-  height: 50%;
+  padding-bottom: 20rem;
+
+/*     display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  height: 100%; */
 }
 .grabbing {
   cursor: grabbing;
+}
+.title-container button {
+  height: 24px;
+  padding: 1rem 8px;
+  margin: 1rem 0;
 }
 </style>

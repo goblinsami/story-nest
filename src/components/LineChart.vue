@@ -4,12 +4,6 @@
       <div class="chart-settings-container" :class="store.showChartSettings ? 'expand' : ''">
         <LineChartSettings class="debug" :data="data" :options="options"@changeSettings="setLineChartData()" @resetZoom="resetZoom()"></LineChartSettings>
       </div>
-
-<br>
-<br>
-
-<h1>
-</h1>
       <Line
         :data="data"
         :options="options"
@@ -312,9 +306,8 @@ const setLineChartData = () => {
   if (store.story.plots.length > 0){
     for (let i = 1; i <= maxPlotNumber; i++) {
       let color = store.plotColorsHard[i - 1];
-
       datasets.push({
-        label: store.story.plots[i - 1].title,
+        label: store.story.plots[i - 1].title.slice(0, 10) + '...',
         data: plotData[i], // Usar los datos de la trama correspondiente
         backgroundColor: color + "30",
         borderColor: color + "99",
@@ -335,8 +328,10 @@ const setLineChartData = () => {
   }
 
     // Actualizar los datos del gráfico
+    const truncate = (str) => str.length > 20 ? str.slice(0, 20) + '...' : str;
+
     data.value.datasets = datasets;
-    data.value.labels = scenes.map((el, index) => `${index + 1} - ${el.title}`);
+    data.value.labels = scenes.map((el, index) => `${index + 1} - ${truncate(el.title)}`);
     options.value.plugins.annotation.annotations = segments;
     options.value.scales.x.ticks.font.size = store.chartFontSize
 

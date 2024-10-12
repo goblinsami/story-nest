@@ -14,9 +14,13 @@
       <button @click="store.toggleShowChartSettings()">
         {{ store.showChartSettings ? "Hide" : "Show" }} Chart Settings
       </button>
-      <button @click="store.toggleShowCarousel()">
-        {{ store.showCarousel ? "Hide" : "Show" }} Scene Carousel
+      <button @click="store.toggleExpandChart()">
+        {{ store.expandChart ? "Expand" : "Contract" }} Chart Settings
       </button>
+
+      <!--       <button @click="store.toggleShowCarousel()">
+        {{ store.showCarousel ? "Hide" : "Show" }} Scene Carousel
+      </button> -->
     </div>
     <div>
       <button @click="exportStoryAsJSON">Exportar JSON</button>
@@ -32,28 +36,23 @@
     </div>
   </div>
 
-  <article class="chartContainer">
+  <article class="chartContainer" style="display: flex; width: 100%">
     <div
+      class="app-text-editor-container"
+      :class="store.showEditor ? 'expand' : ''"
+      :style="{width: store.expandChart ? '0' : '55%'}"
+
+    >
+
+      <TextEditor></TextEditor>
+    </div>
+    <div
+      :style="{width: store.expandChart ? '100%' : '55%', height: '100%'}"
       class="app-chart-container"
       :class="store.showPlotChart ? 'expand' : ''"
     >
       <LineChart />
     </div>
-    <div
-    class="app-carousel-container"
-    :class="store.showCarousel ? 'expand' : ''"
-    >
-      <CollapseButtons mode="carousel" />
-      <SceneCarousel></SceneCarousel>
-    </div>
-
-      <div
-        class="app-text-editor-container"
-        :class="store.showEditor ? 'expand' : ''"
-      >
-        <CollapseButtons />
-        <TextEditor></TextEditor>
-      </div>
   </article>
 </template>
 
@@ -79,13 +78,11 @@ onMounted(() => {
   store.addNumeration();
   store.addColorToActs();
   store.checkCharactersInScene();
- // handleShowPlotChart();
-
-
+  // handleShowPlotChart();
 });
 
 const handleShowPlotChart = () => {
- // store.togglePlotChart();
+  // store.togglePlotChart();
 };
 const handleShowPieChart = () => {
   store.togglePieChart();
@@ -137,6 +134,7 @@ const exportStoryAsJSON = () => {
   opacity: 0;
   height: 0;
   overflow: hidden;
+  overflow-y: scroll;
 }
 
 .app-text-editor-container.expand {
