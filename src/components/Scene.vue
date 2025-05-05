@@ -26,30 +26,40 @@ const { story } = store;
 const props = defineProps({
   scene: {
     required: true,
+    default: () => ({}),
   },
   act: {
     required: false,
+    default: () => ({}),
   },
   sceneIndex: {
-    required: true,
+    required: false,
+    default: 0,
   },
   actIndex: {
     required: false,
+    default: 0,
   },
   mode: {
     required: false,
     default: "text-editor",
   },
 });
-
-const handleAddPlotToScene = (actIndex, sceneIndex, scene) => {
-  console.log(isCarousel.value);
-  if (!isCarousel.value) {
-    store.addPlotToScene(actIndex, sceneIndex);
-  } else {
-    store.editSceneAndAddPlots(scene);
-  }
+const findActIndex = (scene) => {
+  let actIndex = -1;
+  store.story.acts.forEach((act, index) => {
+    if (act.scenes.includes(scene)) {
+      actIndex = index;
+    }
+  });
+  return actIndex;
 };
+
+const handleAddPlotToScene = (scene) => {
+
+  store.addPlotToScene(scene);
+}
+
 const emit = defineEmits(["editScene"]);
 
 //LOGICA DE COLOREAR NOMBRES DE PERSONAJES
@@ -98,7 +108,7 @@ const highlightNamesInDescription = computed(() => {
 });
 
 const dynamicBackgroundStyle = computed(() => {
-  if (isCarousel.value) {
+  if (props.mode === 'single') {
     return {
       backgroundColor: `${store.story.acts[props.scene.actIndex].color}20`, // Color azul con opacidad dinámica
     };
@@ -127,17 +137,18 @@ const onHoverScene = () => {
 const onLeaveScene = () => {
   isHovered.value = false;
 };
+const handleSelectScene = (scene) => {
+  store.goToCarouselVisualization(scene, isSingleMode)
+};
+
+
 let handleCollapse = computed(() => {
-/*   let isCarousel = props.mode == 'carousel' */
-/*   if (localCollapse) {
-    return localCollapse
-  } */
-/*   if (isCarousel) {
-    return props.scene.collapsedCarousel
-  } else {
-    return props.scene.collapsed
-  } */
-return props.scene.collapsed
+
+  return props.scene.collapsed
+});
+
+let isSingleMode = computed(() => {
+  return props.mode === "single";
 });
 
 
@@ -157,126 +168,97 @@ watch(
 </script>
 
 <template>
-  <li
-    class="card"
-    :class="'sceneClass2'"
-    @mouseover="onHoverScene"
-    @mouseleave="onLeaveScene"
-  >
-    <div class="act-tag drag-scene-handle carousel-scene-handle" :style="dynamicBackgroundStyle" @click="store.collapseScene(props.scene), localCollapse = !localCollapse">
-      <h3 style="padding-left: 1rem"><p v-html="highlightNamesInTitle"></p></h3>
+  <li class="card" :class="'sceneClass2'" @mouseover="onHoverScene" @mouseleave="onLeaveScene" @click="handleSelectScene(scene)" @click.stop>
+    <div class="act-tag drag-scene-handle carousel-scene-handle scene-header" :style="dynamicBackgroundStyle"
+      @click="store.collapseScene(props.scene), localCollapse = !localCollapse">
+      <h3 style="padding-left: 1rem; width: 100%;">
+        <p v-html="highlightNamesInTitle" v-if="!editText"></p>
+        <input focus type="text" class="scene-title" v-model="props.scene.title" v-else
+          @input="emit('editScene', scene), store.checkCharactersInScene()" @click.stop />
+      </h3>
+      <button v-if="!isSingleMode" class="soft-btn" v-show="isHovered"
+        @click="store.goToCarouselVisualization(scene)" @click.stop>🎥</button>
     </div>
-      <div class="box-container" :class="handleCollapse ? 'expand' : ''" >
-        <div class="debug left-box">
-          <button
-            class="drag-scene-handle"
-            v-if="!isCarousel"
-            :class="'hideButton' + (isHovered ? 'show' : '')"
-          >
-            Drag
-          </button>
-          <button
-            class="carousel-scene-handle"
-            v-else
-            :class="'hideButton' + (isHovered ? 'show' : '')"
-          >
-            Drag
-          </button>
-          <button
-            @click="toggleEditScene()"
-            :class="'hideButton' + (isHovered ? 'show' : '')"
-            :style="scene.plots.length > 0 ? {marginBottom: '6rem'} : {}"
-          >
-            Edit
-          </button>
-          <button
-            @click="handleAddPlotToScene(props.actIndex, props.sceneIndex, scene)"
-            v-if="!scene.plots.length > 0"
-            :class="'hideButton' + (isHovered ? 'show' : '')"
-          >
-            Plot
-          </button>
-          <div class="plot-editor-container">
-            <button
-              style="margin-bottom: 0.25rem"
-              @click="
-                store.deletePlotsfromScene(
-                  props.actIndex,
-                  props.sceneIndex,
-                  scene
-                )
-              "
-              v-if="scene.plots.length > 0"
-              :class="'hideButton' + (isHovered ? 'show' : '')"
-            >
-              x
-            </button>
-            <td v-if="scene.plots.length > 0">
-              <div v-for="(plot, index) in localData.plots">
-                <input
-                  type="checkbox"
-                  id=""
-                  name=""
-                  v-model="scene.plots"
-                  :value="index + 1"
-                  :style="{ accentColor: store.plotColorsHard[index] }"
-                  @change="emit('editScene', scene)"
-                />
-                <label for="">{{ plot.title }}</label>
-              </div>
-            </td>
-            <td v-if="scene.intensity >= 0 && scene.plots.length > 0">
-              <input
-                type="number"
-                v-model="scene.intensity"
-                class="plot-intensity"
-                min="0"
-                max="11"
-                @input="emit('editScene', scene)"
-              />
-            </td>
-          </div>
-        </div>
-        <div class="text-box" v-if="editText" @dblclick="toggleEditScene()">
-          <textarea
-            type="text"
-            class="description"
-            v-model="scene.title"
-            @input="emit('editScene', scene), store.checkCharactersInScene()"
-             maxlength="40"
-          ></textarea>
-          <textarea
-            type="text"
-            maxlength="100"
+    <div class="scene-content" :class="handleCollapse ? 'expand' : ''">
+      <div class="debug left-box">
+        <!--         <button class="drag-scene-handle" v-if="!isSingleMode" :class="'hideButton' + (isHovered ? 'show' : '')">
+          🖖
+        </button> -->
+        <!--         <button class="carousel-scene-handle" v-else :class="'hideButton' + (isHovered ? 'show' : '')">
+          Drag
+        </button> -->
+        <button @click="toggleEditScene()" class="soft-btn" :class="'hideButton' + (isHovered ? 'show' : '')"
+          :style="scene.plots.length > 0 ? { marginBottom: '6rem' } : {}">
+          {{ editText ? '👌' : '✏️' }}
+        </button>
+        <button @click="handleAddPlotToScene(scene)" v-if="editText && !scene.plots.length > 0"
+          :class="'hideButton' + (isHovered ? 'show' : '')">
+          Plot
+        </button>
+        <div class="plot-editor-container" v-if="editText">
 
-            class="description"
-            v-model="scene.description"
-            @input="emit('editScene', scene), store.checkCharactersInScene()"
-          ></textarea>
-        </div>
-        <div v-if="!editText" class="text-box" @dblclick="toggleEditScene()">
-          <div class="formatted-text description-container" v-if="!editText">
-            <p v-html="highlightNamesInDescription"></p>
-          </div>
-        </div>
-        <div class="debug2 right-box">
-          <button
-            :class="'hideButton' + (isHovered ? 'show' : '')"
-            @click="store.deleteScene(props.actIndex, props.sceneIndex)"
-            style="margin-left: 0rem"
-          >
-            X
+
+          <button style="margin-bottom: 0.25rem" @click="
+            store.deletePlotsfromScene(scene)
+            " v-if="scene.plots.length > 0" :class="'hideButton' + (isHovered ? 'show' : '')">
+            🗑️
           </button>
-      <div class="create-snippet"           :class="'hideButton' + (isHovered ? 'show' : '')">
-        <button @click="store.insertScene('up', actIndex, props.sceneIndex)">&#8593</button>
-        <button @click="store.insertScene('down', actIndex, props.sceneIndex)">&#8595</button>
+          <td v-if="scene.plots.length > 0">
+            <div v-for="(plot, index) in localData.plots">
+              <input type="checkbox" id="" name="" v-model="scene.plots" :value="index + 1"
+                :style="{ accentColor: store.plotColorsHard[index] }" @change="emit('editScene', scene)" />
+              <label for="">{{ plot.title }}</label>
+            </div>
+          </td>
+          <td v-if="scene.intensity >= 0 && scene.plots.length > 0">
+            <input type="number" v-model="scene.intensity" class="plot-intensity" min="0" max="11"
+              @input="emit('editScene', scene)" />
+          </td>
+        </div>
       </div>
+      <div class="text-box" v-if="editText" @dblclick="toggleEditScene()">
+        <!--         <textarea type="text" class="description" v-model="scene.title"
+          @input="emit('editScene', scene), store.checkCharactersInScene()" maxlength="40"></textarea> -->
+        <textarea type="text" maxlength="100" class="description" v-model="scene.description"
+          @input="emit('editScene', scene), store.checkCharactersInScene()"></textarea>
+      </div>
+      <div v-if="!editText" class="text-box" @dblclick="toggleEditScene()">
+        <div class="formatted-text description-container" v-if="!editText">
+          <p v-html="highlightNamesInDescription"></p>
         </div>
+      </div>
+      <div class="debug2 right-box">
+        <button :class="'hideButton' + (isHovered ? 'show' : '')"
+          @click="store.deleteScene(props.actIndex, props.sceneIndex)" style="margin-left: 0rem" v-if="editText">
+          🗑️
+        </button>
+        <div class="create-snippet" :class="'hideButton' + (isHovered ? 'show' : '')" v-if="editText">
+          <button @click="store.insertScene('up', actIndex, props.sceneIndex)">&#8593</button>
+          <button @click="store.insertScene('down', actIndex, props.sceneIndex)">&#8595</button>
+        </div>
+      </div>
 
-       </div>
+    </div>
   </li>
 </template>
 <style>
+.soft-btn {
+  background: none;
+  opacity: 0.5
+}
+
+.scene-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scene-title {
+  font-size: 1em;
+  font-weight: bold;
+  user-select: none;
+  width: 75%;
+}
+
 .sceneClass2 button {
   height: 24px;
   padding: 0 8px;
@@ -284,44 +266,6 @@ watch(
 
 .collapseCard {
   height: min-content;
-      display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin: 0.5rem;
-    width: auto;
-    min-width: 560px;
-}
-.plot-editor-container {
-  position: absolute;
-  bottom: 5px;
-  left: 10px;
-  background-color: #fcfcfd;
-}
-.box-container {
- /*  min-height: 250px; */
-  height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  pointer-events: auto; /* Asegura que puedan recibir clics */
-  transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    overflow: hidden;
-  opacity: 0;
-}
-.box-container.expand {
-  height: 200px;
-  opacity: 1;
-
-}
-.text-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.sceneClass2 {
-/*   min-height: 250px;
- */  max-height: 300px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -329,12 +273,60 @@ watch(
   width: auto;
   min-width: 560px;
 }
+
+.plot-editor-container {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  background-color: #fcfcfd;
+}
+
+.scene-content {
+  /*  min-height: 250px; */
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  pointer-events: auto;
+  /* Asegura que puedan recibir clics */
+  transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.scene-content.expand {
+  height: 200px;
+  opacity: 1;
+
+}
+
+.text-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.sceneClass2 {
+  /*   min-height: 250px;
+ */
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /*   margin: 0.5rem; */
+  width: auto;
+  min-width: 560px;
+}
+
 .right-box {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 1rem;
 }
+
 .left-box {
   display: flex;
   flex-direction: column;
@@ -345,6 +337,7 @@ watch(
 p {
   margin: 0px;
 }
+
 .plot-intensity {
   border: 1px black solid !important;
   width: 3rem;
@@ -357,11 +350,14 @@ p {
 
 .hideButton {
   opacity: 0;
-  transition: opacity 0.5s ease; /* Duración de 0.5s, y una transición suave */
+  transition: opacity 1s ease;
+  /* Duración de 0.5s, y una transición suave */
 }
+
 .show {
   opacity: 1;
 }
+
 .sceneContainer {
   display: flex;
   justify-content: space-between;
@@ -373,17 +369,19 @@ p {
   padding: 0 1.5rem;
 }
 
-.description-container {
-  max-width: 450px;
-  max-height: 200px;
+.description {
+  width: 500px;
+  position: absolute;
+  top: 20%;
 
-  /*  overflow-y: scroll; */
 }
+
+
 li {
   list-style: none;
 }
-.drag-scene-handle {
-}
+
+.drag-scene-handle {}
 
 .border {
   border: 1px black solid;

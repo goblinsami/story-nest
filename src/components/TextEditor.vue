@@ -9,11 +9,11 @@ import CharacterCreator from "./CharacterCreator.vue";
 import FilterScenes from "./FilterScenes.vue";
 const draggable = VueDraggableNext;
 onMounted(() => {
-/* if (isCarousel) {
-  toggleShowEditorSettings()
-
-}
- */
+  /* if (isCarousel) {
+    toggleShowEditorSettings()
+  
+  }
+   */
 });
 const props = defineProps({
   mode: {
@@ -30,6 +30,7 @@ const dragging = ref(false);
 const localData = ref({});
 const showPlotEditor = ref(false);
 const showCharacterEditor = ref(false);
+const expandAllActs = ref(true);
 
 const menuVisible = ref(false); // Controla la visibilidad del menú
 const menuX = ref(0); // Coordenada X donde aparecerá el menú
@@ -85,7 +86,15 @@ const onEnd = () => {
 const handleShowPlotEditor = () => {
   showPlotEditor.value = !showPlotEditor.value;
 };
+const handleToggleCollapseActs = () => {
 
+  expandAllActs.value = !expandAllActs.value
+  if (expandAllActs.value) {
+    store.expandAllActs();
+  } else {
+    store.contractAllActs();
+  }
+};
 watch(
   () => store.story, // Observa cambios en los actos de la historia
   () => {
@@ -101,32 +110,9 @@ watch(
   },
   { deep: true } // Necesitas deep para observar objetos anidados
 );
-/* const beforeEnter = (el) => {
-  el.style.height = "0";
-  el.style.opacity = "0";
-};
-
-const enter = (el, done) => {
-  // Forzar el cálculo de la altura inicial correcta usando `getBoundingClientRect()`
-  const initialHeight = el.getBoundingClientRect().height;
-  el.style.transition = "none"; // Desactivar transición temporalmente
-  el.style.height = initialHeight + "px"; // Establecer la altura inicial
-
-  //el.offsetHeight; // Forzar un reflujo para que el navegador reconozca el cambio de estilo
-
-  el.style.transition = "all 0.5s ease"; // Volver a habilitar la transición
-  el.style.height = el.scrollHeight + "px"; // Aplicar la altura completa
-  el.style.opacity = "1"; // Restaurar opacidad
-
-  el.addEventListener("transitionend", done);
-};
-
-const leave = (el, done) => {
-  el.style.transition = "all 0.5s ease";
-  el.style.height = "0";
-  el.style.opacity = "0";
-  el.addEventListener("transitionend", done);
-}; */
+const buttonText = computed(() => {
+  return expandAllActs.value ? "Collapse" : "Expand";
+});
 </script>
 
 <template>
@@ -137,80 +123,60 @@ const leave = (el, done) => {
         <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="padding: 1rem">Ocultar ajustes</button>
       </div>
 
-        <div class="settings-container" v-if="showEditorSettings && !isCarousel">
-          <div class="title-block">
-            <div>
-              <h1>
-                <input
-                  type="text"
-                  class="title"
-                  v-model="localData.title"
-                  maxlength="50"
-
-                />
-              </h1>
-              <textarea
-                type="textarea"
-                class="sub-title"
-                v-model="localData.description"
-              ></textarea>
-            </div>
-
-            <div class="d-flex settings">
-              <button @click="store.addAct()" class="addAct">
-                Añadir acto
-              </button>
-              <button @click="store.addNumeration()" class="addAct">
-                Numerar
-              </button>
-              <button
-                @click="handleShowPlotEditor(), (showCharacterEditor = false)"
-                class="addAct"
-              >
-                Tramas
-              </button>
-              <button
-                @click="
-                  (showCharacterEditor = !showCharacterEditor),
-                    (showPlotEditor = false)
-                "
-                class="addAct"
-              >
-                Personajes
-              </button>
-              <button @click="store.deleteStory()" class="addAct">
-                Borrar todo
-              </button>
-            </div>
-            <span v-if="localData.acts">{{ store.getScenesLength }}</span>
+      <div class="settings-container" v-if="showEditorSettings && !isCarousel">
+        <div class="title-block">
+          <div>
+            <h1>
+              <input type="text" class="title" v-model="localData.title" maxlength="50" />
+            </h1>
+            <textarea type="textarea" class="sub-title" v-model="localData.description"></textarea>
           </div>
 
-          <div class="plot-block">
-            <PlotCreator v-if="showPlotEditor" />
-            <CharacterCreator v-if="showCharacterEditor" />
+          <div class="d-flex settings">
+            <button @click="store.addAct()" class="addAct">
+              Añadir acto
+            </button>
+            <button @click="store.addNumeration()" class="addAct">
+              Numerar
+            </button>
+            <button @click="handleShowPlotEditor(), (showCharacterEditor = false)" class="addAct">
+              Tramas
+            </button>
+            <button @click="
+              (showCharacterEditor = !showCharacterEditor),
+              (showPlotEditor = false)
+              " class="addAct">
+              Personajes
+            </button>
+            <button @click="store.deleteStory()" class="addAct">
+              Borrar todo
+            </button>
           </div>
+          <span v-if="localData.acts">{{ store.getScenesLength }}</span>
         </div>
+
+        <div class="plot-block">
+          <PlotCreator v-if="showPlotEditor" />
+          <CharacterCreator v-if="showCharacterEditor" />
+        </div>
+      </div>
+
+      <button @click="handleToggleCollapseActs()" class="act-btn">{{ buttonText }} Acts</button>
       <div class="">
-        <draggable
-          v-model="localData.acts"
-          @start="onStart"
-          @end="onEnd"
-          class="acts-container"
-          group="acts"
-          handle=".drag-handle"
-        >
-          <Act
-            v-for="(act, actIndex) in localData.acts"
-            class="card no-select"
-            :act="act"
-            :actIndex="actIndex"
-          ></Act>
+        <draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" handle=".drag-handle">
+          <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
+          {{ act }}
         </draggable>
       </div>
     </article>
   </main>
 </template>
 <style>
+.act-btn {
+  height: 24px;
+  padding: 0 8px;
+}
+
 .title {
   font-size: 36px;
   font-weight: bold;
@@ -223,10 +189,13 @@ const leave = (el, done) => {
 .description {
   font-size: 1rem;
 }
-.title-block {
-}
-.plot-block {
 
+.title-block {}
+
+.plot-block {}
+
+.acts {
+  height: 100%;
 }
 
 .addAct {
@@ -241,6 +210,7 @@ const leave = (el, done) => {
   flex-wrap: wrap;
   padding-bottom: 2rem;
 }
+
 .title-container {
   display: flex;
   justify-content: start;
@@ -249,25 +219,30 @@ const leave = (el, done) => {
   width: 20%;
   margin: 0 auto;
 }
+
 .hand-closed {
-  cursor: grabbing; /* Cambia el cursor a una mano cerrada */
+  cursor: grabbing;
+  /* Cambia el cursor a una mano cerrada */
 }
+
 .acts-container {
-   display: flex;
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-evenly;
-
+  overflow-y: scroll;
   padding-bottom: 20rem;
-
-/*     display: flex;
+  height: 100vh;
+  /*     display: flex;
   flex-direction: column;
   overflow-y: scroll;
   height: 100%; */
 }
+
 .grabbing {
   cursor: grabbing;
 }
+
 .title-container button {
   height: 24px;
   padding: 1rem 8px;

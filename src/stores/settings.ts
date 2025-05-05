@@ -13,13 +13,14 @@ export const useSettingsStore = defineStore('settings', {
     showEditor: true,
     showReader: false,
     showChartSettings: false,
-    showCarousel: true,
+    showCarousel: false,
+    showGrid: false,
     expandChart: false,
     chartFontSize: 15,
-    chartHeight: 40,
-    chartwidtht: 55,
+    chartHeight: 50,
+    chartwidtht: 80,
     editorWidth: 45,
-
+    carouselSceneIndex: 0,
     originalStory: {},
     colorsHard: [
       "#FF5733", // Rojo anaranjado
@@ -140,7 +141,42 @@ export const useSettingsStore = defineStore('settings', {
 
   }),
   actions: {
-
+    importJSON(event) {
+      const file = event.target.files[0]; // Tomar el primer archivo seleccionado
+      if (file && file.type === "application/json") {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const jsonData = JSON.parse(e.target.result);
+            console.log(jsonData); // Aquí procesas el JSON como necesites
+            processJSON(jsonData);
+          } catch (error) {
+            console.error("Error al parsear el archivo JSON", error);
+          }
+        };
+        reader.readAsText(file); // Leer el archivo como texto
+      } else {
+        console.error("Por favor selecciona un archivo JSON válido.");
+      }
+    },
+    processJSON(data) {
+      //store.togglePlotChart();
+      this.updateStory(data);
+      this.addColorToActs();
+      //store.togglePlotChart();
+    },
+    exportStoryAsJSON() {
+      const json = JSON.stringify(this.story, null, 2); // Convierte el store a JSON
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${this.story.title}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url); // Libera la URL creada
+    },
     //FILTERS
 
     filterScenesByPlot() {
@@ -180,9 +216,9 @@ export const useSettingsStore = defineStore('settings', {
     toggleExpandChart() {
       this.expandChart = !this.expandChart
       if (this.expandChart == true) {
-        this.chartHeight = 60
+        this.chartHeight = 100
       } else {
-        this.chartHeight = 40
+        this.chartHeight = 0
       }
     },
     //TOGGLERS
@@ -194,6 +230,9 @@ export const useSettingsStore = defineStore('settings', {
       this.showCarousel = !this.showCarousel
     },
 
+    toggleShowGrid() {
+      this.showGrid = !this.showGrid
+    },
 
     togglePieChart() {
       this.showPieChart = !this.showPieChart
@@ -278,7 +317,11 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     deleteAct(actIndex) {
-      this.story.acts.splice(actIndex, 1)
+      let text = "Quieres eliminar el acto?"
+      if (confirm(text) == true) {
+        this.story.acts.splice(actIndex, 1)
+      }
+
     },
     addColorToActs(selectedPalette = 0) {
       // Aquí puedes definir una lista de colores o asignarlos de forma dinámica.
@@ -355,37 +398,36 @@ export const useSettingsStore = defineStore('settings', {
       // Alert opcional para verificar resultados
     },
 
-/*     addScene(position, act, newScene) {
-      console.log('STOREE!!', position, act.title, newScene)
-
-
-      let updatedAct = this.story.acts.find(el => el.title == act.title)
-
-      let newElement = {
-        title: newScene.title || "Nueva Escena",
-        description: newScene.description || "",
-        duration: 10,
-        plots: [],
-        intensity: null,
-        collapsed: true,
-
-      }
-
-
-      if (position == 'down') {
-        updatedAct.scenes.push(newElement)
-      } else {
-        updatedAct.scenes.unshift(newElement)
-      }
-
-    },
- */
+    /*     addScene(position, act, newScene) {
+    
+    
+          let updatedAct = this.story.acts.find(el => el.title == act.title)
+    
+          let newElement = {
+            title: newScene.title || "Nueva Escena",
+            description: newScene.description || "",
+            duration: 10,
+            plots: [],
+            intensity: null,
+            collapsed: true,
+    
+          }
+    
+    
+          if (position == 'down') {
+            updatedAct.scenes.push(newElement)
+          } else {
+            updatedAct.scenes.unshift(newElement)
+          }
+    
+        },
+     */
 
     insertScene(position, actIndex, sceneIndex) {
       const uniqueId = uuidv4(); // Genera un UUID por cada escena
       let updatedAct = this.story.acts[actIndex]
       let previousScene = updatedAct.scenes[sceneIndex]
-      previousScene.collapsed = false
+      // previousScene.collapsed = false
       let newElement = {
         title: "d Escena",
         description: "",
@@ -394,7 +436,7 @@ export const useSettingsStore = defineStore('settings', {
         intensity: null,
       }
       //newElement.id = uniqueId;
-      newElement.collapsed = true
+      // newElement.collapsed = true
 
 
       if (position == 'down') {
@@ -415,6 +457,7 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     editSceneAndAddPlots(newScene) {
+      alert('editSceneAndAddPlots')
       let updatedAct = this.story.acts[newScene.actIndex]
       let updatedScene = updatedAct.scenes.find(element => element.number == newScene.number)
       if (updatedScene.plots.length == 0) {
@@ -424,10 +467,25 @@ export const useSettingsStore = defineStore('settings', {
 
     },
 
-    deletePlotsfromScene(actIndex, sceneIndex, scene) {
-      console.log(actIndex, sceneIndex)
-      let act = this.story.acts[actIndex]
-      let updatedScene = act.scenes[sceneIndex]
+    goToCarouselVisualization(scene, isSingleMode) {
+      const allScenes = this.getAllScenes; // Use the getter to retrieve all scenes
+
+      console.log('*******************')
+      console.log(scene.actIndex, scene.sceneIndex)
+
+      const sceneToView = this.story.acts[scene.actIndex].scenes[scene.sceneIndex]; // Get the specific scene
+      const sceneIndexInAllScenes = allScenes.findIndex(s => s.id === sceneToView.id); // Find the index of the scene in all scenes
+
+      this.carouselSceneIndex = sceneIndexInAllScenes; // Update the carousel index
+      if (!isSingleMode) {
+
+        this.toggleShowCarousel()
+      }
+    },
+
+    deletePlotsfromScene(scene) {
+      let act = this.story.acts[scene.actIndex]
+      let updatedScene = act.scenes[scene.sceneIndex]
 
       updatedScene.plots = []
 
@@ -468,25 +526,36 @@ export const useSettingsStore = defineStore('settings', {
 
     },
 
-    addPlotToScene(actIndex, sceneIndex) {
-      let act = this.story.acts[actIndex]
+    addPlotToScene(scene) {
+      console.log('addPlotToScene', scene)
+      let updatedAct = this.story.acts[scene.actIndex]
 
-      let scene = act.scenes[sceneIndex]
+      let updatedScene = updatedAct.scenes[scene.sceneIndex]
 
-      scene.plots.push(1)
-      scene.intensity = 5
+      updatedScene.plots.push(1)
+      updatedScene.intensity = 5
     },
 
-  collapseScene(scene, localCollapse) {
-    let updatedAct = this.story.acts[scene.actIndex]
-    let updatedScene = updatedAct.scenes.find(el => el.id == scene.id)
-    console.log(updatedScene)
-    updatedScene.collapsedCarousel = !updatedScene.collapsedCarousel
-    updatedScene.collapsed = !updatedScene.collapsed
+    collapseScene(scene, localCollapse) {
+      let updatedAct = this.story.acts[scene.actIndex]
+      let updatedScene = updatedAct.scenes.find(el => el.id == scene.id)
+      updatedScene.collapsedCarousel = !updatedScene.collapsedCarousel
+      updatedScene.collapsed = !updatedScene.collapsed
 
-  },
+    },
+
+    collapseAct(actIndex) {
+      this.story.acts[actIndex].collapsed = !this.story.acts[actIndex].collapsed
+
+    },
+
+    toggleCollapseAllScenes(actIndex) {
+      this.story.acts[actIndex].scenes.forEach((scene) => {
+        scene.collapsed = !scene.collapsed
+      })
+    },
+
     collapseAllScenes(mode, actIndex) {
-      console.log('collapseAllScenes', mode, actIndex)
       this.story.acts.forEach((act) => {
         act.scenes.forEach((scene) => {
           if (mode == 'carousel') {
@@ -504,8 +573,27 @@ export const useSettingsStore = defineStore('settings', {
       }
 
     },
+    expandAllActs() {
+      this.story.acts.forEach((act) => {
+        act.collapsed = true
+      });
+    },
+    contractAllActs() {
+      this.story.acts.forEach((act) => {
+        act.collapsed = false
+      });
+    },
+
+    expandAllScenesInAllActs() {
+      {
+        this.story.acts.forEach((act) => {
+          act.scenes.forEach((scene) => {
+            scene.collapsed = true
+          });
+        });
+      }
+    },
     expandAllScenes(mode, actIndex) {
-      console.log('expandAllScenes', mode, actIndex)
 
       this.story.acts.forEach((act) => {
         act.scenes.forEach((scene) => {
@@ -522,12 +610,11 @@ export const useSettingsStore = defineStore('settings', {
         });
       }
     },
-/*     toggleCollapseAllScenesFromAct(actIndex) {
-      console.log('toggleCollapseAllScenesFromAct',  )
-      this.story.acts[actIndex].scenes.forEach((scene) => {
-        scene.collapsed = true
-      });
-    }, */
+    /*     toggleCollapseAllScenesFromAct(actIndex) {
+          this.story.acts[actIndex].scenes.forEach((scene) => {
+            scene.collapsed = true
+          });
+        }, */
 
 
     //EDIT SCENES

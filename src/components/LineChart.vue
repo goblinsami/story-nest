@@ -2,14 +2,10 @@
   <div id="canvas-container">
     <div class="chartWrapper" :style="{ height: store.chartHeight + 'vh' }">
       <div class="chart-settings-container" :class="store.showChartSettings ? 'expand' : ''">
-        <LineChartSettings class="debug" :data="data" :options="options"@changeSettings="setLineChartData()" @resetZoom="resetZoom()"></LineChartSettings>
+        <LineChartSettings class="debug" :data="data" :options="options" @changeSettings="setLineChartData()"
+          @resetZoom="resetZoom()"></LineChartSettings>
       </div>
-      <Line
-        :data="data"
-        :options="options"
-        ref="lineChart"
-        :key="key"
-      />
+      <Line :data="data" :options="options" ref="lineChart" :key="key" />
     </div>
   </div>
 </template>
@@ -122,8 +118,8 @@ const options = ref({
         maxRotation: 45, // Rotación máxima
         minRotation: 45, // Rotación mínima
         font: {
-            size: 16,  // Ajusta el tamaño de la fuente para las etiquetas del eje X
-          }
+          size: 16,  // Ajusta el tamaño de la fuente para las etiquetas del eje X
+        }
       },
     },
   },
@@ -204,7 +200,8 @@ const text = reactive({
 
 
 onMounted(() => {
-  setLineChartData();
+  // console.log('ON MOUNED')
+  // setLineChartData();
 });
 
 const resetZoom = () => {
@@ -237,6 +234,45 @@ const resetZoom = () => {
     }
   });
 }; */
+function updateHighlightOnly(index) {
+  const annotations = options.value.plugins.annotation.annotations;
+
+  // Mantén los segmentos previos si ya existen
+  const segmentAnnotations = Object.entries(annotations)
+    .filter(([key]) => key.startsWith("segment_"))
+    .reduce((acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+
+  // Añadir/actualizar la línea de escena destacada
+  const highlight = {
+    highlightScene: {
+      type: 'line',
+      scaleID: 'x',
+      value: index,
+      borderColor: '#e74c3c',
+      borderWidth: 2,
+      borderDash: [6, 6],
+      label: {
+        content: `Escena ${index + 1}`,
+        enabled: true,
+        backgroundColor: '#e74c3c',
+        color: 'white',
+        position: 'start',
+      }
+    }
+  };
+
+  options.value.plugins.annotation.annotations = {
+    ...segmentAnnotations,
+    ...highlight
+  };
+
+  // Forzar actualización del gráfico
+  lineChart.value?.chart.update();
+}
+
 const setLineChartData = () => {
   console.log("setLineChartData");
 
@@ -298,12 +334,12 @@ const setLineChartData = () => {
     // Actualizar el valor inicial para el próximo segmento
     startX += act.scenes.length;
 
-   // key.value++;
+    // key.value++;
   });
 
   // Crear datasets dinámicos basados en el número de tramas
   const datasets = [];
-  if (store.story.plots.length > 0){
+  if (store.story.plots.length > 0) {
     for (let i = 1; i <= maxPlotNumber; i++) {
       let color = store.plotColorsHard[i - 1];
       datasets.push({
@@ -318,7 +354,7 @@ const setLineChartData = () => {
       });
     }
   } else {
-    datasets.push(    {
+    datasets.push({
       label: "",
       data: [],
       borderColor: "rgba(75, 192, 192, 1)",
@@ -327,17 +363,39 @@ const setLineChartData = () => {
     },)
   }
 
-    // Actualizar los datos del gráfico
-    const truncate = (str) => str.length > 20 ? str.slice(0, 20) + '...' : str;
+  // Actualizar los datos del gráfico
+  const truncate = (str) => str.length > 20 ? str.slice(0, 20) + '...' : str;
 
-    data.value.datasets = datasets;
-    data.value.labels = scenes.map((el, index) => `${index + 1} - ${truncate(el.title)}`);
-    options.value.plugins.annotation.annotations = segments;
-    options.value.scales.x.ticks.font.size = store.chartFontSize
+  data.value.datasets = datasets;
+  data.value.labels = scenes.map((el, index) => `${index + 1} - ${truncate(el.title)}`);
+  /* options.value.plugins.annotation.annotations = segments; */
 
-console.log(store.chartFontSize)
+  const highlightSceneIndex = store.carouselSceneIndex; // Escena 7 (indexado desde 0)
+
+  options.value.plugins.annotation.annotations = {
+    ...Object.fromEntries(segments.map((seg, i) => [`segment_${i}`, seg])),
+    highlightScene: {
+      type: 'line',
+      scaleID: 'x',
+      value: highlightSceneIndex,
+      borderColor: '#e74c3c',
+      borderWidth: 2,
+      borderDash: [6, 6],
+      label: {
+        content: `Escena ${highlightSceneIndex + 1}`,
+        enabled: true,
+        backgroundColor: '#e74c3c',
+        color: 'white',
+        position: 'start',
+      }
+    }
+  };
+
+  options.value.scales.x.ticks.font.size = store.chartFontSize
+
+  console.log(store.chartFontSize)
   key.value++;
-  }
+}
 
 const selectElement = (scene, act) => {
   text.subtitle = "";
@@ -360,56 +418,90 @@ const updateScenes = () => {
   drawChart();
 };
 
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+function sanitizeStory(story) {
+  if (!story) return null;
+  const clone = deepClone(story);
+
+  clone.acts?.forEach((act) => {
+    delete act.collapsed;
+    act.scenes?.forEach((scene) => {
+      delete scene.collapsed;
+      delete scene.collapsedCarousel;
+    });
+  });
+
+  return clone;
+}
+let previousSanitized = null;
+
 watch(
-  () => store.story, // Observa cambios en toda la historia
+  () => store.story,
   (newStory) => {
-    if (newStory) {
-//      localData.value = { ...newStory }; // Copiar los datos del store a localData
-      console.log('CHANGE DETECTED IN LINE CHART')
-      setLineChartData(); // Actualiza el gráfico
+    const currentSanitized = sanitizeStory(newStory);
+
+    const hasChanged = JSON.stringify(currentSanitized) !== JSON.stringify(previousSanitized);
+
+    if (hasChanged) {
+      previousSanitized = currentSanitized;
+      console.log('CHANGE DETECTED IN LINE CHART', currentSanitized);
+      setLineChartData();
     }
   },
-  { deep: true },
-  { immediate: true } // Necesario para observar objetos anidados como escenas
+  { deep: true, immediate: true }
 );
-watch(
+/* watch(
   () => store.colorsHard, // Observa cambios en toda la historia
   () => {
 
     setLineChartData(); // Actualiza el gráfico
   },
   { deep: true },
-);
+); */
 watch(
+  () => store.carouselSceneIndex,
+  (newVal, oldVal) => {
+    if (newVal === oldVal || newVal == null) return;
+    console.log('SCENE HIGHLIGHT ONLY', { oldVal, newVal });
+    updateHighlightOnly(newVal);
+  }
+);
+
+/* watch(
   () => store.chartFontSize, // Observa cambios en toda la historia
   () => {
 
     setLineChartData(); // Actualiza el gráfico
   },
   { deep: true },
-);
-watch(
+); */
+/* watch(
   () => store.plotColorsHard, // Observa cambios en toda la historia
   () => {
 
-      setLineChartData(); // Actualiza el gráfico
-    },
+    setLineChartData(); // Actualiza el gráfico
+  },
   { deep: true },
-);
+); */
 
 </script>
 
 <style>
 #canvas-container {
-  width: 100%; /* Ancho total del contenedor */
-/*   height: 100%;  */
-  overflow-x: auto; /* Scroll horizontal */
-/*   border: 1px solid #ccc; */
+  width: 100%;
+  /* Ancho total del contenedor */
+  overflow-x: auto;
+  /* Scroll horizontal */
+  /*   border: 1px solid #ccc; */
 }
+
 .chartWrapper {
- /*  height: 2000px; */
+  /*  height: 2000px; */
   padding-top: 1rem
 }
+
 .chart-settings-container {
   display: flex;
   flex-direction: row;
@@ -420,11 +512,10 @@ watch(
 
 }
 
-.chart-settings-container.expand{
+.chart-settings-container.expand {
 
   opacity: 1;
   height: 200px;
 
 }
-
 </style>
