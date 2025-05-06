@@ -5,6 +5,7 @@
         <LineChartSettings class="debug" :data="data" :options="options" @changeSettings="setLineChartData()"
           @resetZoom="resetZoom()"></LineChartSettings>
       </div>
+      {{ lineChart }}
       <Line :data="data" :options="options" ref="lineChart" :key="key" />
     </div>
   </div>
@@ -276,81 +277,87 @@ function updateHighlightOnly(index) {
 const setLineChartData = () => {
   console.log("setLineChartData");
 
-  //comprobara si la data está definida
   if (!store.story || !store.story.acts) {
     console.error("Story o acts no están definidos aún.");
     return;
   }
 
-  const acts = store.story.acts; // Usar la copia local de los actos
-
+  const acts = store.story.acts;
+  const characters = store.story.characters || [];
   const scenes = [];
   const segments = [];
-  const plotData = {}; // Objeto para almacenar los datos de cada trama
-  let maxPlotNumber = 0; // Para determinar cuántas tramas distintas hay
-  let startX = 0;
+  const plotData = {};
+  const characterAnnotations = {};
+  let maxPlotNumber = 0;
+  let currentSceneIndex = 0;
 
-  // Recorrer actos
+  // === 1. Crear segmentos y recoger datos ===
   acts.forEach((act, actIndex) => {
     const segmentLength = act.scenes.length;
+    const color = act.color;
 
-    let color = act.color;
-    // Crear los segmentos
-    const segment = {
-      xMin: startX,
-      xMax: startX + segmentLength,
+    segments.push({
+      xMin: currentSceneIndex,
+      xMax: currentSceneIndex + segmentLength,
       backgroundColor: color + "30",
       borderColor: color + "99",
       borderWidth: 1,
       title: act.title,
       type: "box",
-    };
-    segments.push(segment);
-
-    // Recorrer escenas
-    act.scenes.forEach((scene) => {
-      //crea las labels del eje X
-      scenes.push({
-        title: scene?.title,
-        act: act?.title,
-      });
-      maxPlotNumber = store.story.plots.length;
-      // Recorrer las tramas en la escena y actualizar el plotData
-      scene?.plots.forEach((plot) => {
-        maxPlotNumber = Math.max(maxPlotNumber, plot); // Determinar el número máximo de tramas
-        if (!plotData[plot]) plotData[plot] = []; // Crear array para la trama si no existe
-        plotData[plot].push(scene.intensity); // Añadir intensidad a la trama
-      });
-
-      // Para las tramas que no están en la escena, añadir `null`
-      for (let i = 1; i <= maxPlotNumber; i++) {
-        if (!scene?.plots.includes(i)) {
-          if (!plotData[i]) plotData[i] = []; // Crear array si aún no existe
-          plotData[i].push(null); // Añadir `null` si no está presente en la escena
-        }
-      }
     });
 
-    // Actualizar el valor inicial para el próximo segmento
-    startX += act.scenes.length;
+    act.scenes.forEach((scene) => {
+      scenes.push({ title: scene?.title, act: act?.title });
 
-    // key.value++;
+      // === 2. Anotaciones de personajes como puntos ===
+      (scene.characters || []).forEach((charName, i) => {
+        const char = characters.find(c => c.title === charName);
+        if (!char) return;
+        const annotationId = `char_${currentSceneIndex}_${i}`;
+        characterAnnotations[annotationId] = {
+          type: 'point',
+          xValue: currentSceneIndex,
+          yValue: 0,
+          radius: 5,
+          backgroundColor: char.color || '#000000',
+          borderColor: '#ffffff',
+          borderWidth: 1,
+        };
+      });
+
+      // === 3. Tramas ===
+      (scene?.plots || []).forEach((plot) => {
+        maxPlotNumber = Math.max(maxPlotNumber, plot);
+        if (!plotData[plot]) plotData[plot] = [];
+        plotData[plot].push(scene.intensity);
+      });
+
+      // === 4. Rellenar con null si una trama no está presente ===
+      for (let i = 1; i <= store.story.plots.length; i++) {
+        if (!scene?.plots.includes(i)) {
+          if (!plotData[i]) plotData[i] = [];
+          plotData[i].push(null);
+        }
+      }
+
+      currentSceneIndex++;
+    });
   });
 
-  // Crear datasets dinámicos basados en el número de tramas
+  // === 5. Construir datasets ===
   const datasets = [];
   if (store.story.plots.length > 0) {
     for (let i = 1; i <= maxPlotNumber; i++) {
-      let color = store.plotColorsHard[i - 1];
+      const color = store.plotColorsHard[i - 1];
       datasets.push({
         label: store.story.plots[i - 1].title.slice(0, 10) + '...',
-        data: plotData[i], // Usar los datos de la trama correspondiente
+        data: plotData[i],
         backgroundColor: color + "30",
         borderColor: color + "99",
         borderWidth: 2,
-        fill: false, // No rellenar debajo de la línea
+        fill: false,
         tension: 0.4,
-        spanGaps: true, // Permitir saltar puntos nulos
+        spanGaps: true,
       });
     }
   } else {
@@ -359,21 +366,21 @@ const setLineChartData = () => {
       data: [],
       borderColor: "rgba(75, 192, 192, 1)",
       backgroundColor: "rgba(75, 192, 192, 0.2)",
-      tension: 0.4, // Controla la suavidad de la línea
-    },)
+      tension: 0.4,
+    });
   }
 
-  // Actualizar los datos del gráfico
+  // === 6. Aplicar datasets y etiquetas ===
   const truncate = (str) => str.length > 20 ? str.slice(0, 20) + '...' : str;
-
   data.value.datasets = datasets;
   data.value.labels = scenes.map((el, index) => `${index + 1} - ${truncate(el.title)}`);
-  /* options.value.plugins.annotation.annotations = segments; */
 
-  const highlightSceneIndex = store.carouselSceneIndex; // Escena 7 (indexado desde 0)
+  // === 7. Anotaciones: segmentos + personajes + escena destacada ===
+  const highlightSceneIndex = store.carouselSceneIndex;
 
   options.value.plugins.annotation.annotations = {
     ...Object.fromEntries(segments.map((seg, i) => [`segment_${i}`, seg])),
+    ...characterAnnotations,
     highlightScene: {
       type: 'line',
       scaleID: 'x',
@@ -388,14 +395,41 @@ const setLineChartData = () => {
         color: 'white',
         position: 'start',
       }
+    },
+    testPoint: {
+      type: 'point',
+      xValue: 3,
+      yValue: 0,
+      radius: 8,
+      backgroundColor: '#ff00ff',
+      borderColor: '#000',
+      borderWidth: 2
     }
   };
 
-  options.value.scales.x.ticks.font.size = store.chartFontSize
+  // === 8. Eventos de hover y clic ===
+  options.value.onHover = (event, elements, chart) => {
+    const xClick = event.x;
+    const index = Math.round(chart.scales.x.getValueForPixel(xClick));
+    store.goToCarouselVisualizationDirectly(index, false);
+    //console.log('hover en escena:', index + 1);
+  };
 
-  console.log(store.chartFontSize)
+  options.value.onClick = (event, elements, chart) => {
+    const xClick = event.x;
+    const index = Math.round(chart.scales.x.getValueForPixel(xClick));
+    store.goToCarouselVisualizationDirectly(index, true);
+    //console.log('Clic en escena:', index + 1);
+  };
+
+  // === 9. Estilo dinámico del eje X ===
+  options.value.scales.x.ticks = {
+    font: { size: store.chartFontSize },
+    color: (context) => context.index === store.carouselSceneIndex ? '#e74c3c' : '#666',
+  };
+
   key.value++;
-}
+};
 
 const selectElement = (scene, act) => {
   text.subtitle = "";

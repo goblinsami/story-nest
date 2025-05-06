@@ -121,6 +121,7 @@ const dynamicBackgroundStyle = computed(() => {
 
 const toggleEditScene = () => {
   editText.value = !editText.value
+  store.editSceneMode = editText.value
 }
 
 const isHovered = ref(false);
@@ -130,8 +131,10 @@ const toggleCollapseScene = () => {
 
 }
 
-const onHoverScene = () => {
+const onHoverScene = (scene) => {
   isHovered.value = true;
+  store.goToCarouselVisualization(scene, isSingleMode)
+
 };
 
 const onLeaveScene = () => {
@@ -165,10 +168,13 @@ watch(
 );
 
 
+
+
 </script>
 
 <template>
-  <li class="card" :class="'sceneClass2'" @mouseover="onHoverScene" @mouseleave="onLeaveScene" @click="handleSelectScene(scene)" @click.stop>
+  <li class="card" :class="'sceneClass2'" @mouseover="onHoverScene(scene)" @mouseleave="onLeaveScene"
+    @click="handleSelectScene(scene)" @click.stop>
     <div class="act-tag drag-scene-handle carousel-scene-handle scene-header" :style="dynamicBackgroundStyle"
       @click="store.collapseScene(props.scene), localCollapse = !localCollapse">
       <h3 style="padding-left: 1rem; width: 100%;">
@@ -176,8 +182,8 @@ watch(
         <input focus type="text" class="scene-title" v-model="props.scene.title" v-else
           @input="emit('editScene', scene), store.checkCharactersInScene()" @click.stop />
       </h3>
-      <button v-if="!isSingleMode" class="soft-btn" v-show="isHovered"
-        @click="store.goToCarouselVisualization(scene)" @click.stop>🎥</button>
+      <button v-if="!isSingleMode" class="soft-btn" v-show="isHovered" @click="store.goToCarouselVisualization(scene)"
+        @click.stop>🎥</button>
     </div>
     <div class="scene-content" :class="handleCollapse ? 'expand' : ''">
       <div class="debug left-box">

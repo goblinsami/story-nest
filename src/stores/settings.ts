@@ -21,6 +21,8 @@ export const useSettingsStore = defineStore('settings', {
     chartwidtht: 80,
     editorWidth: 45,
     carouselSceneIndex: 0,
+    showDebugger: true,
+    editSceneMode: false,
     originalStory: {},
     colorsHard: [
       "#FF5733", // Rojo anaranjado
@@ -465,6 +467,15 @@ export const useSettingsStore = defineStore('settings', {
         updatedScene.intensity = 5
       }
 
+    },
+
+    goToCarouselVisualizationDirectly(index, toggle = true) {
+      this.carouselSceneIndex = index;
+
+      if (toggle === true && !this.showCarousel) {  
+        this.toggleShowCarousel()
+      }
+     
     },
 
     goToCarouselVisualization(scene, isSingleMode) {

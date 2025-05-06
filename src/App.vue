@@ -30,9 +30,10 @@
       <LineChart />
     </div>
   </article>
-<div :style="{position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px'}">
+<div v-if="store.showDebugger" :style="{position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px'}">
   debug
-  {{ store.carouselSceneIndex }}
+  {{store.editSceneMode}}
+  {{ store.carouselSceneIndex }} // {{store.showCarousel}}
 
   </div>
   
@@ -81,61 +82,21 @@ const stopResize = () => {
   document.removeEventListener('mouseup', stopResize)
 }
 
-onMounted(() => {
+const init = () => {
   store.updateStory(jsonStory);
   store.addNumeration();
   store.addColorToActs();
   store.expandAllActs();
   store.checkCharactersInScene();
-  // handleShowPlotChart();
+  store.carouselSceneIndex = 0;
+};  
+
+onMounted(() => {
+  init()
 });
 
-const handleShowPlotChart = () => {
-  // store.togglePlotChart();
-};
-const handleShowPieChart = () => {
-  store.togglePieChart();
-};
 
-const handleShowEditor = () => {
-  store.toggleEditor();
-};
-/* const importJSON = (event) => {
-  const file = event.target.files[0]; // Tomar el primer archivo seleccionado
-  if (file && file.type === "application/json") {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const jsonData = JSON.parse(e.target.result);
-        console.log(jsonData); // Aquí procesas el JSON como necesites
-        processJSON(jsonData);
-      } catch (error) {
-        console.error("Error al parsear el archivo JSON", error);
-      }
-    };
-    reader.readAsText(file); // Leer el archivo como texto
-  } else {
-    console.error("Por favor selecciona un archivo JSON válido.");
-  }
-};
-const processJSON = (data) => {
-  //store.togglePlotChart();
-  store.updateStory(data);
-  store.addColorToActs();
-  //store.togglePlotChart();
-};
-const exportStoryAsJSON = () => {
-  const json = JSON.stringify(store.story, null, 2); // Convierte el store a JSON
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${store.story.title}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url); // Libera la URL creada
-}; */
+
 </script>
 <style>
 .v-enter-active,

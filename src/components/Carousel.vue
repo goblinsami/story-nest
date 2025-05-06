@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import Act from "./Act.vue";
 import Scene from "./Scene.vue";
@@ -44,6 +44,16 @@ const goToPrevScene = () => {
 const editScene = (scene) => {
       store.editScene(scene);
 };
+
+watch(
+   () => store.carouselSceneIndex,
+  (newVal, oldVal) => {
+      if (store.editSceneMode === false) {
+            sceneIndex.value = newVal;
+      }
+  
+  } 
+);
 </script>
 
 <template>
