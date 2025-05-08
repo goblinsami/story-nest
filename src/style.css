@@ -1,3 +1,13 @@
+:root {
+  --color-light-bg: #FCFCFD;
+  --color-light-text: #e6e6e6;
+  --color-dark-bg: #100d36;
+  --color-dark-text: #f5f5f5;
+  --border-radius: 4px;
+}
+
+
+
 .text-red {
   color: red;
 }
@@ -24,7 +34,7 @@ body {
 .act-color-sample {
   border: 1px black solid;
   min-width: 25px;
-  width: 25px;
+  width: 25;
   height: 25px;
   margin-right: 1rem;
 }
@@ -137,8 +147,7 @@ textarea {
 
 .cardStyle, .card {
     background-color: #FCFCFD;
-  border-radius: 4px;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   border-width: 0;
   box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
   box-sizing: border-box;
@@ -148,7 +157,7 @@ button{
   align-items: center;
   appearance: none;
   background-color: #FCFCFD;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   border-width: 0;
   box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
   box-sizing: border-box;
@@ -190,4 +199,39 @@ button:active {
 }
 .settings button {
   margin-right: 10px;
+}
+
+/* dark mode */
+body.dark-mode {
+  background-color: var(--color-dark-bg);
+  color: var(--color-light-text)!important;
+}
+
+body.dark-mode .scene-title-header  {
+  color: var(--color-light-text)!important;
+
+}
+body.dark-mode .title {
+  color: var(--color-light-text)!important;
+  background: none;
+
+}
+
+
+body.dark-mode .card {
+  background-color: var(--color-dark-bg);
+  box-shadow: var(--color-light-text) 0 2px 4px, var(--color-light-text) 0 7px 13px -3px, var(--color-light-text) 0 -3px 0 inset; 
+}
+
+body.dark-mode button,
+body.dark-mode .input-description,
+body.dark-mode .scene-title,
+body.dark-mode .plot-intensity {
+  background-color: var(--color-dark-bg);
+  color: var(--color-light-text)!important;
+}
+
+body.dark-mode .plot-intensity {
+  border: 1px var(--color-light-text) solid!important;
+  border-radius: 1px;
 }

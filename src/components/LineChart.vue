@@ -5,7 +5,6 @@
         <LineChartSettings class="debug" :data="data" :options="options" @changeSettings="setLineChartData()"
           @resetZoom="resetZoom()"></LineChartSettings>
       </div>
-      {{ lineChart }}
       <Line :data="data" :options="options" ref="lineChart" :key="key" />
     </div>
   </div>
@@ -18,6 +17,9 @@ import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { useSettingsStore } from "../stores/settings";
 import LineChartSettings from "./LineChartSettings.vue";
+import { useLineChart } from "../composables/useLineChart";
+
+
 import {
   Chart as ChartJS,
   Title,
@@ -198,237 +200,15 @@ const text = reactive({
   subtitle: "",
   description: "",
 });
+const { setLineChartData, updateHighlightOnly } = useLineChart(data, options, key, lineChart);
 
 
 onMounted(() => {
-  // console.log('ON MOUNED')
-  // setLineChartData();
+
 });
 
 const resetZoom = () => {
   lineChart.value.chart.resetZoom();
-};
-/* const handleClick = (event, chart) => {
-  const chartInstance = lineChart.value.chart; // Acceder a la instancia del gráfico
-  const { x } = event; // Obtiene la posición x del clic
-  const xScale = chartInstance.scales.x; // Escala del eje X
-
-  // Verificar en qué segmento ocurrió el clic
-  const annotations = chartInstance.options.plugins.annotation.annotations;
-
-  for (const annotation of Object.values(annotations)) {
-    const xMin = chartInstance.scales["x"].getPixelForValue(annotation.xMin);
-    const xMax = chartInstance.scales["x"].getPixelForValue(annotation.xMax);
-
-    if (x >= xMin && x <= xMax) {
-      // El clic ocurrió dentro de este segmento
-      text.title = annotation.title;
-    }
-  }
-  chartInstance.data.labels.forEach((label, index) => {
-    const xPosition = xScale.getPixelForValue(index); // Obtener la posición de la etiqueta en el eje X
-
-    // Definir un rango de tolerancia para detectar el clic cerca de la etiqueta
-    const tolerance = 5; // Ajustar según sea necesario
-    if (x >= xPosition - tolerance && x <= xPosition + tolerance) {
-      text.title = label;
-    }
-  });
-}; */
-function updateHighlightOnly(index) {
-  const annotations = options.value.plugins.annotation.annotations;
-
-  // Mantén los segmentos previos si ya existen
-  const segmentAnnotations = Object.entries(annotations)
-    .filter(([key]) => key.startsWith("segment_"))
-    .reduce((acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {});
-
-  // Añadir/actualizar la línea de escena destacada
-  const highlight = {
-    highlightScene: {
-      type: 'line',
-      scaleID: 'x',
-      value: index,
-      borderColor: '#e74c3c',
-      borderWidth: 2,
-      borderDash: [6, 6],
-      label: {
-        content: `Escena ${index + 1}`,
-        enabled: true,
-        backgroundColor: '#e74c3c',
-        color: 'white',
-        position: 'start',
-      }
-    }
-  };
-
-  options.value.plugins.annotation.annotations = {
-    ...segmentAnnotations,
-    ...highlight
-  };
-
-  // Forzar actualización del gráfico
-  lineChart.value?.chart.update();
-}
-
-const setLineChartData = () => {
-  console.log("setLineChartData");
-
-  if (!store.story || !store.story.acts) {
-    console.error("Story o acts no están definidos aún.");
-    return;
-  }
-
-  const acts = store.story.acts;
-  const characters = store.story.characters || [];
-  const scenes = [];
-  const segments = [];
-  const plotData = {};
-  const characterAnnotations = {};
-  let maxPlotNumber = 0;
-  let currentSceneIndex = 0;
-
-  // === 1. Crear segmentos y recoger datos ===
-  acts.forEach((act, actIndex) => {
-    const segmentLength = act.scenes.length;
-    const color = act.color;
-
-    segments.push({
-      xMin: currentSceneIndex,
-      xMax: currentSceneIndex + segmentLength,
-      backgroundColor: color + "30",
-      borderColor: color + "99",
-      borderWidth: 1,
-      title: act.title,
-      type: "box",
-    });
-
-    act.scenes.forEach((scene) => {
-      scenes.push({ title: scene?.title, act: act?.title });
-
-      // === 2. Anotaciones de personajes como puntos ===
-      (scene.characters || []).forEach((charName, i) => {
-        const char = characters.find(c => c.title === charName);
-        if (!char) return;
-        const annotationId = `char_${currentSceneIndex}_${i}`;
-        characterAnnotations[annotationId] = {
-          type: 'point',
-          xValue: currentSceneIndex,
-          yValue: 0,
-          radius: 5,
-          backgroundColor: char.color || '#000000',
-          borderColor: '#ffffff',
-          borderWidth: 1,
-        };
-      });
-
-      // === 3. Tramas ===
-      (scene?.plots || []).forEach((plot) => {
-        maxPlotNumber = Math.max(maxPlotNumber, plot);
-        if (!plotData[plot]) plotData[plot] = [];
-        plotData[plot].push(scene.intensity);
-      });
-
-      // === 4. Rellenar con null si una trama no está presente ===
-      for (let i = 1; i <= store.story.plots.length; i++) {
-        if (!scene?.plots.includes(i)) {
-          if (!plotData[i]) plotData[i] = [];
-          plotData[i].push(null);
-        }
-      }
-
-      currentSceneIndex++;
-    });
-  });
-
-  // === 5. Construir datasets ===
-  const datasets = [];
-  if (store.story.plots.length > 0) {
-    for (let i = 1; i <= maxPlotNumber; i++) {
-      const color = store.plotColorsHard[i - 1];
-      datasets.push({
-        label: store.story.plots[i - 1].title.slice(0, 10) + '...',
-        data: plotData[i],
-        backgroundColor: color + "30",
-        borderColor: color + "99",
-        borderWidth: 2,
-        fill: false,
-        tension: 0.4,
-        spanGaps: true,
-      });
-    }
-  } else {
-    datasets.push({
-      label: "",
-      data: [],
-      borderColor: "rgba(75, 192, 192, 1)",
-      backgroundColor: "rgba(75, 192, 192, 0.2)",
-      tension: 0.4,
-    });
-  }
-
-  // === 6. Aplicar datasets y etiquetas ===
-  const truncate = (str) => str.length > 20 ? str.slice(0, 20) + '...' : str;
-  data.value.datasets = datasets;
-  data.value.labels = scenes.map((el, index) => `${index + 1} - ${truncate(el.title)}`);
-
-  // === 7. Anotaciones: segmentos + personajes + escena destacada ===
-  const highlightSceneIndex = store.carouselSceneIndex;
-
-  options.value.plugins.annotation.annotations = {
-    ...Object.fromEntries(segments.map((seg, i) => [`segment_${i}`, seg])),
-    ...characterAnnotations,
-    highlightScene: {
-      type: 'line',
-      scaleID: 'x',
-      value: highlightSceneIndex,
-      borderColor: '#e74c3c',
-      borderWidth: 2,
-      borderDash: [6, 6],
-      label: {
-        content: `Escena ${highlightSceneIndex + 1}`,
-        enabled: true,
-        backgroundColor: '#e74c3c',
-        color: 'white',
-        position: 'start',
-      }
-    },
-    testPoint: {
-      type: 'point',
-      xValue: 3,
-      yValue: 0,
-      radius: 8,
-      backgroundColor: '#ff00ff',
-      borderColor: '#000',
-      borderWidth: 2
-    }
-  };
-
-  // === 8. Eventos de hover y clic ===
-  options.value.onHover = (event, elements, chart) => {
-    const xClick = event.x;
-    const index = Math.round(chart.scales.x.getValueForPixel(xClick));
-    store.goToCarouselVisualizationDirectly(index, false);
-    //console.log('hover en escena:', index + 1);
-  };
-
-  options.value.onClick = (event, elements, chart) => {
-    const xClick = event.x;
-    const index = Math.round(chart.scales.x.getValueForPixel(xClick));
-    store.goToCarouselVisualizationDirectly(index, true);
-    //console.log('Clic en escena:', index + 1);
-  };
-
-  // === 9. Estilo dinámico del eje X ===
-  options.value.scales.x.ticks = {
-    font: { size: store.chartFontSize },
-    color: (context) => context.index === store.carouselSceneIndex ? '#e74c3c' : '#666',
-  };
-
-  key.value++;
 };
 
 const selectElement = (scene, act) => {
@@ -498,11 +278,16 @@ watch(
   () => store.carouselSceneIndex,
   (newVal, oldVal) => {
     if (newVal === oldVal || newVal == null) return;
-    console.log('SCENE HIGHLIGHT ONLY', { oldVal, newVal });
     updateHighlightOnly(newVal);
   }
 );
 
+watch(
+  () => store.darkMode,
+  () => {
+    setLineChartData();
+  }
+);
 /* watch(
   () => store.chartFontSize, // Observa cambios en toda la historia
   () => {

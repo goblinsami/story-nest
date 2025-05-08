@@ -21,8 +21,9 @@ export const useSettingsStore = defineStore('settings', {
     chartwidtht: 80,
     editorWidth: 45,
     carouselSceneIndex: 0,
-    showDebugger: true,
+    showDebugger: false,
     editSceneMode: false,
+    darkMode: false,
     originalStory: {},
     colorsHard: [
       "#FF5733", // Rojo anaranjado
@@ -143,6 +144,15 @@ export const useSettingsStore = defineStore('settings', {
 
   }),
   actions: {
+    toggleDarkMode() {
+      console.log('toggleDarkMode', this.darkMode)
+      this.darkMode = !this.darkMode
+      if (this.darkMode == true) {
+        document.body.classList.add('dark-mode')
+      } else {
+        document.body.classList.remove('dark-mode')
+      }
+    },
     importJSON(event) {
       const file = event.target.files[0]; // Tomar el primer archivo seleccionado
       if (file && file.type === "application/json") {
@@ -472,17 +482,17 @@ export const useSettingsStore = defineStore('settings', {
     goToCarouselVisualizationDirectly(index, toggle = true) {
       this.carouselSceneIndex = index;
 
-      if (toggle === true && !this.showCarousel) {  
+      if (toggle === true && !this.showCarousel) {
         this.toggleShowCarousel()
       }
-     
+
     },
 
     goToCarouselVisualization(scene, isSingleMode) {
       const allScenes = this.getAllScenes; // Use the getter to retrieve all scenes
 
-      console.log('*******************')
-      console.log(scene.actIndex, scene.sceneIndex)
+      //   console.log('*******************')
+      //   console.log(scene.actIndex, scene.sceneIndex)
 
       const sceneToView = this.story.acts[scene.actIndex].scenes[scene.sceneIndex]; // Get the specific scene
       const sceneIndexInAllScenes = allScenes.findIndex(s => s.id === sceneToView.id); // Find the index of the scene in all scenes

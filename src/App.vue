@@ -30,13 +30,14 @@
       <LineChart />
     </div>
   </article>
-<div v-if="store.showDebugger" :style="{position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px'}">
-  debug
-  {{store.editSceneMode}}
-  {{ store.carouselSceneIndex }} // {{store.showCarousel}}
+  <div v-if="store.showDebugger"
+    :style="{ position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px' }">
+    debug
+    {{ store.editSceneMode }}
+    {{ store.carouselSceneIndex }} // {{ store.showCarousel }}
 
   </div>
-  
+
 
 </template>
 
@@ -83,13 +84,15 @@ const stopResize = () => {
 }
 
 const init = () => {
+  console.log('INIT')
+  store.toggleDarkMode();
   store.updateStory(jsonStory);
   store.addNumeration();
   store.addColorToActs();
   store.expandAllActs();
   store.checkCharactersInScene();
   store.carouselSceneIndex = 0;
-};  
+};
 
 onMounted(() => {
   init()

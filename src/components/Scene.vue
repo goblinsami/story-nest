@@ -173,11 +173,11 @@ watch(
 </script>
 
 <template>
-  <li class="card" :class="'sceneClass2'" @mouseover="onHoverScene(scene)" @mouseleave="onLeaveScene"
+  <li class="card" :class="'scene-container'" @mouseover="onHoverScene(scene)" @mouseleave="onLeaveScene"
     @click="handleSelectScene(scene)" @click.stop>
     <div class="act-tag drag-scene-handle carousel-scene-handle scene-header" :style="dynamicBackgroundStyle"
       @click="store.collapseScene(props.scene), localCollapse = !localCollapse">
-      <h3 style="padding-left: 1rem; width: 100%;">
+      <h3 class="scene-title-header" style="padding-left: 1rem; width: 100%;">
         <p v-html="highlightNamesInTitle" v-if="!editText"></p>
         <input focus type="text" class="scene-title" v-model="props.scene.title" v-else
           @input="emit('editScene', scene), store.checkCharactersInScene()" @click.stop />
@@ -225,7 +225,7 @@ watch(
       <div class="text-box" v-if="editText" @dblclick="toggleEditScene()">
         <!--         <textarea type="text" class="description" v-model="scene.title"
           @input="emit('editScene', scene), store.checkCharactersInScene()" maxlength="40"></textarea> -->
-        <textarea type="text" maxlength="100" class="description" v-model="scene.description"
+        <textarea type="text" maxlength="100" class="input-description" v-model="scene.description"
           @input="emit('editScene', scene), store.checkCharactersInScene()"></textarea>
       </div>
       <div v-if="!editText" class="text-box" @dblclick="toggleEditScene()">
@@ -265,7 +265,7 @@ watch(
   width: 75%;
 }
 
-.sceneClass2 button {
+.scene-container button {
   height: 24px;
   padding: 0 8px;
 }
@@ -284,7 +284,6 @@ watch(
   position: absolute;
   bottom: 5px;
   left: 10px;
-  background-color: #fcfcfd;
 }
 
 .scene-content {
@@ -314,7 +313,7 @@ watch(
   position: relative;
 }
 
-.sceneClass2 {
+.scene-container {
   /*   min-height: 250px;
  */
   max-height: 300px;
@@ -375,7 +374,7 @@ p {
   padding: 0 1.5rem;
 }
 
-.description {
+.input-description {
   width: 500px;
   position: absolute;
   top: 20%;

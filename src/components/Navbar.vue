@@ -21,6 +21,7 @@ const store = useSettingsStore();
         </button>
         <button @click="store.toggleShowCarousel()"> Carousel</button>
         <button @click="store.toggleShowGrid()"> Grid</button>
+        <button @click="store.toggleDarkMode()"> Night</button>
 
         <!--         <button @click="store.toggleExpandChart()">
             {{ store.expandChart ? "Expand" : "Contract" }} Chart Settings
