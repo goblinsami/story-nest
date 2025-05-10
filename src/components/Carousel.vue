@@ -46,13 +46,13 @@ const editScene = (scene) => {
 };
 
 watch(
-   () => store.carouselSceneIndex,
-  (newVal, oldVal) => {
-      if (store.editSceneMode === false) {
-            sceneIndex.value = newVal;
+      () => store.carouselSceneIndex,
+      (newVal, oldVal) => {
+            if (store.editSceneMode === false) {
+                  sceneIndex.value = newVal;
+            }
+
       }
-  
-  } 
 );
 </script>
 
@@ -61,7 +61,7 @@ watch(
             <div class=" heading">
                   <button @click="store.toggleShowCarousel()"> Close</button>
             </div>
-            <div class="scenes-container">
+            <div class="scenes-container" v-if="store.showCarouselScenes">
                   <Scene @editScene="editScene" :scene="store.getAllScenes[sceneIndex - 1]" mode="single" class="prev"
                         v-if="sceneIndex > 0" />
                   <Scene @editScene="editScene" :scene="store.getAllScenes[sceneIndex]" mode="single" />
@@ -112,6 +112,6 @@ watch(
       padding: 1rem;
       position: absolute;
       top: 0;
-      left: 0;
+      right: 0;
 }
 </style>

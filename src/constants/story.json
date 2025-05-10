@@ -1,153 +1,408 @@
 {
-  "title": "La Comunidad del Anillo",
-  "description": "Primera parte de la trilogía de El Señor de los Anillos, donde se forma la Comunidad para destruir el Anillo Único.",
+  "title": "Harry Potter y la piedra filosofal",
+  "description": "El joven Harry Potter descubre que es un mago y comienza su primer año en Hogwarts, enfrentando misterios y peligros alrededor de la legendaria piedra filosofal.",
   "characters": [
     {
       "id": 1,
-      "title": "Frodo",
-      "description": "Portador del Anillo",
-      "color": "#2e8b57"
+      "title": "Harry",
+      "description": "El niño que sobrevivió, protagonista de la historia.",
+      "color": "#1E90FF"
     },
     {
       "id": 2,
-      "title": "Gandalf",
-      "description": "El mago gris",
-      "color": "#708090"
+      "title": "Hermione",
+      "description": "Estudiosa y brillante bruja, amiga leal de Harry.",
+      "color": "#FFD700"
     },
     {
       "id": 3,
-      "title": "Aragorn",
-      "description": "El montaraz heredero de Isildur",
-      "color": "#4682b4"
+      "title": "Ron",
+      "description": "Valiente y divertido, parte esencial del trío protagonista.",
+      "color": "#FF4500"
     }
   ],
   "plots": [
     {
       "id": 1,
-      "title": "El Viaje del Anillo"
+      "title": "Descubrimiento del mundo mágico"
     },
     {
       "id": 2,
-      "title": "Formación de la Comunidad"
+      "title": "Misterio de la piedra filosofal"
     },
     {
       "id": 3,
-      "title": "La amenaza de Sauron"
+      "title": "Amistad y crecimiento personal"
     }
   ],
   "acts": [
     {
       "title": "Acto 1",
-      "description": "Introducción al mundo, el Anillo y la misión",
+      "description": "Descubrimiento del mundo mágico y llegada a Hogwarts",
       "scenes": [
         {
-          "title": "Prólogo: La historia del Anillo",
-          "description": "Se narra la forja y pérdida del Anillo Único.",
+          "title": "Privet Drive: el bebé llega",
+          "description": "Dumbledore y McGonagall dejan a Harry en casa de los Dursley.",
           "duration": 3,
-          "plots": [3],
-          "intensity": 6
-        },
-        {
-          "title": "Un cumpleaños en Hobbiton",
-          "description": "Bilbo celebra su cumpleaños y desaparece.",
-          "duration": 5,
-          "plots": [],
+          "plots": [
+            1
+          ],
           "intensity": 3
         },
         {
-          "title": "El Anillo pasa a Frodo",
-          "description": "Gandalf descubre la verdad y encarga a Frodo huir con el Anillo.",
-          "duration": 6,
-          "plots": [1, 3],
+          "title": "La vida con los Dursley",
+          "description": "Harry crece maltratado y aislado por sus tíos y su primo Dudley.",
+          "duration": 4,
+          "plots": [
+            3
+          ],
+          "intensity": 4
+        },
+        {
+          "title": "El zoológico y la serpiente",
+          "description": "Harry libera accidentalmente una serpiente en el zoológico.",
+          "duration": 4,
+          "plots": [
+            1,
+            3
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Las cartas de Hogwarts",
+          "description": "Cartas mágicas llegan para Harry, pero los Dursley lo impiden.",
+          "duration": 4,
+          "plots": [
+            1
+          ],
+          "intensity": 6
+        },
+        {
+          "title": "La cabaña en la roca",
+          "description": "Hagrid aparece y entrega a Harry su carta de admisión a Hogwarts.",
+          "duration": 4,
+          "plots": [
+            1
+          ],
           "intensity": 7
         },
         {
-          "title": "Huyendo de los Nazgûl",
-          "description": "Frodo y sus amigos escapan de los espectros del Anillo.",
-          "duration": 8,
-          "plots": [1, 3],
-          "intensity": 8
+          "title": "El mundo mágico se revela",
+          "description": "Hagrid explica a Harry sobre sus padres y su herencia mágica.",
+          "duration": 5,
+          "plots": [
+            1
+          ],
+          "intensity": 6
+        },
+        {
+          "title": "El callejón Diagon",
+          "description": "Harry compra sus útiles y conoce la tienda de varitas.",
+          "duration": 6,
+          "plots": [
+            1
+          ],
+          "intensity": 6
+        },
+        {
+          "title": "Visita a Gringotts",
+          "description": "Hagrid retira un misterioso paquete del banco de los magos.",
+          "duration": 4,
+          "plots": [
+            2
+          ],
+          "intensity": 6
+        },
+        {
+          "title": "El andén 9¾",
+          "description": "Harry aprende a tomar el tren a Hogwarts con ayuda de los Weasley.",
+          "duration": 3,
+          "plots": [
+            1
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Harry conoce a Ron y Hermione",
+          "description": "En el tren, Harry conoce a sus futuros mejores amigos.",
+          "duration": 5,
+          "plots": [
+            3
+          ],
+          "intensity": 6
+        },
+        {
+          "title": "Llegada a Hogwarts",
+          "description": "Los estudiantes llegan al castillo cruzando el lago.",
+          "duration": 4,
+          "plots": [
+            1
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "El Sombrero Seleccionador",
+          "description": "Harry es asignado a Gryffindor tras dudar entre casas.",
+          "duration": 3,
+          "plots": [
+            1
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Primeras clases",
+          "description": "Los estudiantes asisten a Pociones y Vuelo.",
+          "duration": 5,
+          "plots": [
+            3
+          ],
+          "intensity": 4
+        },
+        {
+          "title": "Descubrimiento de Fluffy",
+          "description": "Los niños descubren un perro de tres cabezas que guarda una puerta.",
+          "duration": 5,
+          "plots": [
+            2
+          ],
+          "intensity": 7
+        },
+        {
+          "title": "El Espejo de Oesed",
+          "description": "Harry ve a sus padres reflejados en un espejo mágico.",
+          "duration": 5,
+          "plots": [
+            2,
+            3
+          ],
+          "intensity": 6
         }
       ]
     },
     {
       "title": "Acto 2A",
-      "description": "Encuentros y peligros en el viaje",
+      "description": "Misterios y descubrimientos en Hogwarts",
       "scenes": [
         {
-          "title": "Encuentro con Aragorn",
-          "description": "Conocen al montaraz que los protege.",
+          "title": "Clase de encantamientos",
+          "description": "Hermione impresiona a todos con su hechizo perfecto.",
+          "duration": 4,
+          "plots": [
+            3
+          ],
+          "intensity": 3
+        },
+        {
+          "title": "El troll en el baño",
+          "description": "Harry y Ron salvan a Hermione del ataque de un troll.",
           "duration": 5,
-          "plots": [1, 3],
+          "plots": [
+            3
+          ],
+          "intensity": 7
+        },
+        {
+          "title": "Sospechas sobre Snape",
+          "description": "Los niños creen que Snape quiere robar la piedra.",
+          "duration": 4,
+          "plots": [
+            2
+          ],
           "intensity": 6
         },
         {
-          "title": "Atacados en Amon Sûl",
-          "description": "Frodo es herido por un Nazgûl.",
-          "duration": 6,
-          "plots": [3],
+          "title": "Primer partido de Quidditch",
+          "description": "Harry compite como buscador y sospechan que Snape lo hechiza.",
+          "duration": 5,
+          "plots": [
+            2
+          ],
+          "intensity": 6
+        },
+        {
+          "title": "Navidad en Hogwarts",
+          "description": "Harry recibe una capa de invisibilidad y la usa para explorar.",
+          "duration": 4,
+          "plots": [
+            1
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Reencuentro con el Espejo de Oesed",
+          "description": "Harry vuelve al espejo y habla con Dumbledore.",
+          "duration": 4,
+          "plots": [
+            3
+          ],
+          "intensity": 5
+        },
+        {
+          "title": "Investigación sobre Flamel",
+          "description": "Descubren que la piedra otorga inmortalidad.",
+          "duration": 3,
+          "plots": [
+            2
+          ],
+          "intensity": 4
+        },
+        {
+          "title": "Descubrimiento de Norberto",
+          "description": "Hagrid tiene un dragón y los niños lo ayudan a deshacerse de él.",
+          "duration": 4,
+          "plots": [
+            2
+          ],
+          "intensity": 6
+        },
+        {
+          "title": "Detención en el Bosque Prohibido",
+          "description": "Los niños ven a una figura bebiendo sangre de unicornio.",
+          "duration": 5,
+          "plots": [
+            2
+          ],
+          "intensity": 8
+        },
+        {
+          "title": "Confirman las sospechas",
+          "description": "Se dan cuenta de que alguien intenta ayudar a Voldemort.",
+          "duration": 4,
+          "plots": [
+            2
+          ],
+          "intensity": 7
+        },
+        {
+          "title": "Deciden actuar",
+          "description": "El trío decide buscar la piedra por su cuenta.",
+          "duration": 3,
+          "plots": [
+            2,
+            3
+          ],
+          "intensity": 7
+        },
+        {
+          "title": "Superan a Fluffy",
+          "description": "Usan música para dormir al perro de tres cabezas.",
+          "duration": 3,
+          "plots": [
+            2
+          ],
+          "intensity": 8
+        },
+        {
+          "title": "Pruebas mágicas",
+          "description": "Pasan por trampas de magia y lógica.",
+          "duration": 5,
+          "plots": [
+            2
+          ],
+          "intensity": 8
+        },
+        {
+          "title": "Ajedrez mágico",
+          "description": "Ron se sacrifica en una partida gigante para que puedan avanzar.",
+          "duration": 5,
+          "plots": [
+            3
+          ],
           "intensity": 9
         },
         {
-          "title": "Rivendel",
-          "description": "Frodo es curado y se convoca el Concilio de Elrond.",
-          "duration": 7,
-          "plots": [2],
-          "intensity": 5
+          "title": "Acertijo de las pociones",
+          "description": "Hermione resuelve el enigma y Harry avanza solo.",
+          "duration": 4,
+          "plots": [
+            3
+          ],
+          "intensity": 8
         }
       ]
     },
     {
       "title": "Acto 2B",
-      "description": "Formación de la Comunidad y primeras pruebas",
+      "description": "Confrontación con el villano y resolución del conflicto",
       "scenes": [
         {
-          "title": "El Concilio de Elrond",
-          "description": "Se decide destruir el Anillo y formar la Comunidad.",
-          "duration": 6,
-          "plots": [1, 2],
-          "intensity": 7
+          "title": "Encuentro con Quirrell",
+          "description": "Harry descubre que el profesor Quirrell es el villano.",
+          "duration": 5,
+          "plots": [
+            2
+          ],
+          "intensity": 9
         },
         {
-          "title": "Paso por Moria",
-          "description": "Viajan por las minas y Gandalf cae luchando contra el Balrog.",
-          "duration": 10,
-          "plots": [1, 3],
+          "title": "Revelación de Voldemort",
+          "description": "Voldemort está viviendo en el cuerpo de Quirrell.",
+          "duration": 5,
+          "plots": [
+            2
+          ],
           "intensity": 10
         },
         {
-          "title": "Lothlórien",
-          "description": "Encuentro con Galadriel y reflexión sobre el viaje.",
+          "title": "El Espejo de Oesed final",
+          "description": "Harry consigue la piedra al desear no usarla.",
+          "duration": 4,
+          "plots": [
+            2
+          ],
+          "intensity": 9
+        },
+        {
+          "title": "Confrontación final",
+          "description": "Quirrell intenta arrebatarle la piedra, pero el contacto lo destruye.",
           "duration": 5,
-          "plots": [1],
-          "intensity": 4
+          "plots": [
+            2,
+            3
+          ],
+          "intensity": 10
+        },
+        {
+          "title": "Despertar en la enfermería",
+          "description": "Harry se recupera y Dumbledore le explica lo sucedido.",
+          "duration": 3,
+          "plots": [
+            3
+          ],
+          "intensity": 5
         }
       ]
     },
     {
       "title": "Acto 3",
-      "description": "Ruptura y decisiones individuales",
+      "description": "Cierre del curso, despedidas y regreso al mundo muggle",
       "scenes": [
         {
-          "title": "La tentación de Boromir",
-          "description": "Boromir intenta tomar el Anillo.",
-          "duration": 5,
-          "plots": [1, 3],
-          "intensity": 8
+          "title": "La piedra será destruida",
+          "description": "Dumbledore anuncia que la piedra será destruida.",
+          "duration": 3,
+          "plots": [
+            2
+          ],
+          "intensity": 4
         },
         {
-          "title": "Muerte de Boromir y huida de Frodo",
-          "description": "Boromir muere defendiendo a Merry y Pippin; Frodo decide seguir solo.",
-          "duration": 7,
-          "plots": [1],
-          "intensity": 9
+          "title": "Ceremonia de clausura",
+          "description": "Gryffindor gana la Copa de las Casas por sus actos heroicos.",
+          "duration": 3,
+          "plots": [
+            3
+          ],
+          "intensity": 5
         },
         {
-          "title": "Aragorn, Legolas y Gimli persiguen a los orcos",
-          "description": "Se parte la Comunidad y comienzan nuevos caminos.",
-          "duration": 4,
-          "plots": [2],
-          "intensity": 7
+          "title": "Despedidas y regreso a casa",
+          "description": "Los estudiantes se despiden y Harry vuelve con los Dursley.",
+          "duration": 3,
+          "plots": [
+            3
+          ],
+          "intensity": 4
         }
       ]
     }

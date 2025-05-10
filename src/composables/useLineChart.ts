@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { ref } from 'vue';
 import { useSettingsStore } from "../stores/settings";
+const hoveredCharacter = ref(null);
+//const store.selectedCharacter = ref(null);
 
 export function useLineChart(data, options, key, lineChart) {
   const store = useSettingsStore();
@@ -162,20 +164,20 @@ export function useLineChart(data, options, key, lineChart) {
 
   function configureAxisStyles() {
     options.value.scales.y.ticks = {
-        color: store.darkMode ? '#e6e6e6' : '#333', // o cualquier color que prefieras
-        font: {
-          size: store.chartFontSize
-        }
-      };
+      color: store.darkMode ? '#e6e6e6' : '#333', // o cualquier color que prefieras
+      font: {
+        size: store.chartFontSize
+      }
+    };
     options.value.scales.x.ticks = {
       font: { size: store.chartFontSize },
-      color: (ctx) => ctx.index === store.carouselSceneIndex ? 'red' : '#e6e6e6',
+      color: (ctx) => ctx.index === store.carouselSceneIndex ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.7)',
     };
     options.value.scales.x.grid = {
-      color: store.darkMode ? '#e6e6e6' : 'rgba(0, 0, 0, 0.1)',
+      color: store.darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.1)',
     };
     options.value.scales.y.grid = {
-      color: store.darkMode ? '#e6e6e6' : 'rgba(0, 0, 0, 0.1)',
+      color: store.darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.1)',
     };
   }
 
@@ -185,7 +187,9 @@ export function useLineChart(data, options, key, lineChart) {
       const yClick = event.y;
       const xScale = chart.scales.x;
       const yScale = chart.scales.y;
-
+  
+      let clickedOnAnnotation = false;
+  
       for (const [key, ann] of Object.entries(characterAnnotations)) {
         const px = xScale.getPixelForValue(ann.xValue);
         const py = yScale.getPixelForValue(ann.yValue);
@@ -193,35 +197,73 @@ export function useLineChart(data, options, key, lineChart) {
         const dy = yClick - py;
         const distance = Math.sqrt(dx * dx + dy * dy);
         const margin = 5;
-
+  
         if (distance <= (ann.radius || 5) + margin) {
           const [_, sceneIndexStr, charIndexStr] = key.split('_');
           const sceneIndex = parseInt(sceneIndexStr);
           const charIndex = parseInt(charIndexStr);
           const scene = store.story.acts.flatMap(a => a.scenes)[sceneIndex];
           const characterName = scene?.characters?.[charIndex];
-          console.log("👉 Clic en personaje:", characterName, `(escena ${sceneIndex + 1})`);
-          return;
+  
+          if (store.selectedCharacter === characterName) {
+            console.log("👉 Desmarcando personaje:", characterName);
+            store.deselectCharacter?.();
+          } else {
+            console.log("👉 Clic en personaje:", characterName);
+            store.selectedCharacter = characterName;
+          }
+  
+          updateHighlightOnly(sceneIndex);
+          clickedOnAnnotation = true;
+          break;
         }
       }
-
-      const sceneIndex = Math.round(xScale.getValueForPixel(xClick));
-      store.goToCarouselVisualizationDirectly(sceneIndex, true);
+  
+      if (!clickedOnAnnotation) {
+        // Clic libre en el gráfico (no sobre personaje)
+        store.deselectCharacter?.(); // Asegúrate de tener esta función en el store
+        const sceneIndex = Math.round(xScale.getValueForPixel(xClick));
+        store.goToCarouselVisualizationDirectly(sceneIndex, true);
+        updateHighlightOnly(sceneIndex);
+      }
     };
-
+  
     options.value.onHover = (event, elements, chart) => {
       const xClick = event.x;
       const index = Math.round(chart.scales.x.getValueForPixel(xClick));
       store.goToCarouselVisualizationDirectly(index, false);
     };
   }
-
+  
+  function lightenHexColor(hex, amount = 80) {
+    // Asegura que empiece con #
+    hex = hex.replace(/^#/, '');
+  
+    // Convierte a componentes RGB
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+  
+    // Aumenta cada componente, asegurando que no pase de 255
+    r = Math.min(255, r + amount);
+    g = Math.min(255, g + amount);
+    b = Math.min(255, b + amount);
+  
+    // Convierte de nuevo a hex con padding
+    const toHex = (n) => n.toString(16).padStart(2, '0');
+  
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+  
   const updateHighlightOnly = (sceneIndex) => {
     const annotations = options.value.plugins.annotation.annotations;
 
     // === 1. Recalcular puntos de personajes ===
     const characterAnnotations = {};
     let currentSceneIndex = 0;
+
+    const isHighlighted = (charTitle) =>
+      store.selectedCharacter === charTitle;
 
     store.story.acts.forEach((act) => {
       act.scenes.forEach((scene) => {
@@ -233,11 +275,16 @@ export function useLineChart(data, options, key, lineChart) {
           characterAnnotations[annotationId] = {
             type: 'point',
             xValue: currentSceneIndex,
-            yValue: 1 + i * 0.5,
-            radius: 5,
-            backgroundColor: char.color || '#000',
-            borderColor: '#fff',
-            borderWidth: 1,
+            yValue: 1 + i * 0.6,
+            radius: isHighlighted(char.title) ? 8 : 5,
+            backgroundColor: isHighlighted(char.title) ? lightenHexColor(char.color) : char.color,
+            label: {
+              enabled: isHighlighted(char.title),
+              content: char.title,
+              backgroundColor: char.color,
+              color: '#fff',
+              position: 'start'
+            }
           };
         });
         currentSceneIndex++;
@@ -277,12 +324,87 @@ export function useLineChart(data, options, key, lineChart) {
       ...segmentAnnotations,
       ...highlightSceneAnnotation,
     };
+/*     options.value.onClick = (event, _, chart) => {
+      handleChartClick(event, chart);
+    };
+
+    options.value.onHover = (event, _, chart) => {
+      handleChartHover(event, chart);
+    }; */
 
     // === 5. Forzar renderizado del gráfico ===
     lineChart.value?.chart.update();
   };
 
+
+  const handleChartClick = (event, chart) => {
+    const x = event.x;
+    const y = event.y;
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
   
+    let clickedCharacter = null;
+  
+    for (const [key, ann] of Object.entries(chart.options.plugins.annotation.annotations)) {
+      if (!key.startsWith("char_") || ann.type !== "point") continue;
+  
+      const px = xScale.getPixelForValue(ann.xValue);
+      const py = yScale.getPixelForValue(ann.yValue);
+      const r = ann.radius || 5;
+      const distance = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+  
+      if (distance < r + 5) {
+        const [_, sceneIndexStr, charIndexStr] = key.split('_');
+        const scene = store.story.acts.flatMap(a => a.scenes)[+sceneIndexStr];
+        clickedCharacter = scene.characters?.[+charIndexStr];
+  
+        break; // ya encontramos un punto de personaje
+      }
+    }
+  
+    // Actualizar selección
+    if (clickedCharacter) {
+      if (store.selectedCharacter === clickedCharacter) {
+        store.selectedCharacter = null;
+      } else {
+        store.selectedCharacter = clickedCharacter;
+      }
+    } else {
+      store.selectedCharacter = null;
+    }
+  
+    updateHighlightOnly(store.carouselSceneIndex);
+  };
+  
+  const handleChartHover = (event, chart) => {
+    const x = event.x;
+    const y = event.y;
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+
+    let found = null;
+
+    for (const [key, ann] of Object.entries(chart.options.plugins.annotation.annotations)) {
+      if (!key.startsWith("char_") || ann.type !== "point") continue;
+
+      const px = xScale.getPixelForValue(ann.xValue);
+      const py = yScale.getPixelForValue(ann.yValue);
+      const r = ann.radius || 5;
+      const distance = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+
+      if (distance < r + 5) {
+        const [_, sceneIndexStr, charIndexStr] = key.split('_');
+        const scene = store.story.acts.flatMap(a => a.scenes)[+sceneIndexStr];
+        found = scene.characters?.[+charIndexStr];
+        break;
+      }
+    }
+
+    if (hoveredCharacter.value !== found) {
+      hoveredCharacter.value = found;
+      updateHighlightOnly(store.carouselSceneIndex);
+    }
+  };
 
   return {
     setLineChartData,

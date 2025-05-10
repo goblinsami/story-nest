@@ -14,17 +14,19 @@ export const useSettingsStore = defineStore('settings', {
     showReader: false,
     showChartSettings: false,
     showCarousel: false,
+    showCarouselScenes: false,
     showGrid: false,
     expandChart: false,
     chartFontSize: 15,
-    chartHeight: 50,
+    chartHeight: 70,
     chartwidtht: 80,
     editorWidth: 45,
     carouselSceneIndex: 0,
-    showDebugger: false,
+    showDebugger: true,
     editSceneMode: false,
     darkMode: false,
     originalStory: {},
+    selectedCharacter: null,
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -349,6 +351,10 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     //CHARACTERS
+
+    deselectCharacter() {
+      this.selectedCharacter = null
+    },
 
     createCharacter(name) {
       let lastId = 1

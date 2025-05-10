@@ -1,4 +1,11 @@
 <template>
+  <div class="d-flex items-center justify-between">
+    <div class="header d-flex items-center">
+      <h1>Story Nest </h1>
+      <small>v 1.2</small>
+      <Navbar />
+    </div>
+  </div>
   <Transition>
     <p v-if="store.showCarousel">
       <Carousel :initialSceneIndex="store.carouselSceneIndex" />
@@ -9,13 +16,6 @@
       <Grid />
     </p>
   </Transition>
-  <div class="d-flex items-center justify-between">
-    <div class="header d-flex items-center">
-      <h1>Story Nest {{ store.carouselSceneIndex }}</h1>
-      <small>v 1.2</small>
-      <Navbar />
-    </div>
-  </div>
 
   <article class="chartContainer" style="display: flex; width: 100%">
     <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }">
@@ -31,10 +31,9 @@
     </div>
   </article>
   <div v-if="store.showDebugger"
-    :style="{ position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px' }">
-    debug
-    {{ store.editSceneMode }}
-    {{ store.carouselSceneIndex }} // {{ store.showCarousel }}
+    :style="{ color: 'black', backgroundColor: 'rgba(200,200,200,0.8)', position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px' }">
+    {{ store.selectedCharacter }}
+    <button @click="store.deselectCharacter()"></button>
 
   </div>
 
@@ -91,6 +90,7 @@ const init = () => {
   store.addColorToActs();
   store.expandAllActs();
   store.checkCharactersInScene();
+  store.toggleShowCarousel();
   store.carouselSceneIndex = 0;
 };
 
