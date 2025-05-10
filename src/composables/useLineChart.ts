@@ -35,8 +35,41 @@ export function useLineChart(data, options, key, lineChart) {
 
     key.value++;
   };
+  function updatePlotColor(index, newColor) {
+
+    console.log('updatePlotColor')
+    const chartInstance = lineChart.value?.chart;
+    if (!chartInstance || !chartInstance.data?.datasets) return;
+
+    chartInstance.data.datasets.forEach((ds, i) => {
+      const baseColor = store.plotColorsHard[i] || "#999999";
+      const isSelected = i === index;
+
+      ds.borderColor = isSelected ? newColor : baseColor + "99";
+      ds.backgroundColor = isSelected ? newColor + "80" : baseColor + "30";
+      ds.borderWidth = isSelected ? 4 : 2;
+    });
+
+    chartInstance.update();
+  }
+
 
   // === Funciones auxiliares ===
+  function updatePlotHighlight(datasetIndex) {
+    const chartInstance = lineChart.value?.chart;
+
+    console.log('updatePlotHighlight', datasetIndex)
+    data.value.datasets.forEach((ds, i) => {
+      const color = store.plotColorsHard[i] || "#999999";
+      const selected = i === datasetIndex;
+
+      ds.backgroundColor = selected ? color + "80" : color + "30";
+      ds.borderColor = selected ? color : color + "99";
+      ds.borderWidth = selected ? 4 : 2;
+    });
+
+    chartInstance.update();
+  }
 
   function createSegmentsAndCollectScenes(scenes) {
     const segments = [];
@@ -118,17 +151,21 @@ export function useLineChart(data, options, key, lineChart) {
   }
 
   function buildDatasets(plotData) {
+
+    console.log('buildDatasets')
     const datasets = [];
     const plots = store.story.plots;
 
     for (let i = 1; i <= plots.length; i++) {
       const color = store.plotColorsHard[i - 1] || "#999999";
+      const selected = store.selectedPlotIndex === i - 1;
+
       datasets.push({
         label: plots[i - 1].title.slice(0, 10) + '...',
         data: plotData[i] || [],
-        backgroundColor: color + "30",
-        borderColor: color + "99",
-        borderWidth: 2,
+        backgroundColor: selected ? 'red' : color + "30",
+        borderColor: selected ? color : color + "99",
+        borderWidth: selected ? 3 : 2,
         fill: false,
         tension: 0.4,
         spanGaps: true,
@@ -187,9 +224,8 @@ export function useLineChart(data, options, key, lineChart) {
       const yClick = event.y;
       const xScale = chart.scales.x;
       const yScale = chart.scales.y;
-  
-      let clickedOnAnnotation = false;
-  
+
+      // --- 1. Detectar clic en punto de personaje ---
       for (const [key, ann] of Object.entries(characterAnnotations)) {
         const px = xScale.getPixelForValue(ann.xValue);
         const py = yScale.getPixelForValue(ann.yValue);
@@ -197,64 +233,88 @@ export function useLineChart(data, options, key, lineChart) {
         const dy = yClick - py;
         const distance = Math.sqrt(dx * dx + dy * dy);
         const margin = 5;
-  
+
         if (distance <= (ann.radius || 5) + margin) {
           const [_, sceneIndexStr, charIndexStr] = key.split('_');
           const sceneIndex = parseInt(sceneIndexStr);
           const charIndex = parseInt(charIndexStr);
           const scene = store.story.acts.flatMap(a => a.scenes)[sceneIndex];
           const characterName = scene?.characters?.[charIndex];
-  
+
           if (store.selectedCharacter === characterName) {
-            console.log("👉 Desmarcando personaje:", characterName);
             store.deselectCharacter?.();
           } else {
-            console.log("👉 Clic en personaje:", characterName);
             store.selectedCharacter = characterName;
           }
-  
+
           updateHighlightOnly(sceneIndex);
-          clickedOnAnnotation = true;
-          break;
+          return;
         }
       }
-  
-      if (!clickedOnAnnotation) {
-        // Clic libre en el gráfico (no sobre personaje)
-        store.deselectCharacter?.(); // Asegúrate de tener esta función en el store
-        const sceneIndex = Math.round(xScale.getValueForPixel(xClick));
-        store.goToCarouselVisualizationDirectly(sceneIndex, true);
-        updateHighlightOnly(sceneIndex);
+
+      // --- 2. Detectar clic en punto de trama (elementos) ---
+      // --- 2. Detectar clic en punto de trama (elementos) ---
+      if (elements.length > 0) {
+        const point = elements[0];
+        const datasetIndex = point.datasetIndex;
+
+        if (store.selectedPlotIndex === datasetIndex) {
+          store.deselectPlot?.();
+          const defaultColor = store.plotColorsHard[datasetIndex];
+          updatePlotColor(datasetIndex, defaultColor);
+          console.log('DE SELECT PLOT', datasetIndex);
+        } else {
+          store.selectPlot(datasetIndex);
+          const newColor = lightenHexColor(store.plotColorsHard[datasetIndex], 60);
+          updatePlotColor(datasetIndex, newColor);
+          console.log('SELECT PLOT', datasetIndex);
+
+        }
+
+        return;
       }
+
+
+      // --- 3. Clic libre: deselecciona todo ---
+      store.deselectCharacter?.();
+      store.deselectPlot?.();
+
+
+
+
+      const sceneIndex = Math.round(xScale.getValueForPixel(xClick));
+      store.goToCarouselVisualizationDirectly(sceneIndex, true);
+      updateHighlightOnly(sceneIndex);
     };
-  
+
     options.value.onHover = (event, elements, chart) => {
       const xClick = event.x;
       const index = Math.round(chart.scales.x.getValueForPixel(xClick));
       store.goToCarouselVisualizationDirectly(index, false);
     };
   }
-  
+
+
   function lightenHexColor(hex, amount = 80) {
     // Asegura que empiece con #
     hex = hex.replace(/^#/, '');
-  
+
     // Convierte a componentes RGB
     let r = parseInt(hex.substring(0, 2), 16);
     let g = parseInt(hex.substring(2, 4), 16);
     let b = parseInt(hex.substring(4, 6), 16);
-  
+
     // Aumenta cada componente, asegurando que no pase de 255
     r = Math.min(255, r + amount);
     g = Math.min(255, g + amount);
     b = Math.min(255, b + amount);
-  
+
     // Convierte de nuevo a hex con padding
     const toHex = (n) => n.toString(16).padStart(2, '0');
-  
+
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
-  
+
   const updateHighlightOnly = (sceneIndex) => {
     const annotations = options.value.plugins.annotation.annotations;
 
@@ -324,13 +384,13 @@ export function useLineChart(data, options, key, lineChart) {
       ...segmentAnnotations,
       ...highlightSceneAnnotation,
     };
-/*     options.value.onClick = (event, _, chart) => {
-      handleChartClick(event, chart);
-    };
-
-    options.value.onHover = (event, _, chart) => {
-      handleChartHover(event, chart);
-    }; */
+    /*     options.value.onClick = (event, _, chart) => {
+          handleChartClick(event, chart);
+        };
+    
+        options.value.onHover = (event, _, chart) => {
+          handleChartHover(event, chart);
+        }; */
 
     // === 5. Forzar renderizado del gráfico ===
     lineChart.value?.chart.update();
@@ -342,26 +402,26 @@ export function useLineChart(data, options, key, lineChart) {
     const y = event.y;
     const xScale = chart.scales.x;
     const yScale = chart.scales.y;
-  
+
     let clickedCharacter = null;
-  
+
     for (const [key, ann] of Object.entries(chart.options.plugins.annotation.annotations)) {
       if (!key.startsWith("char_") || ann.type !== "point") continue;
-  
+
       const px = xScale.getPixelForValue(ann.xValue);
       const py = yScale.getPixelForValue(ann.yValue);
       const r = ann.radius || 5;
       const distance = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
-  
+
       if (distance < r + 5) {
         const [_, sceneIndexStr, charIndexStr] = key.split('_');
         const scene = store.story.acts.flatMap(a => a.scenes)[+sceneIndexStr];
         clickedCharacter = scene.characters?.[+charIndexStr];
-  
+
         break; // ya encontramos un punto de personaje
       }
     }
-  
+
     // Actualizar selección
     if (clickedCharacter) {
       if (store.selectedCharacter === clickedCharacter) {
@@ -372,10 +432,10 @@ export function useLineChart(data, options, key, lineChart) {
     } else {
       store.selectedCharacter = null;
     }
-  
+
     updateHighlightOnly(store.carouselSceneIndex);
   };
-  
+
   const handleChartHover = (event, chart) => {
     const x = event.x;
     const y = event.y;

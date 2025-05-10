@@ -5,6 +5,7 @@
         <LineChartSettings class="debug" :data="data" :options="options" @changeSettings="setLineChartData()"
           @resetZoom="resetZoom()"></LineChartSettings>
       </div>
+      <button @click="update()">RESET</button>
       <Line :data="data" :options="options" ref="lineChart" :key="key" />
     </div>
   </div>
@@ -210,6 +211,40 @@ onMounted(() => {
 const resetZoom = () => {
   lineChart.value.chart.resetZoom();
 };
+const update = () => {
+  const chartInstance = lineChart.value?.chart;
+
+  if (chartInstance && typeof chartInstance.update === 'function') {
+    // ⚠️ Cambiar radicalmente los datos del primer dataset
+    if (chartInstance.data.datasets.length > 0) {
+      chartInstance.data.datasets[0].data = chartInstance.data.labels.map(() =>
+        Math.floor(Math.random() * 12) // valores aleatorios de 0 a 11
+      );
+      chartInstance.data.datasets[0].borderColor = '#ff0000';
+      chartInstance.data.datasets[0].backgroundColor = '#ff000030';
+      chartInstance.data.datasets[0].label = '⚠️ Dataset modificado';
+    }
+
+    // ⚠️ También podemos añadir un dataset nuevo como prueba
+    chartInstance.data.datasets.push({
+      label: 'Nuevo dataset 🔥',
+      data: chartInstance.data.labels.map(() => Math.floor(Math.random() * 12)),
+      borderColor: '#00ff00',
+      backgroundColor: '#00ff0030',
+      tension: 0.3,
+      fill: false,
+      spanGaps: true
+    });
+
+    // ✅ Ejecutar update para refrescar el gráfico
+  //  chartInstance.update();
+    updateHighlightOnly(store.carouselSceneIndex);
+    console.log("✅ Gráfico actualizado con nuevos datos");
+  } else {
+    console.warn("⚠️ El gráfico aún no está listo o no se puede actualizar.");
+  }
+};
+
 
 const selectElement = (scene, act) => {
   text.subtitle = "";

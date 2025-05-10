@@ -27,6 +27,7 @@ export const useSettingsStore = defineStore('settings', {
     darkMode: false,
     originalStory: {},
     selectedCharacter: null,
+    selectedPlotIndex: null,
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -146,6 +147,12 @@ export const useSettingsStore = defineStore('settings', {
 
   }),
   actions: {
+    selectPlot(index) {
+      this.selectedPlotIndex = index;
+    },
+    deselectPlot() {
+      this.selectedPlotIndex = null;
+    },
     toggleDarkMode() {
       console.log('toggleDarkMode', this.darkMode)
       this.darkMode = !this.darkMode
