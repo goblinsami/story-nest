@@ -115,7 +115,7 @@ const options = ref({
         lineWidth: 1,
       },
       min: 0, // Valor mínimo en el eje Y
-      max: 11, // Valor máximo en el eje Y para mayor amplitud
+      max: 10, // Valor máximo en el eje Y para mayor amplitud
     },
     x: {
       ticks: {
@@ -176,14 +176,14 @@ const options = ref({
     },
     zoom: {
       limits: {
-        y: { min: 0, max: 11 },
+        y: { min: 0, max: 10 },
       },
       pan: {
         enabled: true,
       },
       zoom: {
         limits: {
-          y: { min: 0, max: 11 },
+          y: { min: 0, max: 10 },
         },
         wheel: {
           enabled: true,
