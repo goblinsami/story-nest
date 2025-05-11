@@ -32,9 +32,7 @@
   </article>
   <div v-if="store.showDebugger"
     :style="{ color: 'black', backgroundColor: 'rgba(200,200,200,0.8)', position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px' }">
-    {{ store.selectedCharacter }}
-
-    {{ store.selectedPlotIndex }}
+    {{ store.selectedSegmentIndex }}
     <button @click="store.deselectCharacter()"></button>
 
   </div>

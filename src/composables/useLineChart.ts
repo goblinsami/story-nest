@@ -9,6 +9,7 @@ const whiteColor = 'rgba(255,255,255,0.5)'
 export function useLineChart(data, options, key, lineChart) {
   const store = useSettingsStore();
   const updateChart = () => {
+    console.log("Updating chart");
     const chartInstance = lineChart.value?.chart;
     if (chartInstance && typeof chartInstance.update === 'function') {
       chartInstance.update();
@@ -152,9 +153,61 @@ export function useLineChart(data, options, key, lineChart) {
 
     options.value.onHover = (event, _, chart) => {
       const x = event.x;
-      const index = Math.round(chart.scales.x.getValueForPixel(x));
-      store.goToCarouselVisualizationDirectly(index, false);
+      const sceneIndex = Math.round(chart.scales.x.getValueForPixel(x));
+    
+      let accumulated = 0;
+      let hoveredSegmentIndex = null;
+    
+      for (let i = 0; i < store.story.acts.length; i++) {
+        const act = store.story.acts[i];
+        const start = accumulated;
+        const end = accumulated + act.scenes.length;
+    
+        if (sceneIndex >= start && sceneIndex < end) {
+          hoveredSegmentIndex = i;
+          break;
+        }
+        accumulated = end;
+      }
+    
+      // Solo si ha cambiado el hover
+      if (store._hoveredSegmentIndex !== hoveredSegmentIndex) {
+        store._hoveredSegmentIndex = hoveredSegmentIndex;
+    
+        // Actualizar solo los segmentos
+        const annotations = options.value.plugins.annotation.annotations;
+        const updatedSegments = {};
+    
+        let sceneIndex = 0;
+        store.story.acts.forEach((act, i) => {
+          const len = act.scenes.length;
+          updatedSegments[`segment_${i}`] = {
+            xMin: sceneIndex,
+            xMax: sceneIndex + len,
+            backgroundColor: i === hoveredSegmentIndex || i === store.selectedSegmentIndex
+              ? act.color + "98"
+              : act.color + "40",
+            title: act.title,
+            type: "box",
+            drawTime: 'beforeDatasetsDraw'
+          };
+          sceneIndex += len;
+        });
+    
+        // Reasigna solo los segmentos, sin tocar personajes ni highlight
+        const currentAnnotations = options.value.plugins.annotation.annotations;
+        const filtered = Object.fromEntries(Object.entries(currentAnnotations).filter(([k]) => !k.startsWith('segment_')));
+        options.value.plugins.annotation.annotations = {
+          ...filtered,
+          ...updatedSegments
+        };
+    
+        updateChart();
+      }
+    
+      store.goToCarouselVisualizationDirectly(sceneIndex, false);
     };
+    
   }
 
   const lightenHexColor = (hex, amount = 80) => {
@@ -169,16 +222,16 @@ export function useLineChart(data, options, key, lineChart) {
     const segments = [];
     let index = 0;
 
-    store.story.acts.forEach(act => {
+    store.story.acts.forEach((act, i) => {
       const len = act.scenes.length;
+      const isSelected = store.selectedSegmentIndex === i;
       segments.push({
         xMin: index,
         xMax: index + len,
-        backgroundColor: act.color + "30",
-        borderColor: act.color + "99",
-        borderWidth: 1,
+        backgroundColor: isSelected ? act.color + "98" : act.color + "40",
         title: act.title,
         type: "box",
+        drawTime: 'beforeDatasetsDraw'
       });
 
       act.scenes.forEach(scene => {
@@ -189,6 +242,7 @@ export function useLineChart(data, options, key, lineChart) {
 
     return segments;
   }
+
 
   function buildPlotData() {
     const data = {};
@@ -287,8 +341,38 @@ export function useLineChart(data, options, key, lineChart) {
     };
     options.value.scales.x.ticks = {
       font: { size: store.chartFontSize },
-      color: ctx => ctx.index === store.carouselSceneIndex ? '#fff' : '#ccc',
+      color: (ctx) => {
+        const index = ctx.index;
+        const sceneIndex = store.carouselSceneIndex;
+        const acts = store.story.acts;
+    
+        // Color para escena destacada
+        if (index === sceneIndex) return '#ffffff';
+    
+        let sceneCounter = 0;
+    
+        for (let i = 0; i < acts.length; i++) {
+          const act = acts[i];
+          const start = sceneCounter;
+          const end = sceneCounter + act.scenes.length;
+    
+          if (index >= start && index < end) {
+            if (
+              store.selectedSegmentIndex === i ||
+              store._hoveredSegmentIndex === i
+            ) {
+              return '#aaaaaa'; // color más claro para acto hovered o seleccionado
+            }
+            break;
+          }
+    
+          sceneCounter = end;
+        }
+    
+        return '#666666'; // color por defecto
+      }
     };
+    
     const gridColor = store.darkMode ? whiteColor : 'rgba(0,0,0,0.1)';
     options.value.scales.x.grid = { color: gridColor };
     options.value.scales.y.grid = { color: gridColor };

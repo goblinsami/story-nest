@@ -203,47 +203,49 @@ const text = reactive({
 });
 const { setLineChartData, updateHighlightOnly } = useLineChart(data, options, key, lineChart);
 
+const update = () => {
 
-onMounted(() => {
+/*   const chart = lineChart.value.chart;
+  chart.tooltip.setActiveElements(
+  [{ datasetIndex: 0, index: 2 }],
+  {
+    x:  chart.scales.x.getPixelForValue(11),
+    y:  chart.scales.y.getPixelForValue( chart.data.datasets[0].data[2])
+  }
+); */
 
-});
+options.value.plugins.tooltip = {
+  enabled: true,
+  callbacks: {
+    title: (tooltipItems) => {
+      const item = tooltipItems[0];
+      const sceneIndex = item.dataIndex;
+      const scenes = store.story.acts.flatMap(act => act.scenes);
+      const scene = scenes[sceneIndex];
+      return `${sceneIndex + 1}: ${scene?.title || 'Sin título'}`;
+    },
+    label: (tooltipItem) => {
+      const scenes = store.story.acts.flatMap(act => act.scenes);
+      const scene = scenes[tooltipItem.dataIndex];
+      const intensity = tooltipItem.raw !== null ? `Intensidad: ${tooltipItem.raw}` : null;
+      const characters = scene?.characters?.length
+        ? `Personajes: ${scene.characters.join(', ')}`
+        : null;
+
+      return [intensity, characters].filter(Boolean); // Devuelve array si hay más de una línea
+    }
+  }
+};
+
+
+/* chart.update('none');
+ */};
+
 
 const resetZoom = () => {
   lineChart.value.chart.resetZoom();
 };
-const update = () => {
-  const chartInstance = lineChart.value?.chart;
 
-  if (chartInstance && typeof chartInstance.update === 'function') {
-    // ⚠️ Cambiar radicalmente los datos del primer dataset
-    if (chartInstance.data.datasets.length > 0) {
-      chartInstance.data.datasets[0].data = chartInstance.data.labels.map(() =>
-        Math.floor(Math.random() * 12) // valores aleatorios de 0 a 11
-      );
-      chartInstance.data.datasets[0].borderColor = '#ff0000';
-      chartInstance.data.datasets[0].backgroundColor = '#ff000030';
-      chartInstance.data.datasets[0].label = '⚠️ Dataset modificado';
-    }
-
-    // ⚠️ También podemos añadir un dataset nuevo como prueba
-    chartInstance.data.datasets.push({
-      label: 'Nuevo dataset 🔥',
-      data: chartInstance.data.labels.map(() => Math.floor(Math.random() * 12)),
-      borderColor: '#00ff00',
-      backgroundColor: '#00ff0030',
-      tension: 0.3,
-      fill: false,
-      spanGaps: true
-    });
-
-    // ✅ Ejecutar update para refrescar el gráfico
-  //  chartInstance.update();
-    updateHighlightOnly(store.carouselSceneIndex);
-    console.log("✅ Gráfico actualizado con nuevos datos");
-  } else {
-    console.warn("⚠️ El gráfico aún no está listo o no se puede actualizar.");
-  }
-};
 
 
 const selectElement = (scene, act) => {

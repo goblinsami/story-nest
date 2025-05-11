@@ -28,6 +28,7 @@ export const useSettingsStore = defineStore('settings', {
     originalStory: {},
     selectedCharacter: null,
     selectedPlotIndex: null,
+    selectedSegmentIndex: null,
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -147,6 +148,15 @@ export const useSettingsStore = defineStore('settings', {
 
   }),
   actions: {
+    selectSegment(index) {
+      console.log('selectSegment', index)
+      this.selectedSegmentIndex = index;
+    },
+    deselectSegment(index) {
+      console.log('deselectSegment', index)
+      this.selectedSegmentIndex = null;
+    },
+
     selectPlot(index) {
       this.selectedPlotIndex = index;
     },
