@@ -18,7 +18,7 @@ export const useSettingsStore = defineStore('settings', {
     showGrid: false,
     expandChart: false,
     chartFontSize: 15,
-    chartHeight: 70,
+    chartHeight: 80,
     chartwidtht: 80,
     editorWidth: 45,
     carouselSceneIndex: 0,
@@ -29,6 +29,7 @@ export const useSettingsStore = defineStore('settings', {
     selectedCharacter: null,
     selectedPlotIndex: null,
     selectedSegmentIndex: null,
+    selectedScene: null,
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -148,6 +149,14 @@ export const useSettingsStore = defineStore('settings', {
 
   }),
   actions: {
+    selectScene(index) {
+      console.log('selectScene', index)
+      this.selectedScene = index;
+    },
+    deselectScene(index) {
+      console.log('deselectScene', index)
+      this.selectedScene = null;
+    },
     selectSegment(index) {
       console.log('selectSegment', index)
       this.selectedSegmentIndex = index;
@@ -500,6 +509,26 @@ export const useSettingsStore = defineStore('settings', {
         updatedScene.intensity = 5
       }
 
+    },
+
+    getCharacterColor(character) {
+      let characterIndex = this.story.characters.findIndex(el => el.title == character)
+      let characterColor = this.story.characters[characterIndex].color
+      return characterColor
+    },
+
+    getPlotInfo(plotIndex) {
+      if (!this.story.plots || !this.story.plots[plotIndex]) {
+      return { id: null, title: "" };
+      }
+      return this.story.plots[plotIndex];
+    },
+
+    getPlotColor(plotIndex) {
+      if (!this.plotColorsHard || !this.plotColorsHard[plotIndex]) {
+      return "#000000"; // Default to black if no color is found
+      }
+      return this.plotColorsHard[plotIndex];
     },
 
     goToCarouselVisualizationDirectly(index, toggle = true) {

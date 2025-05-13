@@ -2,10 +2,29 @@
   <div id="canvas-container">
     <div class="chartWrapper" :style="{ height: store.chartHeight + 'vh' }">
       <div class="chart-settings-container" :class="store.showChartSettings ? 'expand' : ''">
+
         <LineChartSettings class="debug" :data="data" :options="options" @changeSettings="setLineChartData()"
           @resetZoom="resetZoom()"></LineChartSettings>
       </div>
-      <button @click="update()">RESET</button>
+<!--       <button @click="update()">RESET</button> -->
+      <ChartTooltip class="tooltip" v-bind="selectionTooltip" />
+      <ChartTooltip class="tooltip" v-bind="sceneTooltip" />
+      <ChartTooltip class="tooltip" v-bind="hoveredSegmentTooltip" />
+
+      <!--       <div v-if="selectionTooltip.visible" class="tooltip" :style="{
+        position: 'absolute',
+        left: `${selectionTooltip.x}px`,
+        top: `${selectionTooltip.y}px`,
+
+      }">
+        {{ selectionTooltip.data }}
+      </div> -->
+
+      <!--       {{ sceneTooltip }}
+      //
+     {{ selectionTooltip }} -->
+
+
       <Line :data="data" :options="options" ref="lineChart" :key="key" />
     </div>
   </div>
@@ -18,6 +37,8 @@ import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { useSettingsStore } from "../stores/settings";
 import LineChartSettings from "./LineChartSettings.vue";
+import ChartTooltip from "./Tooltip.vue";
+
 import { useLineChart } from "../composables/useLineChart";
 
 
@@ -201,41 +222,41 @@ const text = reactive({
   subtitle: "",
   description: "",
 });
-const { setLineChartData, updateHighlightOnly } = useLineChart(data, options, key, lineChart);
+const { setLineChartData, updateHighlightOnly, selectionTooltip, sceneTooltip, hoveredSegmentTooltip } = useLineChart(data, options, key, lineChart);
 
 const update = () => {
 
-/*   const chart = lineChart.value.chart;
-  chart.tooltip.setActiveElements(
-  [{ datasetIndex: 0, index: 2 }],
-  {
-    x:  chart.scales.x.getPixelForValue(11),
-    y:  chart.scales.y.getPixelForValue( chart.data.datasets[0].data[2])
-  }
-); */
-
-options.value.plugins.tooltip = {
-  enabled: true,
-  callbacks: {
-    title: (tooltipItems) => {
-      const item = tooltipItems[0];
-      const sceneIndex = item.dataIndex;
-      const scenes = store.story.acts.flatMap(act => act.scenes);
-      const scene = scenes[sceneIndex];
-      return `${sceneIndex + 1}: ${scene?.title || 'Sin título'}`;
-    },
-    label: (tooltipItem) => {
-      const scenes = store.story.acts.flatMap(act => act.scenes);
-      const scene = scenes[tooltipItem.dataIndex];
-      const intensity = tooltipItem.raw !== null ? `Intensidad: ${tooltipItem.raw}` : null;
-      const characters = scene?.characters?.length
-        ? `Personajes: ${scene.characters.join(', ')}`
-        : null;
-
-      return [intensity, characters].filter(Boolean); // Devuelve array si hay más de una línea
+  /*   const chart = lineChart.value.chart;
+    chart.tooltip.setActiveElements(
+    [{ datasetIndex: 0, index: 2 }],
+    {
+      x:  chart.scales.x.getPixelForValue(11),
+      y:  chart.scales.y.getPixelForValue( chart.data.datasets[0].data[2])
     }
-  }
-};
+  ); */
+
+  options.value.plugins.tooltip = {
+    enabled: true,
+    callbacks: {
+      title: (tooltipItems) => {
+        const item = tooltipItems[0];
+        const sceneIndex = item.dataIndex;
+        const scenes = store.story.acts.flatMap(act => act.scenes);
+        const scene = scenes[sceneIndex];
+        return `${sceneIndex + 1}: ${scene?.title || 'Sin título'}`;
+      },
+      label: (tooltipItem) => {
+        const scenes = store.story.acts.flatMap(act => act.scenes);
+        const scene = scenes[tooltipItem.dataIndex];
+        const intensity = tooltipItem.raw !== null ? `Intensidad: ${tooltipItem.raw}` : null;
+        const characters = scene?.characters?.length
+          ? `Personajes: ${scene.characters.join(', ')}`
+          : null;
+
+        return [intensity, characters].filter(Boolean); // Devuelve array si hay más de una línea
+      }
+    }
+  };
 
 
 /* chart.update('none');
@@ -345,6 +366,19 @@ watch(
 </script>
 
 <style>
+.tooltip {
+  background-color: var(--color-dark-bg);
+  color: white;
+  padding: 5px;
+  border-radius: var(--border-radius);
+  font-size: 12px;
+  z-index: 1000;
+  width: 200px;
+  text-wrap: pretty;
+  height: auto;
+  padding: 1rem;
+}
+
 #canvas-container {
   width: 100%;
   /* Ancho total del contenedor */
