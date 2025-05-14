@@ -69,55 +69,17 @@ ChartJS.register(
 );
 
 const store = useSettingsStore();
-const selectedColor = ref("#caafaf");
-
 const canvas = ref(null);
-const textDisplay = ref(null);
 const lineChart = ref(null);
 const scenes = ref(null);
+/* remove */
 const key = ref(0);
-const localData = ref({}); // Crear un contenedor para la copia local de los datos
 const data = ref({
-  labels: ["1", "2", "3", "4", "5"], //escenas
-  datasets: [
-    {
-      label: "Ventas 2024",
-      data: [1, 2, 3],
-      borderColor: "rgba(75, 192, 192, 1)",
-      backgroundColor: "rgba(75, 192, 192, 0.2)",
-      tension: 0.4, // Controla la suavidad de la línea
-    },
-  ],
+  labels: [], //escenas
+  datasets: [],
 });
 
-const opacity = ref(0);
 
-/* const beforeEnter = (el) => {
-  el.style.height = '0';
-  el.style.opacity = '0';
-};
-
-const enter = (el, done) => {
-  // Forzar el cálculo de la altura inicial correcta usando `getBoundingClientRect()`
-  const initialHeight = el.getBoundingClientRect().height;
-  el.style.transition = 'none'; // Desactivar transición temporalmente
-  el.style.height = initialHeight + 'px'; // Establecer la altura inicial
-
-  //el.offsetHeight; // Forzar un reflujo para que el navegador reconozca el cambio de estilo
-
-  el.style.transition = 'all 0.5s ease'; // Volver a habilitar la transición
-  el.style.height = el.scrollHeight + 'px'; // Aplicar la altura completa
-  el.style.opacity = '1'; // Restaurar opacidad
-
-  el.addEventListener('transitionend', done);
-};
-
-const leave = (el, done) => {
-  el.style.transition = 'all 0.5s ease';
-  el.style.height = '0';
-  el.style.opacity = '0';
- // el.addEventListener('transitionend', done);
-}; */
 // Opciones del gráfico con anotaciones
 const options = ref({
   responsive: true,
@@ -156,44 +118,7 @@ const options = ref({
 
     },
     annotation: {
-      annotations: {
-        segment1: {
-          type: "box",
-          xMin: 0, // Comienza en el valor 0 del eje X
-          xMax: 1, // Termina en el valor 1 del eje X
-          backgroundColor: "rgba(255, 99, 132, 0.5)", // Aumenta la opacidad
-          borderColor: "rgba(255, 99, 132, 1)",
-          borderWidth: 1,
-          name: "act1",
-        },
-        segment2: {
-          type: "box",
-          xMin: 1, // Comienza donde termina el primer segmento
-          xMax: 2, // Termina en el valor 3 del eje X
-          backgroundColor: "rgba(54, 162, 235, 0.25)", // Color diferente
-          borderColor: "rgba(54, 162, 235, 1)",
-          borderWidth: 1,
-          name: "act2",
-        },
-        segment3: {
-          type: "box",
-          xMin: 2, // Comienza donde termina el segmento anterior
-          xMax: 3,
-          backgroundColor: "rgba(75, 192, 192, 0.25)", // Color diferente
-          borderColor: "rgba(75, 192, 192, 1)",
-          borderWidth: 1,
-          name: "act3",
-        },
-        segment4: {
-          type: "box",
-          xMin: 3, // Comienza donde termina el segmento anterior
-          xMax: 4,
-          backgroundColor: "rgba(153, 102, 255, 0.25)", // Color diferente
-          borderColor: "rgba(153, 102, 255, 1)",
-          borderWidth: 1,
-          name: "act4",
-        },
-      },
+      annotations: { },
     },
     zoom: {
       limits: {
@@ -217,11 +142,7 @@ const options = ref({
     },
   },
 });
-const text = reactive({
-  title: "",
-  subtitle: "",
-  description: "",
-});
+
 const { setLineChartData, updateHighlightOnly, selectionTooltip, sceneTooltip, hoveredSegmentTooltip } = useLineChart(data, options, key, lineChart);
 
 const update = () => {
@@ -235,7 +156,7 @@ const update = () => {
     }
   ); */
 
-  options.value.plugins.tooltip = {
+/*   options.value.plugins.tooltip = {
     enabled: true,
     callbacks: {
       title: (tooltipItems) => {
@@ -256,7 +177,7 @@ const update = () => {
         return [intensity, characters].filter(Boolean); // Devuelve array si hay más de una línea
       }
     }
-  };
+  }; */
 
 
 /* chart.update('none');
@@ -267,28 +188,6 @@ const resetZoom = () => {
   lineChart.value.chart.resetZoom();
 };
 
-
-
-const selectElement = (scene, act) => {
-  text.subtitle = "";
-
-  if (scene) {
-    text.title = scene.title;
-    text.description = scene.description;
-    text.subtitle = act.title;
-  } else {
-    text.title = act.title;
-    text.description = act.description;
-  }
-};
-
-const handleShowLabels = () => {
-  labelsSettings.showLabels = !labelsSettings.showLabels;
-};
-
-const updateScenes = () => {
-  drawChart();
-};
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));

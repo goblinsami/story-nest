@@ -18,9 +18,9 @@
   </Transition>
 
   <article class="chartContainer" style="display: flex; width: 100%">
-    <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }">
+    <!-- <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }">
       <TextEditor />
-    </div>
+    </div> -->
 
     <!-- Resizer entre ambos -->
     <div class="resizer" @mousedown="startResize"></div>
