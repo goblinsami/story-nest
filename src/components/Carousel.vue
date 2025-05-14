@@ -58,9 +58,9 @@ watch(
 
 <template>
       <article class="carousel-container">
-            <div class=" heading">
+<!--             <div class=" heading">
                   <button @click="store.toggleShowCarousel()"> Close</button>
-            </div>
+            </div> -->
             <div class="scenes-container" v-if="store.showCarouselScenes">
                   <Scene @editScene="editScene" :scene="store.getAllScenes[sceneIndex - 1]" mode="single" class="prev"
                         v-if="sceneIndex > 0" />
@@ -71,10 +71,10 @@ watch(
             <div :style="{ width: `calc(100%)` }">
                   <LineChart />
             </div>
-            <div class="d-flex">
+<!--             <div class="d-flex">
                   <button @click="goToPrevScene">⬅️</button>
                   <button @click="goToNextScene">➡️</button>
-            </div>
+            </div> -->
       </article>
 </template>
 <style>

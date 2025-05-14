@@ -10,18 +10,18 @@ const store = useSettingsStore();
 
 <template>
     <div class="d-flex justify-center items-center settings">
-        <button @click="store.toggleEditor()">
+<!--         <button @click="store.toggleEditor()">
             {{ store.showEditor ? "Hide" : "Show" }} Editor
         </button>
         <button @click="store.togglePlotChart()">
             {{ store.showPlotChart ? "Hide" : "Show" }} Plot Chart
-        </button>
+        </button> -->
         <button @click="store.toggleShowChartSettings()">
             {{ store.showChartSettings ? "Hide" : "Show" }} Chart Settings
         </button>
-        <button @click="store.toggleShowCarousel()"> Carousel</button>
+<!--         <button @click="store.toggleShowCarousel()"> Carousel</button>
         <button @click="store.toggleShowGrid()"> Grid</button>
-        <button @click="store.toggleDarkMode()"> Night</button>
+        <button @click="store.toggleDarkMode()"> Night</button> -->
 
         <!--         <button @click="store.toggleExpandChart()">
             {{ store.expandChart ? "Expand" : "Contract" }} Chart Settings

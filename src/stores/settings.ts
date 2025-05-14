@@ -22,7 +22,7 @@ export const useSettingsStore = defineStore('settings', {
     chartwidtht: 80,
     editorWidth: 45,
     carouselSceneIndex: 0,
-    showDebugger: true,
+    showDebugger: false,
     editSceneMode: false,
     darkMode: false,
     originalStory: {},
@@ -519,14 +519,14 @@ export const useSettingsStore = defineStore('settings', {
 
     getPlotInfo(plotIndex) {
       if (!this.story.plots || !this.story.plots[plotIndex]) {
-      return { id: null, title: "" };
+        return { id: null, title: "" };
       }
       return this.story.plots[plotIndex];
     },
 
     getPlotColor(plotIndex) {
       if (!this.plotColorsHard || !this.plotColorsHard[plotIndex]) {
-      return "#000000"; // Default to black if no color is found
+        return "#000000"; // Default to black if no color is found
       }
       return this.plotColorsHard[plotIndex];
     },
