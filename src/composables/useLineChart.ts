@@ -29,19 +29,27 @@ export function useLineChart(data, options, key, lineChart) {
     y: 0,
     data: null
   });
-
+  function clampXToViewport(x, tooltipWidth = 200, margin = 16) {
+    const maxX = window.innerWidth - tooltipWidth - margin;
+    return Math.min(x, maxX);
+  }
+  
   function showSelectionTooltip(x, y, type, data) {
     const chart = lineChart.value?.chart;
     if (!chart) return;
     const rect = chart.canvas.getBoundingClientRect();
+  
+    const adjustedX = clampXToViewport(x + rect.left);
+  
     selectionTooltip.value = {
       visible: true,
-      x: x + rect.left,
+      x: adjustedX,
       y: y + rect.top,
       type,
       data
     };
   }
+  
 
   const updateChart = () => {
     // console.log("Updating chart");
@@ -99,7 +107,8 @@ export function useLineChart(data, options, key, lineChart) {
 options.value.plugins.annotation.annotations = {
   ...current,
   ...characterAnnotations,
-  
+  highlightScene: createHighlightAnnotation(sceneIndex),
+
 };
 
 /*     options.value.plugins.annotation.annotations = {
@@ -228,7 +237,7 @@ options.value.plugins.annotation.annotations = {
 
         sceneTooltip.value = {
           visible: true,
-          x: x + rect.left,
+          x: clampXToViewport(x + rect.left),
           y: y + rect.top + 50,
           type: 'scene',
           expand: false,
