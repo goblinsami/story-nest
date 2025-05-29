@@ -41,24 +41,29 @@ export function useLineChart(data, options, key, lineChart) {
 
     const adjustedX = clampXToViewport(x + rect.left);
 
-    selectionTooltip.value = {
-      visible: true,
-      x: adjustedX,
-      y: y + rect.top,
-      type,
-      data
-    };
+    /*     selectionTooltip.value = {
+          visible: true,
+          x: adjustedX,
+          y: y + rect.top,
+          type,
+          data
+        }; */
   }
 
-
+  const hideTooltips = () => {
+    console.log('Hiding tooltips');
+    selectionTooltip.value.visible = false;
+    sceneTooltip.value.visible = false;
+    hoveredSegmentTooltip.value.visible = false;
+  }
   const updateChart = () => {
-    
+
     const chartInstance = lineChart.value?.chart;
     store.consoleCustom('6 updateChart', chartInstance)
     if (chartInstance && typeof chartInstance.update === 'function') {
       chartInstance.update();
     } else {
-      key.value ++
+      key.value++
     }
   };
   const setLineChartData = () => {
@@ -92,13 +97,14 @@ export function useLineChart(data, options, key, lineChart) {
 
     configureAxisStyles();
     configureEvents(characterAnnotations);
-  //  updateChart();
+    //  updateChart();
 
-        store.consoleCustom('5-after setLineChartData', lineChart.value?.chart);
+    store.consoleCustom('5-after setLineChartData', lineChart.value?.chart);
 
   };
 
   const updateHighlightOnly = (sceneIndex) => {
+    store.isToolTipHidden = true;
     const annotations = options.value.plugins.annotation.annotations;
     const scenes = [];
 
@@ -124,7 +130,7 @@ export function useLineChart(data, options, key, lineChart) {
           highlightScene: createHighlightAnnotation(sceneIndex),
         }; */
 
- //   updateChart();
+    //   updateChart();
   };
 
   function buildCharacterAnnotations(highlightedTitle) {
@@ -206,7 +212,7 @@ export function useLineChart(data, options, key, lineChart) {
       ds.borderWidth = selected ? 4 : 2;
     });
 
- //   updateChart();
+    //   updateChart();
   };
 
   const resetPlotColors = () => {
@@ -220,7 +226,7 @@ export function useLineChart(data, options, key, lineChart) {
       ds.borderWidth = 2;
     });
 
- //   updateChart();
+    //   updateChart();
   };
 
   function configureEvents(characterAnnotations) {
@@ -231,40 +237,60 @@ export function useLineChart(data, options, key, lineChart) {
       handleEmptyClick(event, chart);
     };
 
-    options.value.onHover = (event, _, chart) => {
-      const x = event.x;
-      const y = event.y;
-      const xScale = chart.scales.x;
-      const sceneIndex = Math.round(xScale.getValueForPixel(x));
+options.value.onHover = (event, elements, chart) => {
+  const x = event.x;
+  const y = event.y;
+  const xScale = chart.scales.x;
+  const sceneIndex = Math.round(xScale.getValueForPixel(x));
 
-      handleSegmentHover(event, chart);
+  handleSegmentHover(event, chart);
 
-      const scenes = store.story.acts.flatMap(act => act.scenes);
-      const scene = scenes[sceneIndex];
+  // 👇 Detectar si el mouse está sobre un punto de personaje
+  const isOverCharacterPoint = Object.entries(chart.options.plugins.annotation.annotations || {})
+    .some(([key, ann]) => {
+      if (ann.type !== 'point') return false;
+      const px = chart.scales.x.getPixelForValue(ann.xValue);
+      const py = chart.scales.y.getPixelForValue(ann.yValue);
+      const dist = Math.hypot(x - px, y - py);
+      return dist <= (ann.radius || 5) + 5;
+    });
 
-      if (scene) {
-        const rect = chart.canvas.getBoundingClientRect();
+  // 👇 Detectar si el mouse está sobre una línea de trama
+  const isOverPlot = elements.length > 0;
 
-        sceneTooltip.value = {
-          visible: true,
-          x: clampXToViewport(x + rect.left),
-          y: y + rect.top + 50,
-          type: 'scene',
-          expand: false,
-          data: {
-            index: sceneIndex + 1,
-            title: scene.title,
-            desc: scene.description,
-            characters: scene.characters || [],
-            plots: scene.plots || []
-          }
-        };
-      } else {
-        sceneTooltip.value.visible = false;
+  if (isOverCharacterPoint || isOverPlot) {
+    chart.canvas.style.cursor = 'pointer';
+  } else {
+    chart.canvas.style.cursor = 'default';
+  }
+
+  // Mostrar tooltip de escena
+  const scenes = store.story.acts.flatMap(act => act.scenes);
+  const scene = scenes[sceneIndex];
+
+  if (scene) {
+    const rect = chart.canvas.getBoundingClientRect();
+    sceneTooltip.value = {
+      visible: true,
+      x: clampXToViewport(x + rect.left),
+      y: y + rect.top + 50,
+      type: 'scene',
+      expand: false,
+      data: {
+        index: sceneIndex + 1,
+        title: scene.title,
+        desc: scene.description,
+        characters: scene.characters || [],
+        plots: scene.plots || []
       }
-
-      store.goToCarouselVisualizationDirectly(sceneIndex, false);
     };
+  } else {
+    sceneTooltip.value.visible = false;
+  }
+
+  store.goToCarouselVisualizationDirectly(sceneIndex, false);
+};
+
   }
 
   function handleCharacterClick(event, chart, characterAnnotations) {
@@ -284,6 +310,7 @@ export function useLineChart(data, options, key, lineChart) {
         const selected = store.selectedCharacter === name;
 
         store.selectedCharacter = selected ? null : name;
+        document.body.style.cursor = 'pointer';
 
         selectionTooltip.value = selected
           ? { visible: false }
@@ -443,7 +470,7 @@ export function useLineChart(data, options, key, lineChart) {
 
   function createSegments(scenes) {
     const segments = [];
-    store.consoleCustom('5-1 createSegments// change in acts', )
+    store.consoleCustom('5-1 createSegments// change in acts',)
     const labels = [];
     let index = 0;
 
@@ -533,19 +560,19 @@ export function useLineChart(data, options, key, lineChart) {
 
   function createLabels(scenes) {
     store.consoleCustom('5-3 createLabels', lineChart.value?.chart);
-    console.log("Creating labels for scenes:",  lineChart.value?.chart.data.labels[0] , );
+    console.log("Creating labels for scenes:", lineChart.value?.chart.data.labels[0],);
 
     console.log(lineChart.value?.chart, "2- lineChart.value?.chart")
-    key.value ++
+    key.value++
 
     if (lineChart.value?.chart) {
 
-        
+
       //lineChart.value?.chart.update()
     }
-    
+
     const truncate = str => str.length > 20 ? str.slice(0, 20) + '...' : str;
-     // updateChart();
+    // updateChart();
     return scenes.map((scene, i) => `${i + 1} - ${truncate(scene.title)}`);
   }
 
@@ -576,7 +603,7 @@ export function useLineChart(data, options, key, lineChart) {
   }
 
   function createHighlightAnnotation(index = store.carouselSceneIndex ?? 0) {
-    store.consoleCustom('5-6 createHighlightAnnotation', index,  lineChart.value?.chart);
+    store.consoleCustom('5-6 createHighlightAnnotation', index, lineChart.value?.chart);
     return {
       type: 'line',
       scaleID: 'x',
@@ -644,6 +671,7 @@ export function useLineChart(data, options, key, lineChart) {
     selectionTooltip,
     sceneTooltip,
     hoveredSegmentTooltip,
-    updateChart
+    updateChart,
+    hideTooltips
   };
 }

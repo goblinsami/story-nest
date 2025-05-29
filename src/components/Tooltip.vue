@@ -13,7 +13,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div v-if="visible" class="tooltip" :style="{
+  <div v-if="visible && store.isToolTipHidden" class="tooltip" :style="{
     position: 'absolute',
     left: `${x}px`,
     top: `${y}px`

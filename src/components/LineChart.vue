@@ -11,7 +11,7 @@
       <ChartTooltip class="tooltip" v-bind="sceneTooltip" />
       <ChartTooltip class="tooltip" v-bind="hoveredSegmentTooltip" />
 
-      <Line :data="data" :options="options" ref="lineChart" :key="key" />
+      <Line :data="data" :options="options" ref="lineChart" :key="key" @mouseleave="handleMouseLeave"/>
     </div>
   </div>
 </template>
@@ -129,7 +129,7 @@ const options = ref({
   },
 });
 
-const { setLineChartData, updateHighlightOnly, selectionTooltip, sceneTooltip, hoveredSegmentTooltip, updateChart } = useLineChart(data, options, key, lineChart);
+const { setLineChartData, updateHighlightOnly, selectionTooltip, sceneTooltip, hoveredSegmentTooltip, updateChart, hideTooltips } = useLineChart(data, options, key, lineChart);
 
 
 const resetZoom = () => {
@@ -139,7 +139,10 @@ const resetZoom = () => {
   updateChart()
 });
  
-
+function handleMouseLeave() {
+  hideTooltips()
+  // Aquí puedes ocultar tooltips, deseleccionar, etc.
+}
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));

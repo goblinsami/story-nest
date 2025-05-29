@@ -9,11 +9,14 @@
 
   <article class="chartContainer" style="display: flex; width: 100%">
     <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
-      v-if="!store.textEditorIsDettached && store.textEditorPosition === 'left'">
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions['LEFT']">
       <TextEditor>
         <template #toolbar>
-          <button @click="moveToLeft">⏮️</button>
-          <button @click="moveToRight">⏭️</button>
+          <div class="d-flex justify-between">
+
+            <button @click="moveToLeft">⏮️</button>
+            <button @click="moveToRight">⏭️</button>
+          </div>
         </template>
 
       </TextEditor>
@@ -21,11 +24,13 @@
 
 
     <DragModal class="drag-modal" v-bind="dragModalSettings" v-if="store.textEditorIsDettached">
-
       <TextEditor>
         <template #toolbar>
-          <button @click="moveToLeft">⏮️</button>
-          <button @click="moveToRight">⏭️</button>
+          <div class="d-flex justify-between">
+
+            <button @click="moveToLeft">⏮️</button>
+            <button @click="moveToRight">⏭️</button>
+          </div>
         </template>
 
       </TextEditor>
@@ -33,21 +38,25 @@
 
     <!-- Resizer entre ambos -->
     <div class="resizer" @mousedown="startResize"
-      v-if="!store.textEditorIsDettached && store.textEditorPosition === 'left'"></div>
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions['LEFT']"></div>
 
     <div v-if="store.storyIsSet" class="app-chart-container" :class="{ expand: store.showPlotChart }"
       :style="{ width: `calc(100% - ${editorWidth}px - 6px)` }">
       <LineChart />
     </div>
-    <div class="resizer" @mousedown="startResize" v-if="!store.textEditorIsDettached && store.textEditorPosition === 'right'"></div>
+    <div class="resizer" @mousedown="startResize"
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions['RIGHT']"></div>
 
     <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
-      v-if="store.textEditorPosition === 'right'">
+      v-if="store.textEditorPosition === positions['RIGHT']">
 
       <TextEditor>
         <template #toolbar>
-          <button @click="moveToLeft">⏮️</button>
-          <button @click="moveToRight">⏭️</button>
+          <div class="d-flex justify-between">
+
+            <button @click="moveToLeft">⏮️</button>
+            <button @click="moveToRight">⏭️</button>
+          </div>
         </template>
 
       </TextEditor>
@@ -75,11 +84,13 @@ import Grid from "./components/Grid.vue";
 import Debugger from "./components/Debugger.vue";
 import DragModal from "./components/DragModal.vue";
 import 'vue-draggable-resizable/style.css';
-
 //import jsonStory from './constants/uav.json'
+import { positionsConstants } from "./constants/positions";
 
+const positions = computed(() => {
+  return positionsConstants();
+});
 const store = useSettingsStore();
-
 const showEditor = ref(false);
 const show = ref(false);
 const dragModalSettings = ref({

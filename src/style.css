@@ -25,7 +25,9 @@ body {
   font-family: "Courier New", Courier, monospace;
   overflow: hidden;
 }
-
+.w-100 {
+  width: 100%;
+}
 .color-sample {
   border: 1px black solid;
   width: 20px;
@@ -133,12 +135,12 @@ ul {
   list-style: none;
   padding: none;
 }
-textarea {
+/* textarea {
   height: auto;
   min-width: 100px;
   max-width: 480px;
   max-height: 300px;
-}
+} */
 
 #file-upload {
   display: none;
@@ -216,7 +218,15 @@ body.dark-mode .title {
   background: none;
 
 }
+body.dark-mode .title {
+  color: var(--color-light-text)!important;
+  background: none;
 
+}
+
+.plot-creator {
+  color: var(--color-light-text)!important;
+}
 
 body.dark-mode .card {
   background-color: var(--color-dark-bg);

@@ -4,7 +4,7 @@ import { CostResult } from '../interfaces/interfaces';
 import { maxRegisters } from "../constants/constants.json";
 import { v4 as uuidv4 } from 'uuid';
 
-export const initialEdidtorWidth = 350;
+export const initialEdidtorWidth = 450;
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     story: {},
@@ -34,6 +34,10 @@ export const useSettingsStore = defineStore('settings', {
     textEditorPosition: 'left',
     storyIsSet: false,
     editorWidth: initialEdidtorWidth,
+    isToolTipHidden: true,
+    editorSettings: {
+      showSettings: false,
+    },
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -215,13 +219,13 @@ export const useSettingsStore = defineStore('settings', {
     moveToLeft() {
       this.textEditorPosition = 'left';
       this.textEditorIsDettached = false; // Reset dettached state when moving to left
-        this.editorWidth = initialEdidtorWidth;
+      this.editorWidth = initialEdidtorWidth;
 
     },
     moveToRight() {
       this.textEditorPosition = 'right';
       this.textEditorIsDettached = false; // Reset dettached state when moving to left
-        this.editorWidth = initialEdidtorWidth;
+      this.editorWidth = initialEdidtorWidth;
     },
     processJSON(data) {
       //store.togglePlotChart();
@@ -319,7 +323,7 @@ export const useSettingsStore = defineStore('settings', {
     },
     consoleCustom(...args) {
       let arrow = '---------------------------------------'
-      //  console.log(arrow, '\n', ...args, '\n', arrow);
+      console.log(arrow, '\n', ...args, '\n', arrow);
     },
 
     //EDIT STORY

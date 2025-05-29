@@ -8,6 +8,10 @@ import Act from "./Act.vue";
 import CharacterCreator from "./CharacterCreator.vue";
 import FilterScenes from "./FilterScenes.vue";
 const draggable = VueDraggableNext;
+import { useLineChart } from "../composables/useLineChart";
+
+const { hideTooltips } = useLineChart(null, null, null, null);
+
 onMounted(() => {
   /* if (isCarousel) {
     toggleShowEditorSettings()
@@ -60,7 +64,8 @@ const newScene = ref({
 });
 
 const toggleShowEditorSettings = () => {
-  showEditorSettings.value = !showEditorSettings.value;
+  /* showEditorSettings.value = !showEditorSettings.value; */
+  store.editorSettings.showSettings = !store.editorSettings.showSettings;
 };
 
 const createScene = (position, act) => {
@@ -89,6 +94,10 @@ const handleShowPlotEditor = () => {
 
 const dettachWindow = () => {
   store.dettachWindow()
+};
+
+const handleMouseEnter = () => {
+  store.isToolTipHidden = false; // Oculta el tooltip al entrar al componente
 };
 const handleToggleCollapseActs = () => {
 
@@ -130,69 +139,73 @@ const buttonAdjustText = computed(() => {
 </script>
 
 <template>
-  <main class="acts-container">
-    <div class="settings-container" v-if="showEditorSettings && !isCarousel">
-      <div class="title-block">
-        <div>
-          <h1>
-            <input type="text" class="title" v-model="localData.title" maxlength="50" />
-          </h1>
-          <textarea type="textarea" class="sub-title" v-model="localData.description"></textarea>
-        </div>
+  <div  @mouseenter="handleMouseEnter">
 
-        <div class="d-flex settings">
-          <button @click="store.addAct()" class="addAct">
-            Añadir acto
-          </button>
-          <button @click="store.addNumeration()" class="addAct">
-            Numerar
-          </button>
-          <button @click="handleShowPlotEditor(), (showCharacterEditor = false)" class="addAct">
-            Tramas
-          </button>
-          <button @click="
-            (showCharacterEditor = !showCharacterEditor),
-            (showPlotEditor = false)
-            " class="addAct">
-            Personajes
-          </button>
-          <button @click="store.deleteStory()" class="addAct">
-            Borrar todo
-          </button>
-        </div>
-        <span v-if="localData.acts">{{ store.getScenesLength }}</span>
-      </div>
 
-      <div class="plot-block">
-        <PlotCreator v-if="showPlotEditor" />
-        <CharacterCreator v-if="showCharacterEditor" />
-      </div>
+    <div class="d-flex justify-between"
+      style="width: 100%; position: sticky; top: 0; z-index: 10; flex-direction: column; background-color: var(--color-dark-bg);">
+      <slot name="toolbar"> </slot>
+  
+      <button @click="dettachWindow()" class="act-btn"> Dettach </button>
+      <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="act-btn">{{ buttonAdjustText }}
+        ajustes</button>
+      <button @click="handleToggleCollapseActs()" class="act-btn">{{ buttonText }} Acts</button>
     </div>
-    <draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" handle=".drag-handle"
+    <main class="acts-container">
+  
+      <draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" handle=".drag-handle"
       class="acts-container2">
-      <div class="toolbar">
-        <div class="d-flex justify-between">
-          <slot name="toolbar"> </slot>
+      <div class="settings-container" v-if="store.editorSettings.showSettings && !isCarousel">
+        <div class="w-100">
+  
+          <textarea type="text" class="title" v-model="localData.title" maxlength="50" ></textarea>
+          <textarea type="textarea" class="sub-title title" v-model="localData.description"></textarea>
         </div>
-        <div class="d-flex justify-between">
-          <button @click="dettachWindow()" class="act-btn"> Dettach </button>
-          <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="act-btn">{{ buttonAdjustText }}
-            ajustes</button>
-          <button @click="handleToggleCollapseActs()" class="act-btn">{{ buttonText }} Acts</button>
-        </div>
+   
+  
+            <button @click="store.addAct()" class="addAct">
+              Añadir acto
+            </button>
+            <button @click="store.addNumeration()" class="addAct">
+              Numerar
+            </button>
+            <button @click="handleShowPlotEditor(), (showCharacterEditor = false)" class="addAct">
+              Tramas
+            </button>
+            <button @click="
+              (showCharacterEditor = !showCharacterEditor),
+              (showPlotEditor = false)
+              " class="addAct">
+              Personajes
+            </button>
+            <button @click="store.deleteStory()" class="addAct">
+              Borrar todo
+            </button>
+  
+          <PlotCreator v-if="showPlotEditor" class="plot-creator"/>
+          <CharacterCreator v-if="showCharacterEditor" />
+  
       </div>
-      <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
-      {{ act }}
-    </draggable>
-  </main>
+      <div class="toolbar">
+          <div class="d-flex justify-between">
+          </div>
+  
+        </div>
+        <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
+        {{ act }}
+      </draggable>
+    </main>
+  </div>
+
+  
 </template>
 <style>
-
 .toolbar {
-  background-color:  var(--color-dark-bg);
+  background-color: var(--color-dark-bg);
   opacity: 0.8;
   position: sticky;
 }
+
 .acts-container {
   /*  background-color: var(--color-dark-bg); */
 }
@@ -200,7 +213,8 @@ const buttonAdjustText = computed(() => {
 .acts-container2 {
   position: relative;
   width: inherit;
-  padding: 0 0.5rem}
+  padding: 0 0.5rem
+}
 
 .act-btn {
   height: 24px;
@@ -210,6 +224,8 @@ const buttonAdjustText = computed(() => {
 .title {
   font-size: 36px;
   font-weight: bold;
+  width: 100%;
+
 }
 
 .sub-title {
@@ -235,10 +251,11 @@ const buttonAdjustText = computed(() => {
 
 .settings-container {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
   flex-wrap: wrap;
-  padding-bottom: 2rem;
+  width: 100%;
+  justify-content: space-between;
+  background-color: var(--color-dark-bg);
+
 }
 
 .title-container {
@@ -256,6 +273,7 @@ const buttonAdjustText = computed(() => {
 }
 
 .acts-container {
+  z-index: 99999999999999999999999999999999000;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -263,7 +281,7 @@ const buttonAdjustText = computed(() => {
   /* overflow-y: scroll; */
   padding-bottom: 20rem;
   height: 100vh;
-  width: inherit;
+  width: 100%;
   /*     display: flex;
   flex-direction: column;
   overflow-y: scroll;
