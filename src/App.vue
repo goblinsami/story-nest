@@ -6,40 +6,56 @@
       <Navbar />
     </div>
   </div>
-  <Transition>
-    <p v-if="store.showCarousel">
-      <Carousel :initialSceneIndex="store.carouselSceneIndex" />
-    </p>
-  </Transition>
-  <Transition>
-    <p v-if="store.showGrid">
-      <Grid />
-    </p>
-  </Transition>
 
   <article class="chartContainer" style="display: flex; width: 100%">
-    <!-- <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }">
-      <TextEditor />
-    </div> -->
+    <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === 'left'">
+      <TextEditor>
+        <template #toolbar>
+          <button @click="moveToLeft">⏮️</button>
+          <button @click="moveToRight">⏭️</button>
+        </template>
+
+      </TextEditor>
+    </div>
+
+
+    <DragModal class="drag-modal" v-bind="dragModalSettings" v-if="store.textEditorIsDettached">
+
+      <TextEditor>
+        <template #toolbar>
+          <button @click="moveToLeft">⏮️</button>
+          <button @click="moveToRight">⏭️</button>
+        </template>
+
+      </TextEditor>
+    </DragModal>
 
     <!-- Resizer entre ambos -->
-    <div class="resizer" @mousedown="startResize"></div>
+    <div class="resizer" @mousedown="startResize"
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === 'left'"></div>
 
-    <div class="app-chart-container" :class="{ expand: store.showPlotChart }"
+    <div v-if="store.storyIsSet" class="app-chart-container" :class="{ expand: store.showPlotChart }"
       :style="{ width: `calc(100% - ${editorWidth}px - 6px)` }">
       <LineChart />
     </div>
+    <div class="resizer" @mousedown="startResize" v-if="!store.textEditorIsDettached && store.textEditorPosition === 'right'"></div>
+
+    <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
+      v-if="store.textEditorPosition === 'right'">
+
+      <TextEditor>
+        <template #toolbar>
+          <button @click="moveToLeft">⏮️</button>
+          <button @click="moveToRight">⏭️</button>
+        </template>
+
+      </TextEditor>
+    </div>
+
+
   </article>
-  <div v-if="store.showDebugger"
-    :style="{ color: 'black', backgroundColor: 'rgba(200,200,200,0.8)', position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px' }">
-    <p>selected scene:{{ store.selectedScene }}</p>
-    <p>{{ store.selectedScene === null }}</p>
-
-
-
-    <button @click="store.deselectCharacter()"></button>
-
-  </div>
+  <Debugger v-if="store.showDebugger" />
 
 
 </template>
@@ -47,7 +63,7 @@
 <script setup>
 import { nextTick } from "vue";
 
-import { ref, onMounted, reactive } from "vue";
+import { ref, onMounted, reactive, computed } from "vue";
 import jsonStory from "./constants/story.json";
 import TextEditor from "./components/TextEditor.vue";
 import LineChart from "./components/LineChart.vue";
@@ -56,29 +72,80 @@ import CollapseButtons from "./components/CollapseButtons.vue";
 import Navbar from "./components/Navbar.vue";
 import Carousel from "./components/Carousel.vue";
 import Grid from "./components/Grid.vue";
+import Debugger from "./components/Debugger.vue";
+import DragModal from "./components/DragModal.vue";
+import 'vue-draggable-resizable/style.css';
 
-import TComponent from "./components/TComponent.vue";
 //import jsonStory from './constants/uav.json'
 
 const store = useSettingsStore();
 
 const showEditor = ref(false);
 const show = ref(false);
-
+const dragModalSettings = ref({
+  w: 350,
+  h: 500,
+  x: 0,
+  y: 0,
+  maximixed: false,
+  minimized: false,
+});
 const editorRef = ref(null)
-const editorWidth = ref(800) // ancho inicial en px
+//const editorWidth = ref(350) // ancho inicial en px
 const isResizing = ref(false)
+let editorWidth = computed(() => {
+
+  return store.editorWidth
+});
+
+const moveToLeft = () => {
+  store.moveToLeft()
+};
+const moveToRight = () => {
+  store.moveToRight()
+
+};
+
+function minimizeModal() {
+  dragModalSettings.value.minimized = true;
+  dragModalSettings.value.maximized = false;
+
+  const padding = 20;
+  const modalWidth = 300;
+  const modalHeight = 100;
+
+  // Asumimos que el modal se posiciona en base a la ventana
+  const windowWidth = window.innerWidth;
+
+  dragModalSettings.value.w = modalWidth;
+  dragModalSettings.value.h = modalHeight;
+  dragModalSettings.value.x = windowWidth - modalWidth - padding;
+  dragModalSettings.value.y = padding;
+}
+function maximizeModal() {
+  dragModalSettings.value.maximized = true;
+  dragModalSettings.value.minimized = false;
+  dragModalSettings.value.x = 0;
+  dragModalSettings.value.y = 0;
+  dragModalSettings.value.w = window.innerWidth;
+  dragModalSettings.value.h = window.innerHeight;
+}
 
 const startResize = (e) => {
   isResizing.value = true
   document.addEventListener('mousemove', resize)
   document.addEventListener('mouseup', stopResize)
 }
-
 const resize = (e) => {
-  if (!isResizing.value) return
-  editorWidth.value = e.clientX
-}
+  if (!isResizing.value) return;
+
+  if (store.textEditorPosition === 'left') {
+    store.editorWidth = e.clientX;
+  } else if (store.textEditorPosition === 'right') {
+    const totalWidth = window.innerWidth;
+    store.editorWidth = totalWidth - e.clientX;
+  }
+};
 
 const stopResize = () => {
   isResizing.value = false
@@ -86,26 +153,33 @@ const stopResize = () => {
   document.removeEventListener('mouseup', stopResize)
 }
 
-const init = () => {
+const init = async () => {
   console.log('INIT')
-  store.toggleDarkMode();
-  store.updateStory(jsonStory);
-  store.addNumeration();
-  store.addColorToActs();
-  store.expandAllActs();
-  store.checkCharactersInScene();
-  store.toggleShowCarousel();
+  await store.toggleDarkMode();
+  await store.loadStory(jsonStory);
+  await store.addNumeration();
+  await store.addColorToActs();
+  await store.expandAllActs();
+  await store.checkCharactersInScene();
+  await store.toggleShowCarousel();
+  store.storyIsSet = true;
   store.carouselSceneIndex = 0;
 };
 
-onMounted(() => {
-  init()
+onMounted(async () => {
+  await init()
 });
 
 
 
 </script>
 <style>
+.drag-modal {
+  position: absolute;
+  z-index: 9000;
+
+}
+
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.1s linear

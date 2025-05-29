@@ -182,8 +182,8 @@ watch(
         <input focus type="text" class="scene-title" v-model="props.scene.title" v-else
           @input="emit('editScene', scene), store.checkCharactersInScene()" @click.stop />
       </h3>
-      <button v-if="!isSingleMode" class="soft-btn" v-show="isHovered" @click="store.goToCarouselVisualization(scene)"
-        @click.stop>🎥</button>
+<!--       <button v-if="!isSingleMode" class="soft-btn" v-show="isHovered" @click="store.goToCarouselVisualization(scene)"
+        @click.stop>🎥</button> -->
     </div>
     <div class="scene-content" :class="handleCollapse ? 'expand' : ''">
       <div class="debug left-box">
@@ -321,8 +321,8 @@ watch(
   flex-direction: column;
   justify-content: space-between;
   /*   margin: 0.5rem; */
-  width: auto;
-  min-width: 560px;
+  width: inherit;
+   min-width: 200px;
 }
 
 .right-box {
@@ -363,7 +363,7 @@ p {
   opacity: 1;
 }
 
-.sceneContainer {
+/* .sceneContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -373,9 +373,10 @@ p {
   max-width: 550px;
   padding: 0 1.5rem;
 }
-
+ */
 .input-description {
-  width: 500px;
+  width: auto;
+  min-width: 200px;
   position: absolute;
   top: 20%;
 

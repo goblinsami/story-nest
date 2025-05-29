@@ -4,7 +4,7 @@ import { CostResult } from '../interfaces/interfaces';
 import { maxRegisters } from "../constants/constants.json";
 import { v4 as uuidv4 } from 'uuid';
 
-
+export const initialEdidtorWidth = 350;
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     story: {},
@@ -20,9 +20,8 @@ export const useSettingsStore = defineStore('settings', {
     chartFontSize: 15,
     chartHeight: 80,
     chartwidtht: 80,
-    editorWidth: 45,
     carouselSceneIndex: 0,
-    showDebugger: false,
+    showDebugger: true,
     editSceneMode: false,
     darkMode: false,
     originalStory: {},
@@ -30,6 +29,11 @@ export const useSettingsStore = defineStore('settings', {
     selectedPlotIndex: null,
     selectedSegmentIndex: null,
     selectedScene: null,
+    showEditorTextModal: false,
+    textEditorIsDettached: false,
+    textEditorPosition: 'left',
+    storyIsSet: false,
+    editorWidth: initialEdidtorWidth,
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -199,9 +203,29 @@ export const useSettingsStore = defineStore('settings', {
         console.error("Por favor selecciona un archivo JSON válido.");
       }
     },
+    dettachWindow() {
+      console.log('dettachWindow', this.textEditorIsDettached)
+      this.textEditorIsDettached = !this.textEditorIsDettached
+      if (this.textEditorIsDettached) {
+        this.editorWidth = 0;
+      } else {
+        this.editorWidth = initialEdidtorWidth;
+      }
+    },
+    moveToLeft() {
+      this.textEditorPosition = 'left';
+      this.textEditorIsDettached = false; // Reset dettached state when moving to left
+        this.editorWidth = initialEdidtorWidth;
+
+    },
+    moveToRight() {
+      this.textEditorPosition = 'right';
+      this.textEditorIsDettached = false; // Reset dettached state when moving to left
+        this.editorWidth = initialEdidtorWidth;
+    },
     processJSON(data) {
       //store.togglePlotChart();
-      this.updateStory(data);
+      this.loadStory(data);
       this.addColorToActs();
       //store.togglePlotChart();
     },
@@ -293,9 +317,14 @@ export const useSettingsStore = defineStore('settings', {
       console.log(selectedPalette)
       this.addColorToActs(selectedPalette)
     },
+    consoleCustom(...args) {
+      let arrow = '---------------------------------------'
+      //  console.log(arrow, '\n', ...args, '\n', arrow);
+    },
 
     //EDIT STORY
-    updateStory(story) {
+    loadStory(story) {
+      this.consoleCustom('1. loadStory', story)
       this.story = story
     },
 
@@ -364,6 +393,8 @@ export const useSettingsStore = defineStore('settings', {
 
     },
     addColorToActs(selectedPalette = 0) {
+      this.consoleCustom('3. addColorToActs', selectedPalette)
+
       // Aquí puedes definir una lista de colores o asignarlos de forma dinámica.
       this.story.acts.forEach((act, index) => {
         // Asignar un color desde la lista o generar uno dinámico
@@ -417,6 +448,8 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     checkCharactersInScene() {
+      this.consoleCustom('4. checkCharactersInScene')
+
       // Itera sobre cada acto
       this.story.acts.forEach((act) => {
         // Itera sobre cada escena dentro del acto
@@ -658,6 +691,7 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     expandAllScenesInAllActs() {
+      console.log('expandAllScenesInAllActs', this.story.acts)
       {
         this.story.acts.forEach((act) => {
           act.scenes.forEach((scene) => {
@@ -692,6 +726,7 @@ export const useSettingsStore = defineStore('settings', {
 
     //EDIT SCENES
     addNumeration() {
+      this.consoleCustom('2. addNumeration')
       let sceneNumber = 1; // Inicializa el número de escena
       this.story.acts.forEach((act, actIndex) => {
         act.scenes.forEach((scene, sceneIndex) => {

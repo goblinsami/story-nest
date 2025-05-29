@@ -21,7 +21,7 @@ const acts = computed(() => {
 });
 
 onMounted(() => {
-      store.expandAllScenesInAllActs();
+    //  store.expandAllScenesInAllActs();
 });
 
 const goToNextScene = () => {
@@ -69,6 +69,7 @@ watch(
                         v-if="sceneIndex < store.getAllScenes.length - 1" />
             </div>
             <div :style="{ width: `calc(100%)` }">
+                  hh
                   <LineChart />
             </div>
 <!--             <div class="d-flex">

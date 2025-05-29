@@ -80,11 +80,15 @@ const onStart = () => {
 // Función que se ejecuta cuando termina el arrastre
 const onEnd = () => {
   dragging.value = false;
-  store.updateStory(localData.value);
+  store.loadStory(localData.value);
 };
 
 const handleShowPlotEditor = () => {
   showPlotEditor.value = !showPlotEditor.value;
+};
+
+const dettachWindow = () => {
+  store.dettachWindow()
 };
 const handleToggleCollapseActs = () => {
 
@@ -95,83 +99,109 @@ const handleToggleCollapseActs = () => {
     store.contractAllActs();
   }
 };
+onMounted(() => {
+  // Cargar los datos locales al montar el componente
+  if (store.storyIsSet) {
+    localData.value = store.story;
+  }
+});
 watch(
   () => store.story, // Observa cambios en los actos de la historia
   () => {
     localData.value = store.story;
   },
-  { immediate: true },
+  { immediate: false },
   { deep: true } // Ejecutar inmediatamente si ya hay datos
 );
-watch(
+/*  watch(
   () => localData.value, // Observa cambios en localData
   (newData) => {
-    store.updateStory(newData); // Actualiza el store cada vez que hay un cambio
+    store.loadStory(newData); // Actualiza el store cada vez que hay un cambio
   },
   { deep: true } // Necesitas deep para observar objetos anidados
-);
+);   */
 const buttonText = computed(() => {
   return expandAllActs.value ? "Collapse" : "Expand";
+});
+
+const buttonAdjustText = computed(() => {
+  return showEditorSettings.value ? "Hide" : "Show";
 });
 </script>
 
 <template>
-  <main>
-    <article>
-      <!--       <FilterScenes /> -->
-      <div class="title-container">
-        <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="padding: 1rem">Ocultar ajustes</button>
-      </div>
-
-      <div class="settings-container" v-if="showEditorSettings && !isCarousel">
-        <div class="title-block">
-          <div>
-            <h1>
-              <input type="text" class="title" v-model="localData.title" maxlength="50" />
-            </h1>
-            <textarea type="textarea" class="sub-title" v-model="localData.description"></textarea>
-          </div>
-
-          <div class="d-flex settings">
-            <button @click="store.addAct()" class="addAct">
-              Añadir acto
-            </button>
-            <button @click="store.addNumeration()" class="addAct">
-              Numerar
-            </button>
-            <button @click="handleShowPlotEditor(), (showCharacterEditor = false)" class="addAct">
-              Tramas
-            </button>
-            <button @click="
-              (showCharacterEditor = !showCharacterEditor),
-              (showPlotEditor = false)
-              " class="addAct">
-              Personajes
-            </button>
-            <button @click="store.deleteStory()" class="addAct">
-              Borrar todo
-            </button>
-          </div>
-          <span v-if="localData.acts">{{ store.getScenesLength }}</span>
+  <main class="acts-container">
+    <div class="settings-container" v-if="showEditorSettings && !isCarousel">
+      <div class="title-block">
+        <div>
+          <h1>
+            <input type="text" class="title" v-model="localData.title" maxlength="50" />
+          </h1>
+          <textarea type="textarea" class="sub-title" v-model="localData.description"></textarea>
         </div>
 
-        <div class="plot-block">
-          <PlotCreator v-if="showPlotEditor" />
-          <CharacterCreator v-if="showCharacterEditor" />
+        <div class="d-flex settings">
+          <button @click="store.addAct()" class="addAct">
+            Añadir acto
+          </button>
+          <button @click="store.addNumeration()" class="addAct">
+            Numerar
+          </button>
+          <button @click="handleShowPlotEditor(), (showCharacterEditor = false)" class="addAct">
+            Tramas
+          </button>
+          <button @click="
+            (showCharacterEditor = !showCharacterEditor),
+            (showPlotEditor = false)
+            " class="addAct">
+            Personajes
+          </button>
+          <button @click="store.deleteStory()" class="addAct">
+            Borrar todo
+          </button>
         </div>
+        <span v-if="localData.acts">{{ store.getScenesLength }}</span>
       </div>
 
-      <button @click="handleToggleCollapseActs()" class="act-btn">{{ buttonText }} Acts</button>
-      <div class="">
-        <draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" handle=".drag-handle">
-          <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
-          {{ act }}
-        </draggable>
+      <div class="plot-block">
+        <PlotCreator v-if="showPlotEditor" />
+        <CharacterCreator v-if="showCharacterEditor" />
       </div>
-    </article>
+    </div>
+    <draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" handle=".drag-handle"
+      class="acts-container2">
+      <div class="toolbar">
+        <div class="d-flex justify-between">
+          <slot name="toolbar"> </slot>
+        </div>
+        <div class="d-flex justify-between">
+          <button @click="dettachWindow()" class="act-btn"> Dettach </button>
+          <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="act-btn">{{ buttonAdjustText }}
+            ajustes</button>
+          <button @click="handleToggleCollapseActs()" class="act-btn">{{ buttonText }} Acts</button>
+        </div>
+      </div>
+      <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
+      {{ act }}
+    </draggable>
   </main>
 </template>
 <style>
+
+.toolbar {
+  background-color:  var(--color-dark-bg);
+  opacity: 0.8;
+  position: sticky;
+}
+.acts-container {
+  /*  background-color: var(--color-dark-bg); */
+}
+
+.acts-container2 {
+  position: relative;
+  width: inherit;
+  padding: 0 0.5rem}
+
 .act-btn {
   height: 24px;
   padding: 0 8px;
@@ -230,9 +260,10 @@ const buttonText = computed(() => {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-evenly;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
   padding-bottom: 20rem;
   height: 100vh;
+  width: inherit;
   /*     display: flex;
   flex-direction: column;
   overflow-y: scroll;

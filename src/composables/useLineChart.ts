@@ -33,14 +33,14 @@ export function useLineChart(data, options, key, lineChart) {
     const maxX = window.innerWidth - tooltipWidth - margin;
     return Math.min(x, maxX);
   }
-  
+
   function showSelectionTooltip(x, y, type, data) {
     const chart = lineChart.value?.chart;
     if (!chart) return;
     const rect = chart.canvas.getBoundingClientRect();
-  
+
     const adjustedX = clampXToViewport(x + rect.left);
-  
+
     selectionTooltip.value = {
       visible: true,
       x: adjustedX,
@@ -49,19 +49,23 @@ export function useLineChart(data, options, key, lineChart) {
       data
     };
   }
-  
+
 
   const updateChart = () => {
-    // console.log("Updating chart");
+    
     const chartInstance = lineChart.value?.chart;
+    store.consoleCustom('6 updateChart', chartInstance)
     if (chartInstance && typeof chartInstance.update === 'function') {
       chartInstance.update();
+    } else {
+      key.value ++
     }
   };
   const setLineChartData = () => {
-    console.log("Setting line chart data");
+    store.consoleCustom('5 setLineChartData', lineChart.value?.chart);
+
     if (!store.story?.acts) return;
-  
+
     const scenes = [];
     const { segments, labels } = createSegments(scenes); // ← AHORA retornas dos cosas
     const plotData = buildPlotData();
@@ -70,7 +74,7 @@ export function useLineChart(data, options, key, lineChart) {
     const characterAnnotations = buildCharacterAnnotations(store.selectedCharacter);
     const actLabelAnnotations = buildActLabelAnnotations(); // puedes optar por eliminar este si te quedas con los de createSegments
     const highlightSceneAnnotation = createHighlightAnnotation();
-  
+
     data.value.datasets = datasets;
     data.value.labels = labelsX;
     const annotations = options.value.plugins.annotation.annotations;
@@ -78,24 +82,27 @@ export function useLineChart(data, options, key, lineChart) {
     const segmentEntries = Object.fromEntries(segments.map(s => [s.id, s]));
     const labelEntries = Object.fromEntries(labels.map(l => [l.id, l]));
 
-  
+
     options.value.plugins.annotation.annotations = {
       ...segmentEntries,
       ...characterAnnotations,
       ...labelEntries,
       highlightScene: highlightSceneAnnotation
     };
-  
+
     configureAxisStyles();
     configureEvents(characterAnnotations);
-    updateChart();
-  };
-  
-  const updateHighlightOnly = (sceneIndex) => {
-   const annotations = options.value.plugins.annotation.annotations;
-   const scenes = [];
+  //  updateChart();
 
-   const { segments, labels } = createSegments(scenes); // ← AHORA retornas dos cosas
+        store.consoleCustom('5-after setLineChartData', lineChart.value?.chart);
+
+  };
+
+  const updateHighlightOnly = (sceneIndex) => {
+    const annotations = options.value.plugins.annotation.annotations;
+    const scenes = [];
+
+    const { segments, labels } = createSegments(scenes); // ← AHORA retornas dos cosas
 
     const characterAnnotations = buildCharacterAnnotations(store.selectedCharacter);
     const segmentEntries = Object.fromEntries(segments.map(s => [s.id, s]));
@@ -104,24 +111,25 @@ export function useLineChart(data, options, key, lineChart) {
 
 
     const current = options.value.plugins.annotation.annotations;
-options.value.plugins.annotation.annotations = {
-  ...current,
-  ...characterAnnotations,
-  highlightScene: createHighlightAnnotation(sceneIndex),
-
-};
-
-/*     options.value.plugins.annotation.annotations = {
+    options.value.plugins.annotation.annotations = {
+      ...current,
       ...characterAnnotations,
-      ...labelEntries,
       highlightScene: createHighlightAnnotation(sceneIndex),
-    }; */
- 
-    updateChart();
+
+    };
+
+    /*     options.value.plugins.annotation.annotations = {
+          ...characterAnnotations,
+          ...labelEntries,
+          highlightScene: createHighlightAnnotation(sceneIndex),
+        }; */
+
+ //   updateChart();
   };
 
   function buildCharacterAnnotations(highlightedTitle) {
     const annotations = {};
+    store.consoleCustom('5-4 buildCharacterAnnotations', highlightedTitle);
     let currentSceneIndex = 0;
 
     store.story.acts.forEach(act =>
@@ -153,6 +161,7 @@ options.value.plugins.annotation.annotations = {
     return annotations;
   }
   function buildActLabelAnnotations() {
+    store.consoleCustom('5-5 buildActLabelAnnotations');
     const annotations = {};
     let index = 0;
 
@@ -181,6 +190,7 @@ options.value.plugins.annotation.annotations = {
       index += actLength;
     });
 
+
     return annotations;
   }
 
@@ -196,7 +206,7 @@ options.value.plugins.annotation.annotations = {
       ds.borderWidth = selected ? 4 : 2;
     });
 
-    updateChart();
+ //   updateChart();
   };
 
   const resetPlotColors = () => {
@@ -210,7 +220,7 @@ options.value.plugins.annotation.annotations = {
       ds.borderWidth = 2;
     });
 
-    updateChart();
+ //   updateChart();
   };
 
   function configureEvents(characterAnnotations) {
@@ -395,32 +405,32 @@ options.value.plugins.annotation.annotations = {
       updateChart();
     }
 
-/*     // Mostrar tooltip después de 1s
-    if (hoveredIndex !== null) {
-      clearTimeout(segmentHoverTimer);
-      segmentHoverTimer = setTimeout(() => {
-        const act = store.story.acts[hoveredIndex];
-        const xStart = store.story.acts.slice(0, hoveredIndex).reduce((acc, a) => acc + a.scenes.length, 0);
-
-        const px = chart.scales.x.getPixelForValue(xStart);
-        const rect = chart.canvas.getBoundingClientRect();
-
-        hoveredSegmentTooltip.value = {
-          visible: true,
-          x: px + rect.left,
-          y: rect.top + 10, // Fijo arriba del gráfico
-          data: {
-            title: act.title,
-            color: act.color,
-            sceneCount: act.scenes.length
-          }
-        };
-      }, 1000);
-
-    } else {
-      clearTimeout(segmentHoverTimer);
-      hoveredSegmentTooltip.value.visible = false;
-    } */
+    /*     // Mostrar tooltip después de 1s
+        if (hoveredIndex !== null) {
+          clearTimeout(segmentHoverTimer);
+          segmentHoverTimer = setTimeout(() => {
+            const act = store.story.acts[hoveredIndex];
+            const xStart = store.story.acts.slice(0, hoveredIndex).reduce((acc, a) => acc + a.scenes.length, 0);
+    
+            const px = chart.scales.x.getPixelForValue(xStart);
+            const rect = chart.canvas.getBoundingClientRect();
+    
+            hoveredSegmentTooltip.value = {
+              visible: true,
+              x: px + rect.left,
+              y: rect.top + 10, // Fijo arriba del gráfico
+              data: {
+                title: act.title,
+                color: act.color,
+                sceneCount: act.scenes.length
+              }
+            };
+          }, 1000);
+    
+        } else {
+          clearTimeout(segmentHoverTimer);
+          hoveredSegmentTooltip.value.visible = false;
+        } */
   }
 
   const lightenHexColor = (hex, amount = 80) => {
@@ -433,13 +443,14 @@ options.value.plugins.annotation.annotations = {
 
   function createSegments(scenes) {
     const segments = [];
+    store.consoleCustom('5-1 createSegments// change in acts', )
     const labels = [];
     let index = 0;
-  
+
     store.story.acts.forEach((act, i) => {
       const len = act.scenes.length;
       const isSelected = store.selectedSegmentIndex === i;
-  
+
       segments.push({
         id: `segment_${i}`,
         xMin: index,
@@ -449,7 +460,7 @@ options.value.plugins.annotation.annotations = {
         type: "box",
         drawTime: 'beforeDatasetsDraw'
       });
-  
+
       labels.push({
         id: `label_act_${i}`,
         type: 'label',
@@ -465,16 +476,16 @@ options.value.plugins.annotation.annotations = {
         drawTime: 'afterDatasetsDraw',
         z: 1000,
       });
-  
+
       act.scenes.forEach(scene => {
         scenes.push({ title: scene.title, act: act.title });
         index++;
       });
     });
-  
+
     return { segments, labels };
   }
-  
+
 
 
   function buildPlotData() {
@@ -502,6 +513,8 @@ options.value.plugins.annotation.annotations = {
   }
 
   function buildDatasets(plotData) {
+    store.consoleCustom('5-2 buildDatasets');
+    console.log("Plot data:", plotData);
     return store.story.plots.map((plot, i) => {
       const base = store.plotColorsHard[i] || "#999999";
       const selected = store.selectedPlotIndex === i;
@@ -519,7 +532,20 @@ options.value.plugins.annotation.annotations = {
   }
 
   function createLabels(scenes) {
+    store.consoleCustom('5-3 createLabels', lineChart.value?.chart);
+    console.log("Creating labels for scenes:",  lineChart.value?.chart.data.labels[0] , );
+
+    console.log(lineChart.value?.chart, "2- lineChart.value?.chart")
+    key.value ++
+
+    if (lineChart.value?.chart) {
+
+        
+      //lineChart.value?.chart.update()
+    }
+    
     const truncate = str => str.length > 20 ? str.slice(0, 20) + '...' : str;
+     // updateChart();
     return scenes.map((scene, i) => `${i + 1} - ${truncate(scene.title)}`);
   }
 
@@ -550,6 +576,7 @@ options.value.plugins.annotation.annotations = {
   }
 
   function createHighlightAnnotation(index = store.carouselSceneIndex ?? 0) {
+    store.consoleCustom('5-6 createHighlightAnnotation', index,  lineChart.value?.chart);
     return {
       type: 'line',
       scaleID: 'x',
@@ -616,6 +643,7 @@ options.value.plugins.annotation.annotations = {
     updateHighlightOnly,
     selectionTooltip,
     sceneTooltip,
-    hoveredSegmentTooltip
+    hoveredSegmentTooltip,
+    updateChart
   };
 }
