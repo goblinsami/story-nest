@@ -125,9 +125,9 @@ const startResize = (e) => {
 const resize = (e) => {
   if (!isResizing.value) return;
 
-  if (store.textEditorPosition === 'left') {
+  if (store.textEditorPosition === positions['LEFT']) {
     store.editorWidth = e.clientX;
-  } else if (store.textEditorPosition === 'right') {
+  } else if (store.textEditorPosition === positions['RIGHT']) {
     const totalWidth = window.innerWidth;
     store.editorWidth = totalWidth - e.clientX;
   }

@@ -3,7 +3,12 @@ import { defineStore } from 'pinia';
 import { CostResult } from '../interfaces/interfaces';
 import { maxRegisters } from "../constants/constants.json";
 import { v4 as uuidv4 } from 'uuid';
+import { positionsConstants } from "../constants/positions";
+import {  computed } from "vue";
 
+const positions = computed(() => {
+  return positionsConstants();
+});
 export const initialEdidtorWidth = 450;
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
@@ -217,13 +222,13 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
     moveToLeft() {
-      this.textEditorPosition = 'left';
+      this.textEditorPosition = positions['LEFT'];
       this.textEditorIsDettached = false; // Reset dettached state when moving to left
       this.editorWidth = initialEdidtorWidth;
 
     },
     moveToRight() {
-      this.textEditorPosition = 'right';
+      this.textEditorPosition = positions['RIGHT'];
       this.textEditorIsDettached = false; // Reset dettached state when moving to left
       this.editorWidth = initialEdidtorWidth;
     },
