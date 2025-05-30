@@ -7,7 +7,7 @@ const props = defineProps({
   x: Number,
   y: Number,
   type: String,
-  data: Object,
+  data: Object | String,
   expand: Boolean
 });
 </script>

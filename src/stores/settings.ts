@@ -21,7 +21,7 @@ export const useSettingsStore = defineStore('settings', {
     chartHeight: 80,
     chartwidtht: 80,
     carouselSceneIndex: 0,
-    showDebugger: true,
+    showDebugger: false,
     editSceneMode: false,
     darkMode: false,
     originalStory: {},
@@ -323,7 +323,7 @@ export const useSettingsStore = defineStore('settings', {
     },
     consoleCustom(...args) {
       let arrow = '---------------------------------------'
-      console.log(arrow, '\n', ...args, '\n', arrow);
+     // console.log(arrow, '\n', ...args, '\n', arrow);
     },
 
     //EDIT STORY
@@ -569,28 +569,28 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     goToCarouselVisualizationDirectly(index, toggle = true) {
-      this.carouselSceneIndex = index;
+/*       this.carouselSceneIndex = index;
 
       if (toggle === true && !this.showCarousel) {
         this.toggleShowCarousel()
       }
-
+ */
     },
 
     goToCarouselVisualization(scene, isSingleMode) {
-      const allScenes = this.getAllScenes; // Use the getter to retrieve all scenes
+   /*    const allScenes = this.getAllScenes; */ // Use the getter to retrieve all scenes
 
       //   console.log('*******************')
       //   console.log(scene.actIndex, scene.sceneIndex)
 
-      const sceneToView = this.story.acts[scene.actIndex].scenes[scene.sceneIndex]; // Get the specific scene
+/*       const sceneToView = this.story.acts[scene.actIndex].scenes[scene.sceneIndex]; // Get the specific scene
       const sceneIndexInAllScenes = allScenes.findIndex(s => s.id === sceneToView.id); // Find the index of the scene in all scenes
 
       this.carouselSceneIndex = sceneIndexInAllScenes; // Update the carousel index
       if (!isSingleMode) {
 
         this.toggleShowCarousel()
-      }
+      } */
     },
 
     deletePlotsfromScene(scene) {

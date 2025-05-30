@@ -20,7 +20,6 @@ const createScene = (position, act) => {
 <template>
   <div class="scene-creator card create-scene" id="createScene">
       <table>
-        <tr>
           <td>
             + -
             <input
@@ -38,7 +37,6 @@ const createScene = (position, act) => {
               <button @click="createScene('down', act)">&#8595</button>
             </div>
           </td>
-        </tr>
       </table>
     </div>
 </template>

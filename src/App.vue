@@ -3,6 +3,7 @@
     <div class="header d-flex items-center">
       <h1>Story Nest </h1>
       <small>v 1.2</small>
+      <h5><strong>{{ store.story.title }}</strong></h5>
       <Navbar />
     </div>
   </div>
@@ -10,30 +11,12 @@
   <article class="chartContainer" style="display: flex; width: 100%">
     <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
       v-if="!store.textEditorIsDettached && store.textEditorPosition === positions['LEFT']">
-      <TextEditor>
-        <template #toolbar>
-          <div class="d-flex justify-between">
-
-            <button @click="moveToLeft">⏮️</button>
-            <button @click="moveToRight">⏭️</button>
-          </div>
-        </template>
-
-      </TextEditor>
+      <TextEditor/>
     </div>
 
 
     <DragModal class="drag-modal" v-bind="dragModalSettings" v-if="store.textEditorIsDettached">
-      <TextEditor>
-        <template #toolbar>
-          <div class="d-flex justify-between">
-
-            <button @click="moveToLeft">⏮️</button>
-            <button @click="moveToRight">⏭️</button>
-          </div>
-        </template>
-
-      </TextEditor>
+      <TextEditor/>
     </DragModal>
 
     <!-- Resizer entre ambos -->
@@ -50,16 +33,8 @@
     <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
       v-if="store.textEditorPosition === positions['RIGHT']">
 
-      <TextEditor>
-        <template #toolbar>
-          <div class="d-flex justify-between">
+      <TextEditor/>
 
-            <button @click="moveToLeft">⏮️</button>
-            <button @click="moveToRight">⏭️</button>
-          </div>
-        </template>
-
-      </TextEditor>
     </div>
 
 

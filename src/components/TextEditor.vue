@@ -2,23 +2,16 @@
 import { useSettingsStore } from "../stores/settings";
 import { VueDraggableNext } from "vue-draggable-next";
 import { ref, watch, onMounted, computed } from "vue";
-import SceneCreator from "./SceneCreator.vue";
 import PlotCreator from "./PlotCreator.vue";
 import Act from "./Act.vue";
 import CharacterCreator from "./CharacterCreator.vue";
 import FilterScenes from "./FilterScenes.vue";
 const draggable = VueDraggableNext;
 import { useLineChart } from "../composables/useLineChart";
-
+import EditorSettings from "./EditorSettings.vue";
 const { hideTooltips } = useLineChart(null, null, null, null);
 
-onMounted(() => {
-  /* if (isCarousel) {
-    toggleShowEditorSettings()
-  
-  }
-   */
-});
+
 const props = defineProps({
   mode: {
     required: false,
@@ -36,32 +29,8 @@ const showPlotEditor = ref(false);
 const showCharacterEditor = ref(false);
 const expandAllActs = ref(true);
 
-const menuVisible = ref(false); // Controla la visibilidad del menú
-const menuX = ref(0); // Coordenada X donde aparecerá el menú
-const menuY = ref(0); // Coordenada Y donde aparecerá el menú
 
-// Mostrar el menú en la posición del clic derecho
-const showMenu = (event) => {
-  menuVisible.value = true;
-  menuX.value = event.clientX;
-  menuY.value = event.clientY;
-};
 
-// Ocultar el menú
-const hideMenu = () => {
-  menuVisible.value = false;
-};
-
-// Manejar la opción seleccionada
-const handleOption = (option) => {
-  console.log("Seleccionaste:", option);
-  hideMenu(); // Ocultar el menú después de seleccionar
-};
-
-const newScene = ref({
-  title: "Añade nueva escena",
-  description: "Nueva escena",
-});
 
 const toggleShowEditorSettings = () => {
   /* showEditorSettings.value = !showEditorSettings.value; */
@@ -85,6 +54,7 @@ const onStart = () => {
 // Función que se ejecuta cuando termina el arrastre
 const onEnd = () => {
   dragging.value = false;
+  console.log(localData.value);
   store.loadStory(localData.value);
 };
 
@@ -139,65 +109,36 @@ const buttonAdjustText = computed(() => {
 </script>
 
 <template>
-  <div  @mouseenter="handleMouseEnter">
+  <div @mouseenter="handleMouseEnter">
 
 
     <div class="d-flex justify-between"
       style="width: 100%; position: sticky; top: 0; z-index: 10; flex-direction: column; background-color: var(--color-dark-bg);">
-      <slot name="toolbar"> </slot>
-  
+      <!-- <slot name="toolbar"> </slot> -->
+      <div class="d-flex justify-between">
+        
+        <button @click="store.moveToLeft">⏮️</button>
+        <button @click="store.moveToRight">⏭️</button>
+      </div>
+
       <button @click="dettachWindow()" class="act-btn"> Dettach </button>
       <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="act-btn">{{ buttonAdjustText }}
         ajustes</button>
       <button @click="handleToggleCollapseActs()" class="act-btn">{{ buttonText }} Acts</button>
     </div>
     <main class="acts-container">
-  
+
+<EditorSettings v-model="localData" :show="store.editorSettings.showSettings" />
+
       <draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" handle=".drag-handle"
-      class="acts-container2">
-      <div class="settings-container" v-if="store.editorSettings.showSettings && !isCarousel">
-        <div class="w-100">
-  
-          <textarea type="text" class="title" v-model="localData.title" maxlength="50" ></textarea>
-          <textarea type="textarea" class="sub-title title" v-model="localData.description"></textarea>
-        </div>
-   
-  
-            <button @click="store.addAct()" class="addAct">
-              Añadir acto
-            </button>
-            <button @click="store.addNumeration()" class="addAct">
-              Numerar
-            </button>
-            <button @click="handleShowPlotEditor(), (showCharacterEditor = false)" class="addAct">
-              Tramas
-            </button>
-            <button @click="
-              (showCharacterEditor = !showCharacterEditor),
-              (showPlotEditor = false)
-              " class="addAct">
-              Personajes
-            </button>
-            <button @click="store.deleteStory()" class="addAct">
-              Borrar todo
-            </button>
-  
-          <PlotCreator v-if="showPlotEditor" class="plot-creator"/>
-          <CharacterCreator v-if="showCharacterEditor" />
-  
-      </div>
-      <div class="toolbar">
-          <div class="d-flex justify-between">
-          </div>
-  
-        </div>
+        class="acts-container2">
+
         <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
-        {{ act }}
       </draggable>
     </main>
   </div>
 
-  
+
 </template>
 <style>
 .toolbar {

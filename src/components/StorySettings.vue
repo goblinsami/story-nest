@@ -1,7 +1,6 @@
 <script setup >
 import { ref, computed } from 'vue';
 import { useSettingsStore } from '../stores/settings';
-import SceneCreator from './SceneCreator.vue';
 import PlotCreator from './PlotCreator.vue';
 const showEditorSettings = ref(false);
 

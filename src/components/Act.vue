@@ -2,7 +2,6 @@
 import { useSettingsStore } from "../stores/settings";
 import { VueDraggableNext } from "vue-draggable-next";
 import { computed, ref, watch } from "vue";
-import SceneCreator from "./SceneCreator.vue";
 import PlotCreator from "./PlotCreator.vue";
 import Scene from "./Scene.vue";
 import CollapseButtons from "./CollapseButtons.vue";
@@ -69,7 +68,7 @@ watch(
       <div class="d-flex justify-between act-tag">
         <button class="drag-handle">Drag</button>
         <button class="drag-handle" @click="store.collapseAct(props.actIndex)">{{ collapseActText }} Act</button>
-        <button @click="handleToggleCollapse(actIndex)" :style="{ visibility: props.act.collapsed ? 'visible' : 'hidden' }">{{ buttonText }} All Scenes</button>
+        <button @click="handleToggleCollapse(actIndex)" :style="{ visibility: act.collapsed ? 'visible' : 'hidden' }">{{ buttonText }} All Scenes</button>
 
         <button @click="store.deleteAct(props.actIndex)" class="deleteAct">
           X
@@ -83,7 +82,6 @@ watch(
         </h2>
       </div>
     </div>
-    <!--       <SceneCreator :act="act" class="card"/> -->
     <div class="act-content" :class="handleCollapse ? 'expand' : ''">
       <draggable v-model="act.scenes" @start="onStart" @end="onEnd" group="scenes" handle=".drag-scene-handle">
         <Scene v-for="(scene, sceneIndex) in act.scenes" :scene="scene" :sceneIndex="sceneIndex"

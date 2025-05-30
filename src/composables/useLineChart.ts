@@ -105,33 +105,25 @@ export function useLineChart(data, options, key, lineChart) {
 
   const updateHighlightOnly = (sceneIndex) => {
     store.isToolTipHidden = true;
+
     const annotations = options.value.plugins.annotation.annotations;
-    const scenes = [];
 
-    const { segments, labels } = createSegments(scenes); // ← AHORA retornas dos cosas
-
+    // ⚠️ Regeneramos los puntos de personaje con el seleccionado actual
     const characterAnnotations = buildCharacterAnnotations(store.selectedCharacter);
-    const segmentEntries = Object.fromEntries(segments.map(s => [s.id, s]));
-    const labelEntries = Object.fromEntries(labels.map(l => [l.id, l]));
 
+    // Solo reemplazamos los que empiezan por "char_" (puntos de personaje)
+    const filtered = Object.fromEntries(
+      Object.entries(annotations).filter(([k]) => !k.startsWith("char_") && k !== "highlightScene")
+    );
 
-
-    const current = options.value.plugins.annotation.annotations;
     options.value.plugins.annotation.annotations = {
-      ...current,
+      ...filtered,
       ...characterAnnotations,
       highlightScene: createHighlightAnnotation(sceneIndex),
-
     };
 
-    /*     options.value.plugins.annotation.annotations = {
-          ...characterAnnotations,
-          ...labelEntries,
-          highlightScene: createHighlightAnnotation(sceneIndex),
-        }; */
-
-    //   updateChart();
-  };
+    updateChart();
+  }
 
   function buildCharacterAnnotations(highlightedTitle) {
     const annotations = {};
@@ -237,59 +229,57 @@ export function useLineChart(data, options, key, lineChart) {
       handleEmptyClick(event, chart);
     };
 
-options.value.onHover = (event, elements, chart) => {
-  const x = event.x;
-  const y = event.y;
-  const xScale = chart.scales.x;
-  const sceneIndex = Math.round(xScale.getValueForPixel(x));
+    options.value.onHover = (event, elements, chart) => {
+      const x = event.x;
+      const y = event.y;
+      const xScale = chart.scales.x;
+      const sceneIndex = Math.round(xScale.getValueForPixel(x));
 
-  handleSegmentHover(event, chart);
+      // Mostrar la línea de escena actual
+      updateHighlightOnly(sceneIndex);
 
-  // 👇 Detectar si el mouse está sobre un punto de personaje
-  const isOverCharacterPoint = Object.entries(chart.options.plugins.annotation.annotations || {})
-    .some(([key, ann]) => {
-      if (ann.type !== 'point') return false;
-      const px = chart.scales.x.getPixelForValue(ann.xValue);
-      const py = chart.scales.y.getPixelForValue(ann.yValue);
-      const dist = Math.hypot(x - px, y - py);
-      return dist <= (ann.radius || 5) + 5;
-    });
+      // Cambiar cursor si estamos sobre punto o línea
+      const isOverCharacterPoint = Object.entries(chart.options.plugins.annotation.annotations || {})
+        .some(([key, ann]) => {
+          if (ann.type !== 'point') return false;
+          const px = chart.scales.x.getPixelForValue(ann.xValue);
+          const py = chart.scales.y.getPixelForValue(ann.yValue);
+          const dist = Math.hypot(x - px, y - py);
+          return dist <= (ann.radius || 5) + 5;
+        });
 
-  // 👇 Detectar si el mouse está sobre una línea de trama
-  const isOverPlot = elements.length > 0;
+      const isOverPlot = elements.length > 0;
 
-  if (isOverCharacterPoint || isOverPlot) {
-    chart.canvas.style.cursor = 'pointer';
-  } else {
-    chart.canvas.style.cursor = 'default';
-  }
+      chart.canvas.style.cursor = (isOverCharacterPoint || isOverPlot) ? 'pointer' : 'default';
 
-  // Mostrar tooltip de escena
-  const scenes = store.story.acts.flatMap(act => act.scenes);
-  const scene = scenes[sceneIndex];
+      // Tooltip de escena
+      const scenes = store.story.acts.flatMap(act => act.scenes);
+      const scene = scenes[sceneIndex];
 
-  if (scene) {
-    const rect = chart.canvas.getBoundingClientRect();
-    sceneTooltip.value = {
-      visible: true,
-      x: clampXToViewport(x + rect.left),
-      y: y + rect.top + 50,
-      type: 'scene',
-      expand: false,
-      data: {
-        index: sceneIndex + 1,
-        title: scene.title,
-        desc: scene.description,
-        characters: scene.characters || [],
-        plots: scene.plots || []
+      if (scene) {
+        const rect = chart.canvas.getBoundingClientRect();
+        sceneTooltip.value = {
+          visible: true,
+          x: clampXToViewport(x + rect.left),
+          y: y + rect.top + 50,
+          type: 'scene',
+          expand: false,
+          data: {
+            index: sceneIndex + 1,
+            title: scene.title,
+            desc: scene.description,
+            characters: scene.characters || [],
+            plots: scene.plots || []
+          }
+        };
+      } else {
+        sceneTooltip.value.visible = false;
       }
-    };
-  } else {
-    sceneTooltip.value.visible = false;
-  }
 
-  store.goToCarouselVisualizationDirectly(sceneIndex, false);
-};
+      store.goToCarouselVisualizationDirectly(sceneIndex, false);
+    };
+
+
 
   }
 

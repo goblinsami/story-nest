@@ -2,7 +2,6 @@
 import { useSettingsStore } from "../stores/settings";
 import { VueDraggableNext } from "vue-draggable-next";
 import { ref, watch, computed, onMounted } from "vue";
-import SceneCreator from "./SceneCreator.vue";
 import PlotCreator from "./PlotCreator.vue";
 import TComponent from "./TComponent.vue";
 

@@ -1,8 +1,8 @@
 <template>
     <div
-        :style="{ color: 'black', backgroundColor: 'rgba(200,200,200,0.8)', position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '200px', height: '200px' }">
+        :style="{ color: 'black', backgroundColor: 'rgba(200,200,200,0.8)', position: 'absolute', bottom: '0', right: '0', border: '1px solid red', width: '400px', height: '800px' }">
 
-        {{store.isToolTipHidden }}
+        <pre>{{ JSON.stringify(store.story.acts, null, 2) }}</pre>
 
     </div>
 
