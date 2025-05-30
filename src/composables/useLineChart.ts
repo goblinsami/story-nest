@@ -97,7 +97,7 @@ export function useLineChart(data, options, key, lineChart) {
 
     configureAxisStyles();
     configureEvents(characterAnnotations);
-    //  updateChart();
+    updateChart();
 
     store.consoleCustom('5-after setLineChartData', lineChart.value?.chart);
 
@@ -105,25 +105,33 @@ export function useLineChart(data, options, key, lineChart) {
 
   const updateHighlightOnly = (sceneIndex) => {
     store.isToolTipHidden = true;
-
     const annotations = options.value.plugins.annotation.annotations;
+    const scenes = [];
 
-    // ⚠️ Regeneramos los puntos de personaje con el seleccionado actual
+    const { segments, labels } = createSegments(scenes); // ← AHORA retornas dos cosas
+
     const characterAnnotations = buildCharacterAnnotations(store.selectedCharacter);
+    const segmentEntries = Object.fromEntries(segments.map(s => [s.id, s]));
+    const labelEntries = Object.fromEntries(labels.map(l => [l.id, l]));
 
-    // Solo reemplazamos los que empiezan por "char_" (puntos de personaje)
-    const filtered = Object.fromEntries(
-      Object.entries(annotations).filter(([k]) => !k.startsWith("char_") && k !== "highlightScene")
-    );
 
+
+    const current = options.value.plugins.annotation.annotations;
     options.value.plugins.annotation.annotations = {
-      ...filtered,
+      ...current,
       ...characterAnnotations,
       highlightScene: createHighlightAnnotation(sceneIndex),
+
     };
 
+    /*     options.value.plugins.annotation.annotations = {
+          ...characterAnnotations,
+          ...labelEntries,
+          highlightScene: createHighlightAnnotation(sceneIndex),
+        }; */
+
     updateChart();
-  }
+  };
 
   function buildCharacterAnnotations(highlightedTitle) {
     const annotations = {};
@@ -234,10 +242,12 @@ export function useLineChart(data, options, key, lineChart) {
       const y = event.y;
       const xScale = chart.scales.x;
       const sceneIndex = Math.round(xScale.getValueForPixel(x));
+      handleSegmentHover(event, chart);
 
       // Mostrar la línea de escena actual
-      updateHighlightOnly(sceneIndex);
 
+      updateHighlightOnly(sceneIndex);
+      store.carouselSceneIndex = sceneIndex;
       // Cambiar cursor si estamos sobre punto o línea
       const isOverCharacterPoint = Object.entries(chart.options.plugins.annotation.annotations || {})
         .some(([key, ann]) => {

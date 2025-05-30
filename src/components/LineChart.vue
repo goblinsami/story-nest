@@ -140,7 +140,7 @@ const resetZoom = () => {
 });
  
 function handleMouseLeave() {
-  hideTooltips()
+ hideTooltips()
   // Aquí puedes ocultar tooltips, deseleccionar, etc.
 }
 
@@ -187,11 +187,11 @@ watch(
   { deep: true },
 ); */
 watch(
-  () => store.carouselSceneIndex,
+/*   () => store.carouselSceneIndex,
   (newVal, oldVal) => {
     if (newVal === oldVal || newVal == null) return;
     updateHighlightOnly(newVal);
-  }
+  } */
 );
 
 watch(

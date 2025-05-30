@@ -149,7 +149,6 @@ const init = async () => {
   await store.checkCharactersInScene();
   await store.toggleShowCarousel();
   store.storyIsSet = true;
-  store.carouselSceneIndex = 0;
 };
 
 onMounted(async () => {
