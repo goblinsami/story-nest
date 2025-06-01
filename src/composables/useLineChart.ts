@@ -51,19 +51,20 @@ export function useLineChart(data, options, key, lineChart) {
   }
 
   const hideTooltips = () => {
-    console.log('Hiding tooltips');
+    // console.log('Hiding tooltips');
     selectionTooltip.value.visible = false;
     sceneTooltip.value.visible = false;
     hoveredSegmentTooltip.value.visible = false;
   }
   const updateChart = () => {
+    //   console.log('Updating chart', lineChart.value?.chart);
 
     const chartInstance = lineChart.value?.chart;
     store.consoleCustom('6 updateChart', chartInstance)
     if (chartInstance && typeof chartInstance.update === 'function') {
       chartInstance.update();
     } else {
-      key.value++
+      /* key.value++ */
     }
   };
   const setLineChartData = () => {
@@ -85,6 +86,7 @@ export function useLineChart(data, options, key, lineChart) {
     const annotations = options.value.plugins.annotation.annotations;
 
     const segmentEntries = Object.fromEntries(segments.map(s => [s.id, s]));
+    debugger
     const labelEntries = Object.fromEntries(labels.map(l => [l.id, l]));
 
 
@@ -165,6 +167,37 @@ export function useLineChart(data, options, key, lineChart) {
     );
 
     return annotations;
+  }
+
+  function updateSceneLabels() {
+    const scenes = [];
+    createSegments(scenes); // ← llena `scenes`
+    const labelsX = createLabels(scenes)
+
+    lineChart.value.chart.data.labels = labelsX
+    updateChart();
+  }
+
+  function updateActLabelAnnotations() {
+    const annotations = options.value.plugins.annotation.annotations || {};
+
+    // 1. Filtrar todas las anotaciones excepto las que empiezan por `label_act_`
+    const filtered = Object.fromEntries(
+      Object.entries(annotations).filter(([key]) => !key.startsWith('label_act_'))
+    );
+
+    // 2. Generar las nuevas etiquetas de actos
+    const scenes = [];
+    const { segments, labels } = createSegments(scenes); // Ya genera también las `label_act_*`
+    const labelEntries = Object.fromEntries(labels.map(l => [l.id, l]));
+
+    // 3. Actualizar solo esas anotaciones en el gráfico
+    options.value.plugins.annotation.annotations = {
+      ...filtered,
+      ...labelEntries,
+    };
+
+   updateChart();
   }
   function buildActLabelAnnotations() {
     store.consoleCustom('5-5 buildActLabelAnnotations');
@@ -563,13 +596,7 @@ export function useLineChart(data, options, key, lineChart) {
     console.log("Creating labels for scenes:", lineChart.value?.chart.data.labels[0],);
 
     console.log(lineChart.value?.chart, "2- lineChart.value?.chart")
-    key.value++
 
-    if (lineChart.value?.chart) {
-
-
-      //lineChart.value?.chart.update()
-    }
 
     const truncate = str => str.length > 20 ? str.slice(0, 20) + '...' : str;
     // updateChart();
@@ -672,6 +699,10 @@ export function useLineChart(data, options, key, lineChart) {
     sceneTooltip,
     hoveredSegmentTooltip,
     updateChart,
-    hideTooltips
+    hideTooltips,
+    createSegments,
+    createLabels,
+    updateActLabelAnnotations,
+    updateSceneLabels
   };
 }

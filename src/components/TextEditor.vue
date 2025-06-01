@@ -9,6 +9,10 @@ import FilterScenes from "./FilterScenes.vue";
 const draggable = VueDraggableNext;
 import { useLineChart } from "../composables/useLineChart";
 import EditorSettings from "./EditorSettings.vue";
+import { positionsConstants } from "../constants/positions";
+const positions = computed(() => {
+    return positionsConstants();
+});
 const { hideTooltips } = useLineChart(null, null, null, null);
 
 
@@ -63,6 +67,7 @@ const handleShowPlotEditor = () => {
 };
 
 const dettachWindow = () => {
+  console.log("Dettach window",window.innerHeight, window.innerWidth);
   store.dettachWindow()
 };
 
@@ -84,6 +89,14 @@ onMounted(() => {
     localData.value = store.story;
   }
 });
+const moveToLeft = () => {
+  store.moveToLeft()
+};
+const moveToRight = () => {
+  store.moveToRight()
+
+};
+
 watch(
   () => store.story, // Observa cambios en los actos de la historia
   () => {
@@ -116,8 +129,7 @@ const buttonAdjustText = computed(() => {
       style="width: 100%; position: sticky; top: 0; z-index: 10; flex-direction: column; background-color: var(--color-dark-bg);">
       <!-- <slot name="toolbar"> </slot> -->
       <div class="d-flex justify-between">
-        
-        <button @click="store.moveToLeft">⏮️</button>
+        <button @click="store.moveToLeft" >⏮️</button>
         <button @click="store.moveToRight">⏭️</button>
       </div>
 

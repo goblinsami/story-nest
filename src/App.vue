@@ -10,7 +10,7 @@
 
   <article class="chartContainer" style="display: flex; width: 100%">
     <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
-      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions['LEFT']">
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions.LEFT">
       <TextEditor/>
     </div>
 
@@ -21,17 +21,17 @@
 
     <!-- Resizer entre ambos -->
     <div class="resizer" @mousedown="startResize"
-      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions['LEFT']"></div>
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions.LEFT"></div>
 
     <div v-if="store.storyIsSet" class="app-chart-container" :class="{ expand: store.showPlotChart }"
       :style="{ width: `calc(100% - ${editorWidth}px - 6px)` }">
       <LineChart />
     </div>
     <div class="resizer" @mousedown="startResize"
-      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions['RIGHT']"></div>
+      v-if="!store.textEditorIsDettached && store.textEditorPosition === positions.RIGHT"></div>
 
     <div ref="editorRef" class="app-text-editor-container expand" :style="{ width: editorWidth + 'px' }"
-      v-if="store.textEditorPosition === positions['RIGHT']">
+      v-if="store.textEditorPosition === positions.RIGHT">
 
       <TextEditor/>
 
@@ -70,8 +70,8 @@ const showEditor = ref(false);
 const show = ref(false);
 const dragModalSettings = ref({
   w: 350,
-  h: 500,
-  x: 0,
+  h: 917/2 ,
+  x: 1600/3 + 350,
   y: 0,
   maximixed: false,
   minimized: false,
@@ -84,13 +84,6 @@ let editorWidth = computed(() => {
   return store.editorWidth
 });
 
-const moveToLeft = () => {
-  store.moveToLeft()
-};
-const moveToRight = () => {
-  store.moveToRight()
-
-};
 
 function minimizeModal() {
   dragModalSettings.value.minimized = true;
@@ -119,15 +112,16 @@ function maximizeModal() {
 
 const startResize = (e) => {
   isResizing.value = true
+  console.log('START RESIZE', store.textEditorPosition)
   document.addEventListener('mousemove', resize)
   document.addEventListener('mouseup', stopResize)
 }
 const resize = (e) => {
   if (!isResizing.value) return;
 
-  if (store.textEditorPosition === positions['LEFT']) {
+  if (store.textEditorPosition === positions.value.LEFT) {
     store.editorWidth = e.clientX;
-  } else if (store.textEditorPosition === positions['RIGHT']) {
+  } else if (store.textEditorPosition === positions.value.RIGHT) {
     const totalWidth = window.innerWidth;
     store.editorWidth = totalWidth - e.clientX;
   }
@@ -149,6 +143,8 @@ const init = async () => {
   await store.checkCharactersInScene();
   await store.toggleShowCarousel();
   store.storyIsSet = true;
+  store.triggerChange2()
+
 };
 
 onMounted(async () => {

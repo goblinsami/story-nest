@@ -4,7 +4,7 @@ import { CostResult } from '../interfaces/interfaces';
 import { maxRegisters } from "../constants/constants.json";
 import { v4 as uuidv4 } from 'uuid';
 import { positionsConstants } from "../constants/positions";
-import {  computed } from "vue";
+import { computed } from "vue";
 
 const positions = computed(() => {
   return positionsConstants();
@@ -26,7 +26,7 @@ export const useSettingsStore = defineStore('settings', {
     chartHeight: 80,
     chartwidtht: 80,
     carouselSceneIndex: 0,
-    showDebugger: false,
+    showDebugger: true,
     editSceneMode: false,
     darkMode: false,
     originalStory: {},
@@ -43,6 +43,8 @@ export const useSettingsStore = defineStore('settings', {
     editorSettings: {
       showSettings: false,
     },
+    triggerChangeKey2: 0,
+    triggerChangeKey: 0,
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -222,13 +224,16 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
     moveToLeft() {
-      this.textEditorPosition = positions['LEFT'];
+            console.log('moveToRight', positions, positions.value.LEFT, positions.value.RIGHT )
+
+      this.textEditorPosition = positions.value.LEFT;
       this.textEditorIsDettached = false; // Reset dettached state when moving to left
       this.editorWidth = initialEdidtorWidth;
 
     },
     moveToRight() {
-      this.textEditorPosition = positions['RIGHT'];
+      console.log('moveToRight', positions.value.RIGHT)
+      this.textEditorPosition = positions.value.RIGHT;
       this.textEditorIsDettached = false; // Reset dettached state when moving to left
       this.editorWidth = initialEdidtorWidth;
     },
@@ -328,7 +333,7 @@ export const useSettingsStore = defineStore('settings', {
     },
     consoleCustom(...args) {
       let arrow = '---------------------------------------'
-      // console.log(arrow, '\n', ...args, '\n', arrow);
+    //  console.log(arrow, '\n', ...args, '\n', arrow);
     },
 
     //EDIT STORY
@@ -435,6 +440,14 @@ export const useSettingsStore = defineStore('settings', {
       this.story.characters.splice(index, 1)
 
     },
+    triggerChange2() {
+      this.triggerChangeKey2 += 1; // Incrementa la clave para forzar la actualización
+      console.log('triggerChange', this.triggerChangeKey)
+    },
+    triggerChange() {
+      this.triggerChangeKey += 1; // Incrementa la clave para forzar la actualización
+      console.log("📊 triggerChange, Estructura cambiada → regenerar todo");
+    },
     //SCENES
 
     dragScenesInCarousel(scene1, scene2, oldIndex, newIndex) {
@@ -531,6 +544,8 @@ export const useSettingsStore = defineStore('settings', {
         updatedAct.scenes.splice(sceneIndex, 0, newElement);
       }
       this.addNumeration()
+      this.triggerChange()
+
     },
 
 
@@ -539,6 +554,8 @@ export const useSettingsStore = defineStore('settings', {
 
       let act = this.story.acts[actIndex]
       act.scenes.splice(sceneIndex, 1)
+
+      this.triggerChange()
 
     },
 
@@ -599,12 +616,13 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     deletePlotsfromScene(scene) {
+
       let act = this.story.acts[scene.actIndex]
       let updatedScene = act.scenes[scene.sceneIndex]
 
       updatedScene.plots = []
+      this.triggerChange()
 
-      console.log(act, updatedScene)
       /*       let updatedAct = this.story.acts[newScene.actIndex]
             let updatedScene = updatedAct.scenes.find(element => element.number == newScene.number)
             updatedScene.plots = [] */
@@ -738,9 +756,11 @@ export const useSettingsStore = defineStore('settings', {
       this.consoleCustom('2. addNumeration')
       let sceneNumber = 1; // Inicializa el número de escena
       this.story.acts.forEach((act, actIndex) => {
+        const uniqueActId = uuidv4(); // Genera un UUID por cada acto
+        act.id = uniqueActId;
         act.scenes.forEach((scene, sceneIndex) => {
-          const uniqueId = uuidv4(); // Genera un UUID por cada escena
-          scene.id = uniqueId;
+          const uniqueSceneId = uuidv4(); // Genera un UUID por cada escena
+          scene.id = uniqueSceneId;
           scene.number = sceneNumber++; // Asigna el número de escena y lo incrementa
           scene.actIndex = actIndex; // Asigna el índice del acto
           scene.sceneIndex = sceneIndex; // Asigna el índice de la escena

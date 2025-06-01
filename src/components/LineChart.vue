@@ -10,14 +10,15 @@
       <ChartTooltip class="tooltip" v-bind="selectionTooltip" />
       <ChartTooltip class="tooltip" v-bind="sceneTooltip" />
       <ChartTooltip class="tooltip" v-bind="hoveredSegmentTooltip" />
+      <button @click="test()">test</button>
 
-      <Line :data="data" :options="options" ref="lineChart" :key="key" @mouseleave="handleMouseLeave"/>
+      <Line :data="data" :options="options" ref="lineChart" :key="lineKey" @mouseleave="handleMouseLeave" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, watch } from "vue";
+import { ref, onMounted, reactive, watch, computed } from "vue";
 import { Line, Pie } from "vue-chartjs";
 import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
@@ -64,7 +65,9 @@ const data = ref({
   labels: [], //escenas
   datasets: [],
 });
-
+const lineKey = computed(() => {
+  return store.triggerChangeKey;
+});
 
 // Opciones del gráfico con anotaciones
 const options = ref({
@@ -129,18 +132,18 @@ const options = ref({
   },
 });
 
-const { setLineChartData, updateHighlightOnly, selectionTooltip, sceneTooltip, hoveredSegmentTooltip, updateChart, hideTooltips } = useLineChart(data, options, key, lineChart);
+const { setLineChartData, createLabels, updateHighlightOnly, selectionTooltip, sceneTooltip, hoveredSegmentTooltip, updateChart, hideTooltips, createSegments, updateActLabelAnnotations, updateSceneLabels } = useLineChart(data, options, key, lineChart);
 
 
 const resetZoom = () => {
   lineChart.value.chart.resetZoom();
 };
- onMounted(() => {
+onMounted(() => {
   updateChart()
 });
- 
+
 function handleMouseLeave() {
- hideTooltips()
+  hideTooltips()
   // Aquí puedes ocultar tooltips, deseleccionar, etc.
 }
 
@@ -162,7 +165,6 @@ function sanitizeStory(story) {
   return clone;
 }
 let previousSanitized = null;
-
 watch(
   () => store.story,
   (newStory) => {
@@ -170,52 +172,139 @@ watch(
 
     const hasChanged = JSON.stringify(currentSanitized) !== JSON.stringify(previousSanitized);
 
-    if (hasChanged) {
+    if (hasChanged && store.triggerChangeKey2 === 1) {
       previousSanitized = currentSanitized;
       console.log('CHANGE DETECTED IN LINE CHART', currentSanitized);
       setLineChartData();
+      store.triggerChange2()
     }
+
   },
   { deep: true, immediate: true }
 );
-/* watch(
-  () => store.colorsHard, // Observa cambios en toda la historia
-  () => {
-
-    setLineChartData(); // Actualiza el gráfico
-  },
-  { deep: true },
-); */
-watch(
-/*   () => store.carouselSceneIndex,
-  (newVal, oldVal) => {
-    if (newVal === oldVal || newVal == null) return;
-    updateHighlightOnly(newVal);
-  } */
-);
 
 watch(
-  () => store.darkMode,
+  () => store.triggerChangeKey,
   () => {
+
     setLineChartData();
-  }
+
+
+  },
+  { deep: true, immediate: true }
 );
-/* watch(
-  () => store.chartFontSize, // Observa cambios en toda la historia
-  () => {
+function test() {
+  console.log('TEST', data.value.labels);
+  setLineChartData()
+  updateHighlightOnly()
+}
 
-    setLineChartData(); // Actualiza el gráfico
-  },
-  { deep: true },
-); */
-/* watch(
-  () => store.plotColorsHard, // Observa cambios en toda la historia
-  () => {
+function getSceneTitlesSnapshot(story) {
+  return story?.acts?.flatMap(act =>
+    act.scenes.map(scene => ({ id: scene.id, title: scene.title }))
+  ) || [];
+}
 
-    setLineChartData(); // Actualiza el gráfico
+
+function hasSceneTitlesChanged(newStory, previousTitles) {
+  const newTitles = getSceneTitlesSnapshot(newStory);
+  const changed = JSON.stringify(newTitles) !== JSON.stringify(previousTitles);
+  return { changed, newTitles };
+}
+
+
+
+function getActTitlesSnapshot(story) {
+  return story?.acts?.map(act => act.title) || [];
+}
+
+function hasActTitlesChanged(newStory, previousActTitles) {
+  const newActTitles = getActTitlesSnapshot(newStory);
+  const changed = JSON.stringify(newActTitles) !== JSON.stringify(previousActTitles);
+  return { changed, newActTitles };
+}
+
+
+
+function getStoryStructureSnapshot(story) {
+  return {
+    // El orden y la cantidad de actos
+    actOrder: story.acts?.map(act => act.id || act.title) || [],
+
+    // Para cada acto, el orden y cantidad de escenas
+    scenesPerAct: story.acts?.map(act => ({
+      id: act.id || act.title,
+      sceneOrder: act.scenes.map(scene => scene.id || scene.title)
+    })) || [],
+
+    // El orden y cantidad de tramas
+    plotOrder: story.plots?.map(plot => plot.id || plot.title) || []
+  };
+}
+
+
+function hasStructureChanged(newStory, previousStructure) {
+  const newStructure = getStoryStructureSnapshot(newStory);
+  const changed = JSON.stringify(newStructure) !== JSON.stringify(previousStructure);
+  debugger
+  return { changed, newStructure };
+}
+
+
+let previousStructure = getStoryStructureSnapshot(store.story);
+let previousSceneTitles = getSceneTitlesSnapshot(store.story);
+let previousActTitles = getActTitlesSnapshot(store.story);
+
+watch(
+  () => store.story,
+  (newStory) => {
+    if (!data.value || !options.value || !store.storyIsSet) return;
+
+    const sceneCheck = hasSceneTitlesChanged(newStory, previousSceneTitles);
+
+    const actCheck = hasActTitlesChanged(newStory, previousActTitles);
+    const structureCheck = hasStructureChanged(newStory, previousStructure);
+
+
+
+    if (structureCheck.changed) {
+      console.log("📊 Estructura cambiada → regenerar todo");
+      previousStructure = structureCheck.newStructure;
+      store.triggerChange()
+      return;
+    }
+
+    if (sceneCheck.changed) {
+      console.log("✏️ Título de escena cambiado → actualizar labels X");
+
+      updateSceneLabels()
+
+      previousSceneTitles = sceneCheck.newTitles;
+      return;
+    }
+
+
+    if (actCheck.changed) {
+      console.log("✏️ Título de acto cambiado → actualizar etiquetas de actos");
+      updateActLabelAnnotations()
+      previousActTitles = actCheck.newActTitles;
+      return
+    }
+
+
+
   },
-  { deep: true },
-); */
+  { deep: true }
+);
+
+
+
+
+
+
+
+
+
 
 </script>
 

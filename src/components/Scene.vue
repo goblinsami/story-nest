@@ -211,13 +211,13 @@ watch(
           <td v-if="scene.plots.length > 0">
             <div v-for="(plot, index) in localData.plots">
               <input type="checkbox" id="" name="" v-model="scene.plots" :value="index + 1"
-                :style="{ accentColor: store.plotColorsHard[index] }" @change="emit('editScene', scene)" />
+                :style="{ accentColor: store.plotColorsHard[index] }" @change="emit('editScene', scene), store.triggerChange()" />
               <label for="">{{ plot.title }}</label>
             </div>
           </td>
           <td v-if="scene.intensity >= 0 && scene.plots.length > 0">
             <input type="number" v-model="scene.intensity" class="plot-intensity" min="0" max="11"
-              @input="emit('editScene', scene)" />
+              @input="emit('editScene', scene), store.triggerChange()" />
           </td>
         </div>
       </div>
