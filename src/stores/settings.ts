@@ -45,6 +45,14 @@ export const useSettingsStore = defineStore('settings', {
     },
     triggerChangeKey2: 0,
     triggerChangeKey: 0,
+    dragModalSettings: {
+      w: 350,
+      h: 500,
+      x: 0,
+      y: 0,
+      maximixed: false,
+      minimized: false,
+    },
     colorsHard: [
       "#FF5733", // Rojo anaranjado
       "#33FF57", // Verde lima
@@ -184,6 +192,11 @@ export const useSettingsStore = defineStore('settings', {
     selectPlot(index) {
       this.selectedPlotIndex = index;
     },
+
+    clearActHoverSelection() {
+      this.selectedSegmentIndex = null
+
+    },
     deselectPlot() {
       this.selectedPlotIndex = null;
     },
@@ -217,14 +230,26 @@ export const useSettingsStore = defineStore('settings', {
     dettachWindow() {
       console.log('dettachWindow', this.textEditorIsDettached)
       this.textEditorIsDettached = !this.textEditorIsDettached
-      if (this.textEditorIsDettached) {
-        this.editorWidth = 0;
-      } else {
+
+      if (!this.textEditorIsDettached) {
         this.editorWidth = initialEdidtorWidth;
+        return
       }
+
+      this.editorWidth = 0;
+      
+      if (this.textEditorPosition == positions.value.LEFT) {
+        this.dragModalSettings.x = 0;
+      } else if (this.textEditorPosition == positions.value.RIGHT) {
+        this.dragModalSettings.x = window.innerWidth - this.dragModalSettings.w;
+      }
+
     },
+
+
+
     moveToLeft() {
-            console.log('moveToRight', positions, positions.value.LEFT, positions.value.RIGHT )
+      console.log('moveToRight', positions, positions.value.LEFT, positions.value.RIGHT)
 
       this.textEditorPosition = positions.value.LEFT;
       this.textEditorIsDettached = false; // Reset dettached state when moving to left
@@ -333,7 +358,7 @@ export const useSettingsStore = defineStore('settings', {
     },
     consoleCustom(...args) {
       let arrow = '---------------------------------------'
-    //  console.log(arrow, '\n', ...args, '\n', arrow);
+      //  console.log(arrow, '\n', ...args, '\n', arrow);
     },
 
     //EDIT STORY
@@ -470,7 +495,7 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     checkCharactersInScene() {
-      this.consoleCustom('4. checkCharactersInScene')
+      console.log('4. checkCharactersInScene')
 
       // Itera sobre cada acto
       this.story.acts.forEach((act) => {
@@ -493,6 +518,8 @@ export const useSettingsStore = defineStore('settings', {
           });
         });
       });
+
+      this.triggerChange(); // Llama a triggerChange para actualizar la vista
 
       // Alert opcional para verificar resultados
     },

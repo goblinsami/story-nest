@@ -10,15 +10,14 @@
       <ChartTooltip class="tooltip" v-bind="selectionTooltip" />
       <ChartTooltip class="tooltip" v-bind="sceneTooltip" />
       <ChartTooltip class="tooltip" v-bind="hoveredSegmentTooltip" />
-      <button @click="test()">test</button>
-
+<p style="visibility: hidden;">1</p>
       <Line :data="data" :options="options" ref="lineChart" :key="lineKey" @mouseleave="handleMouseLeave" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, watch, computed } from "vue";
+import { ref, onMounted, reactive, watch, computed,nextTick } from "vue";
 import { Line, Pie } from "vue-chartjs";
 import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
@@ -187,16 +186,19 @@ watch(
   () => store.triggerChangeKey,
   () => {
 
+nextTick(() => {
     setLineChartData();
+
+})
 
 
   },
   { deep: true, immediate: true }
 );
 function test() {
-  console.log('TEST', data.value.labels);
-  setLineChartData()
-  updateHighlightOnly()
+  //console.log('TEST', data.value.labels);
+  //setLineChartData()
+//  updateHighlightOnly()
 }
 
 function getSceneTitlesSnapshot(story) {

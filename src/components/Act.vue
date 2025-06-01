@@ -75,7 +75,7 @@ watch(
         </button>
       </div>
       <div class="act-header-container" :style="{ border: `1px solid ${props.act.color}` }">
-        <input type="color" :id="props.actIndex" name="head" v-model="props.act.color" class="act-color-sample" />
+        <input @change="store.triggerChange()" type="color" :id="props.actIndex" name="head" v-model="props.act.color" class="act-color-sample" />
         <input type="text" class="title" v-model="props.act.title" />
         <h2>
           <span>{{ act.scenes.length }}</span>

@@ -15,7 +15,7 @@
     </div>
 
 
-    <DragModal class="drag-modal" v-bind="dragModalSettings" v-if="store.textEditorIsDettached">
+    <DragModal class="drag-modal" v-bind="store.dragModalSettings" v-if="store.textEditorIsDettached">
       <TextEditor/>
     </DragModal>
 
@@ -68,10 +68,10 @@ const positions = computed(() => {
 const store = useSettingsStore();
 const showEditor = ref(false);
 const show = ref(false);
-const dragModalSettings = ref({
+const dragModalSettings2 = ref({
   w: 350,
-  h: 917/2 ,
-  x: 1600/3 + 350,
+  h: 500 ,
+  x: window.innerWidth - 350,
   y: 0,
   maximixed: false,
   minimized: false,
@@ -85,30 +85,7 @@ let editorWidth = computed(() => {
 });
 
 
-function minimizeModal() {
-  dragModalSettings.value.minimized = true;
-  dragModalSettings.value.maximized = false;
 
-  const padding = 20;
-  const modalWidth = 300;
-  const modalHeight = 100;
-
-  // Asumimos que el modal se posiciona en base a la ventana
-  const windowWidth = window.innerWidth;
-
-  dragModalSettings.value.w = modalWidth;
-  dragModalSettings.value.h = modalHeight;
-  dragModalSettings.value.x = windowWidth - modalWidth - padding;
-  dragModalSettings.value.y = padding;
-}
-function maximizeModal() {
-  dragModalSettings.value.maximized = true;
-  dragModalSettings.value.minimized = false;
-  dragModalSettings.value.x = 0;
-  dragModalSettings.value.y = 0;
-  dragModalSettings.value.w = window.innerWidth;
-  dragModalSettings.value.h = window.innerHeight;
-}
 
 const startResize = (e) => {
   isResizing.value = true

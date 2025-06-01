@@ -106,6 +106,7 @@ export function useLineChart(data, options, key, lineChart) {
   };
 
   const updateHighlightOnly = (sceneIndex) => {
+    console.log('5-6 updateHighlightOnly', sceneIndex);
     store.isToolTipHidden = true;
     const annotations = options.value.plugins.annotation.annotations;
     const scenes = [];
@@ -178,27 +179,31 @@ export function useLineChart(data, options, key, lineChart) {
     updateChart();
   }
 
-  function updateActLabelAnnotations() {
-    const annotations = options.value.plugins.annotation.annotations || {};
+function updateActLabelAnnotations() {
+  const annotations = options.value.plugins.annotation.annotations;
 
-    // 1. Filtrar todas las anotaciones excepto las que empiezan por `label_act_`
-    const filtered = Object.fromEntries(
-      Object.entries(annotations).filter(([key]) => !key.startsWith('label_act_'))
-    );
+  if (!annotations) return;
 
-    // 2. Generar las nuevas etiquetas de actos
-    const scenes = [];
-    const { segments, labels } = createSegments(scenes); // Ya genera también las `label_act_*`
-    const labelEntries = Object.fromEntries(labels.map(l => [l.id, l]));
+  // Generar las nuevas etiquetas de actos
+  const scenes = [];
+  const { labels } = createSegments(scenes); // Extraemos solo las labels
+  const labelEntries = Object.fromEntries(labels.map(l => [l.id, l]));
 
-    // 3. Actualizar solo esas anotaciones en el gráfico
-    options.value.plugins.annotation.annotations = {
-      ...filtered,
-      ...labelEntries,
-    };
+  // 1. Eliminar solo las anotaciones antiguas `label_act_*`
+/*   for (const key in annotations) {
+    if (key.startsWith('label_act_')) {
+      delete annotations[key];
+    }
+  } */
 
-   updateChart();
+  // 2. Añadir o actualizar las nuevas anotaciones `label_act_*`
+  for (const [id, label] of Object.entries(labelEntries)) {
+    annotations[id] = label;
   }
+
+  updateChart();
+}
+
   function buildActLabelAnnotations() {
     store.consoleCustom('5-5 buildActLabelAnnotations');
     const annotations = {};
@@ -263,6 +268,7 @@ export function useLineChart(data, options, key, lineChart) {
   };
 
   function configureEvents(characterAnnotations) {
+
     options.value.onClick = (event, elements, chart) => {
       if (handleCharacterClick(event, chart, characterAnnotations)) return;
       if (handlePlotClick(event, elements, chart)) return;
@@ -278,7 +284,7 @@ export function useLineChart(data, options, key, lineChart) {
       handleSegmentHover(event, chart);
 
       // Mostrar la línea de escena actual
-
+      console.log('1')
       updateHighlightOnly(sceneIndex);
       store.carouselSceneIndex = sceneIndex;
       // Cambiar cursor si estamos sobre punto o línea
@@ -319,7 +325,6 @@ export function useLineChart(data, options, key, lineChart) {
         sceneTooltip.value.visible = false;
       }
 
-      store.goToCarouselVisualizationDirectly(sceneIndex, false);
     };
 
 
@@ -413,85 +418,61 @@ export function useLineChart(data, options, key, lineChart) {
 
   let segmentHoverTimer = null;
 
-  function handleSegmentHover(event, chart) {
-    const x = event.x;
-    const y = event.y;
-    const xScale = chart.scales.x;
-    const sceneIndex = Math.round(xScale.getValueForPixel(x));
+function handleSegmentHover(event, chart) {
+  const x = event.x;
+  const xScale = chart.scales.x;
+  const sceneIndex = Math.round(xScale.getValueForPixel(x));
 
-    let accumulated = 0;
-    let hoveredIndex = null;
+  let accumulated = 0;
+  let hoveredIndex = null;
 
-    for (let i = 0; i < store.story.acts.length; i++) {
-      const act = store.story.acts[i];
-      const start = accumulated;
-      const end = accumulated + act.scenes.length;
+  for (let i = 0; i < store.story.acts.length; i++) {
+    const act = store.story.acts[i];
+    const start = accumulated;
+    const end = accumulated + act.scenes.length;
 
-      if (sceneIndex >= start && sceneIndex < end) {
-        hoveredIndex = i;
-        break;
-      }
-      accumulated = end;
+    if (sceneIndex >= start && sceneIndex < end) {
+      hoveredIndex = i;
+      break;
     }
-
-    if (store._hoveredSegmentIndex !== hoveredIndex) {
-      store._hoveredSegmentIndex = hoveredIndex;
-
-      // Actualiza colores de los segmentos (como ya haces normalmente)
-      const annotations = options.value.plugins.annotation.annotations;
-      const updatedSegments = {};
-      let index = 0;
-      store.story.acts.forEach((act, i) => {
-        const len = act.scenes.length;
-        updatedSegments[`segment_${i}`] = {
-          xMin: index,
-          xMax: index + len,
-          backgroundColor: i === hoveredIndex || i === store.selectedSegmentIndex
-            ? act.color + "98"
-            : act.color + "40",
-          title: act.title,
-          type: "box",
-          drawTime: 'beforeDatasetsDraw'
-        };
-        index += len;
-      });
-
-      const filtered = Object.fromEntries(Object.entries(annotations).filter(([k]) => !k.startsWith('segment_')));
-      options.value.plugins.annotation.annotations = {
-        ...filtered,
-        ...updatedSegments
-      };
-
-      updateChart();
-    }
-
-    /*     // Mostrar tooltip después de 1s
-        if (hoveredIndex !== null) {
-          clearTimeout(segmentHoverTimer);
-          segmentHoverTimer = setTimeout(() => {
-            const act = store.story.acts[hoveredIndex];
-            const xStart = store.story.acts.slice(0, hoveredIndex).reduce((acc, a) => acc + a.scenes.length, 0);
-    
-            const px = chart.scales.x.getPixelForValue(xStart);
-            const rect = chart.canvas.getBoundingClientRect();
-    
-            hoveredSegmentTooltip.value = {
-              visible: true,
-              x: px + rect.left,
-              y: rect.top + 10, // Fijo arriba del gráfico
-              data: {
-                title: act.title,
-                color: act.color,
-                sceneCount: act.scenes.length
-              }
-            };
-          }, 1000);
-    
-        } else {
-          clearTimeout(segmentHoverTimer);
-          hoveredSegmentTooltip.value.visible = false;
-        } */
+    accumulated = end;
   }
+
+  if (store._hoveredSegmentIndex === hoveredIndex) return;
+
+  store._hoveredSegmentIndex = hoveredIndex;
+  store.selectedSegmentIndex = hoveredIndex;
+
+  const annotations = options.value.plugins.annotation.annotations;
+
+  let index = 0;
+  for (let i = 0; i < store.story.acts.length; i++) {
+    const act = store.story.acts[i];
+    const len = act.scenes.length;
+    const id = `segment_${i}`;
+
+    const isActive = i === hoveredIndex || i === store.selectedSegmentIndex;
+    const bgColor = isActive ? act.color + '98' : act.color + '40';
+
+    if (!annotations[id]) {
+      annotations[id] = {
+        type: 'box',
+        drawTime: 'beforeDatasetsDraw',
+        title: act.title
+      };
+    }
+
+    // Solo actualizamos las props necesarias
+    annotations[id].xMin = index;
+    annotations[id].xMax = index + len;
+    annotations[id].backgroundColor = bgColor;
+
+    index += len;
+  }
+
+  updateChart();
+}
+
 
   const lightenHexColor = (hex, amount = 80) => {
     hex = hex.replace(/^#/, '');
