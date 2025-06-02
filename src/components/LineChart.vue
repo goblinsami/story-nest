@@ -6,18 +6,17 @@
         <LineChartSettings class="debug" :data="data" :options="options" @changeSettings="setLineChartData()"
           @resetZoom="resetZoom()"></LineChartSettings>
       </div>
-      <!--       <button @click="update()">RESET</button> -->
       <ChartTooltip class="tooltip" v-bind="selectionTooltip" />
       <ChartTooltip class="tooltip" v-bind="sceneTooltip" />
       <ChartTooltip class="tooltip" v-bind="hoveredSegmentTooltip" />
-<p style="visibility: hidden;">1</p>
+      <p style="visibility: hidden;">1</p>
       <Line :data="data" :options="options" ref="lineChart" :key="lineKey" @mouseleave="handleMouseLeave" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, watch, computed,nextTick } from "vue";
+import { ref, onMounted, reactive, watch, computed, nextTick } from "vue";
 import { Line, Pie } from "vue-chartjs";
 import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
@@ -142,8 +141,10 @@ onMounted(() => {
 });
 
 function handleMouseLeave() {
+  console.log('handleMouseLeave');
   hideTooltips()
-  // Aquí puedes ocultar tooltips, deseleccionar, etc.
+  store.clearActHoverSelection()
+  // Espera un segundo antes de limpiar la selección
 }
 
 function deepClone(obj) {
@@ -185,20 +186,17 @@ watch(
 watch(
   () => store.triggerChangeKey,
   () => {
-
-nextTick(() => {
-    setLineChartData();
-
-})
-
+    nextTick(() => {
+      setLineChartData();
+    })
 
   },
   { deep: true, immediate: true }
 );
 function test() {
   //console.log('TEST', data.value.labels);
-  //setLineChartData()
-//  updateHighlightOnly()
+  setLineChartData()
+  store.triggerChange2()
 }
 
 function getSceneTitlesSnapshot(story) {
@@ -256,6 +254,21 @@ function hasStructureChanged(newStory, previousStructure) {
 let previousStructure = getStoryStructureSnapshot(store.story);
 let previousSceneTitles = getSceneTitlesSnapshot(store.story);
 let previousActTitles = getActTitlesSnapshot(store.story);
+
+watch(
+  () => store.selectedSegmentIndex,
+  () => {
+
+    console.log('wacth act hover', store.selectedSegmentIndex)
+
+    if (store.selectedSegmentIndex === null) {
+      store.triggerChange()
+      return;
+    }
+
+  },
+  { immediate: true }
+);
 
 watch(
   () => store.story,

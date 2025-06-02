@@ -106,7 +106,6 @@ export function useLineChart(data, options, key, lineChart) {
   };
 
   const updateHighlightOnly = (sceneIndex) => {
-    console.log('5-6 updateHighlightOnly', sceneIndex);
     store.isToolTipHidden = true;
     const annotations = options.value.plugins.annotation.annotations;
     const scenes = [];
@@ -284,7 +283,6 @@ function updateActLabelAnnotations() {
       handleSegmentHover(event, chart);
 
       // Mostrar la línea de escena actual
-      console.log('1')
       updateHighlightOnly(sceneIndex);
       store.carouselSceneIndex = sceneIndex;
       // Cambiar cursor si estamos sobre punto o línea
@@ -438,9 +436,10 @@ function handleSegmentHover(event, chart) {
     accumulated = end;
   }
 
-  if (store._hoveredSegmentIndex === hoveredIndex) return;
+  if( hoveredIndex === null) {
+    alert()
+  }
 
-  store._hoveredSegmentIndex = hoveredIndex;
   store.selectedSegmentIndex = hoveredIndex;
 
   const annotations = options.value.plugins.annotation.annotations;

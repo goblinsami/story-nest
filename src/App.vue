@@ -4,8 +4,8 @@
       <h1>Story Nest </h1>
       <small>v 1.2</small>
       <h5><strong>{{ store.story.title }}</strong></h5>
-      <Navbar />
     </div>
+    <Navbar />
   </div>
 
   <article class="chartContainer" style="display: flex; width: 100%">
@@ -13,7 +13,6 @@
       v-if="!store.textEditorIsDettached && store.textEditorPosition === positions.LEFT">
       <TextEditor/>
     </div>
-
 
     <DragModal class="drag-modal" v-bind="store.dragModalSettings" v-if="store.textEditorIsDettached">
       <TextEditor/>

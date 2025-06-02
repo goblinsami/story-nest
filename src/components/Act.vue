@@ -1,12 +1,15 @@
 <script setup>
 import { useSettingsStore } from "../stores/settings";
-import { VueDraggableNext } from "vue-draggable-next";
 import { computed, ref, watch } from "vue";
 import PlotCreator from "./PlotCreator.vue";
 import Scene from "./Scene.vue";
 import CollapseButtons from "./CollapseButtons.vue";
+import { iconsNames } from "../constants/iconsNames";
 
-const draggable = VueDraggableNext;
+
+const icons = computed(() => {
+  return iconsNames();
+});
 
 const localData = ref({});
 const dragging = ref(false);
@@ -61,33 +64,34 @@ watch(
   { deep: true } // Ejecutar inmediatamente si ya hay datos
 );
 </script>
-
 <template>
   <div class="act">
     <div class="act-info">
       <div class="d-flex justify-between act-tag">
-        <button class="drag-handle">Drag</button>
-        <button class="drag-handle" @click="store.collapseAct(props.actIndex)">{{ collapseActText }} Act</button>
-        <button @click="handleToggleCollapse(actIndex)" :style="{ visibility: act.collapsed ? 'visible' : 'hidden' }">{{ buttonText }} All Scenes</button>
+        <Button class="drag-handle" :icon=icons.drag :tooltip="'Drag'" size="m"></Button>
 
-        <button @click="store.deleteAct(props.actIndex)" class="deleteAct">
-          X
-        </button>
+        <Button :icon=icons.collapse @click="store.collapseAct(props.actIndex)" size="m"
+          :tooltip="collapseActText + 'Act'"></Button>
+        <Button :style="{ visibility: act.collapsed ? 'visible' : 'hidden' }" :icon=icons.expand
+          @click="handleToggleCollapse(actIndex)" size="m" :tooltip="buttonText + 'All Scenes'"></Button>
+        <Button :icon=icons.delete tooltip="Delete act" size="m" @click="store.deleteAct(props.actIndex)">
+        </Button>
       </div>
       <div class="act-header-container" :style="{ border: `1px solid ${props.act.color}` }">
-        <input @change="store.triggerChange()" type="color" :id="props.actIndex" name="head" v-model="props.act.color" class="act-color-sample" />
+        <input @change="store.triggerChange()" type="color" :id="props.actIndex" name="head" v-model="props.act.color"
+          class="act-color-sample" />
         <input type="text" class="title" v-model="props.act.title" />
         <h2>
           <span>{{ act.scenes.length }}</span>
         </h2>
       </div>
     </div>
-    <div class="act-content" :class="handleCollapse ? 'expand' : ''">
-      <draggable v-model="act.scenes" @start="onStart" @end="onEnd" group="scenes" handle=".drag-scene-handle">
+    <div class="act-content" :class="handleCollapse ? 'expand' : ''" @mousedown.stop>
+      <Draggable v-model="act.scenes" @start="onStart" @end="onEnd" group="scenes">
         <Scene v-for="(scene, sceneIndex) in act.scenes" :scene="scene" :sceneIndex="sceneIndex"
           :actIndex="props.actIndex" :act="act">
         </Scene>
-      </draggable>
+      </Draggable>
     </div>
   </div>
 </template>

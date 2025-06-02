@@ -1,24 +1,27 @@
 <template>
-  <vue-draggable-resizable  class-name-active="activeModal" :x="x"
-    :y="y" :w="w" :h="h" :draggable="!maximized"
-    :resizable="!maximized" class-name="dragModal">
+<VueDraggableResizable :prevent-deactivation="true" :enable-native-drag="true"
+  :x="x"
+  :y="y"
+  :w="w"
+  :h="h"
+  class-name="dragModal"
+  drag-handle=".toolbar"
+>
+<!-- Dentro del modal -->
     <div class="modal-content" style="overflow: auto; height: 100%;">
-     <div class="toolbar">
-      <slot name="toolbar">
-      </slot>
-     </div>
-      <slot >
-      </slot>
-      <slot>
-      </slot>
-    </div>
-  </vue-draggable-resizable>
+
+  <div class="editor-area" >
+    <slot />
+  </div>
+</div>
+
+</VueDraggableResizable>
+
 </template>
 
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import VueDraggableResizable from 'vue-draggable-resizable'
 
 const props = defineProps({
   x: { type: Number, default: 100 },
@@ -35,13 +38,12 @@ const props = defineProps({
 
 <style scoped>
 
-.toolbar {
-  background-color: red
-}
 .modal-content {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%; /* ← Esta línea es clave */
+  width: 100%;
+  /* ← Esta línea es clave */
   overflow: hidden;
-}</style>
+}
+</style>

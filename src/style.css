@@ -2,6 +2,8 @@
   --color-light-bg: #FCFCFD;
   --color-light-text: #e6e6e6;
   --color-dark-bg: #100d36;
+    --color-dark-bg-extra:#28254a;
+
   --color-dark-text: #f5f5f5;
   --border-radius: 4px;
 }

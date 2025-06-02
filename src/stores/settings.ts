@@ -26,7 +26,7 @@ export const useSettingsStore = defineStore('settings', {
     chartHeight: 80,
     chartwidtht: 80,
     carouselSceneIndex: 0,
-    showDebugger: true,
+    showDebugger: false,
     editSceneMode: false,
     darkMode: false,
     originalStory: {},
@@ -40,6 +40,7 @@ export const useSettingsStore = defineStore('settings', {
     storyIsSet: false,
     editorWidth: initialEdidtorWidth,
     isToolTipHidden: true,
+    hideSelection: false,
     editorSettings: {
       showSettings: false,
     },
@@ -210,6 +211,7 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
     importJSON(event) {
+      console.log('importJSON', event)
       const file = event.target.files[0]; // Tomar el primer archivo seleccionado
       if (file && file.type === "application/json") {
         const reader = new FileReader();
@@ -217,12 +219,15 @@ export const useSettingsStore = defineStore('settings', {
           try {
             const jsonData = JSON.parse(e.target.result);
             console.log(jsonData); // Aquí procesas el JSON como necesites
-            processJSON(jsonData);
+            this.processJSON(jsonData);
           } catch (error) {
             console.error("Error al parsear el archivo JSON", error);
           }
         };
         reader.readAsText(file); // Leer el archivo como texto
+        setTimeout(() => {
+          this.triggerChange(); // Asegúrate de añadir la numeración después de cargar la historia
+        }, 1);
       } else {
         console.error("Por favor selecciona un archivo JSON válido.");
       }
@@ -237,7 +242,7 @@ export const useSettingsStore = defineStore('settings', {
       }
 
       this.editorWidth = 0;
-      
+
       if (this.textEditorPosition == positions.value.LEFT) {
         this.dragModalSettings.x = 0;
       } else if (this.textEditorPosition == positions.value.RIGHT) {

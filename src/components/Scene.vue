@@ -1,11 +1,12 @@
 <script setup>
 import { useSettingsStore } from "../stores/settings";
-import { VueDraggableNext } from "vue-draggable-next";
 import { ref, watch, computed, onMounted } from "vue";
 import PlotCreator from "./PlotCreator.vue";
 import TComponent from "./TComponent.vue";
-
-const draggable = VueDraggableNext;
+import { iconsNames } from "../constants/iconsNames";
+const icons = computed(() => {
+  return iconsNames();
+});
 
 const localData = ref({});
 const dragging = ref(false);
@@ -181,37 +182,35 @@ watch(
         <input focus type="text" class="scene-title" v-model="props.scene.title" v-else
           @input="emit('editScene', scene), store.checkCharactersInScene()" @click.stop />
       </h3>
-<!--       <button v-if="!isSingleMode" class="soft-btn" v-show="isHovered" @click="store.goToCarouselVisualization(scene)"
-        @click.stop>🎥</button> -->
+
     </div>
     <div class="scene-content" :class="handleCollapse ? 'expand' : ''">
       <div class="debug left-box">
-        <!--         <button class="drag-scene-handle" v-if="!isSingleMode" :class="'hideButton' + (isHovered ? 'show' : '')">
-          🖖
-        </button> -->
-        <!--         <button class="carousel-scene-handle" v-else :class="'hideButton' + (isHovered ? 'show' : '')">
-          Drag
-        </button> -->
-        <button @click="toggleEditScene()" class="soft-btn" :class="'hideButton' + (isHovered ? 'show' : '')"
-          :style="scene.plots.length > 0 ? { marginBottom: '6rem' } : {}">
-          {{ editText ? '👌' : '✏️' }}
-        </button>
-        <button @click="handleAddPlotToScene(scene)" v-if="editText && !scene.plots.length > 0"
-          :class="'hideButton' + (isHovered ? 'show' : '')">
-          Plot
-        </button>
+
+
+
+
+
+
+
+        <Button size="m" :icon="editText ?  icons.close : icons.edit" tooltip="Edit Scene"
+          @click="toggleEditScene()" :class="'hideButton' + (isHovered ? 'show' : '')"
+          :style="scene.plots.length > 0 ? { marginBottom: '6rem' } : {}"> </Button>
+
+        <Button @click="handleAddPlotToScene(scene)" v-if="editText && !scene.plots.length > 0"
+          size="m" :class="'hideButton' + (isHovered ? 'show' : '')" icon="material-symbols:add-box-outline">
+        </Button>
         <div class="plot-editor-container" v-if="editText">
 
+          <Button size="m" :icon=icons.delete  tooltip="Delete plots"
+            v-if="scene.plots.length > 0" @click="store.deletePlotsfromScene(scene)"
+            :class="'hideButton' + (isHovered ? 'show' : '')"> </Button>
 
-          <button style="margin-bottom: 0.25rem" @click="
-            store.deletePlotsfromScene(scene)
-            " v-if="scene.plots.length > 0" :class="'hideButton' + (isHovered ? 'show' : '')">
-            🗑️
-          </button>
           <td v-if="scene.plots.length > 0">
             <div v-for="(plot, index) in localData.plots">
               <input type="checkbox" id="" name="" v-model="scene.plots" :value="index + 1"
-                :style="{ accentColor: store.plotColorsHard[index] }" @change="emit('editScene', scene), store.triggerChange()" />
+                :style="{ accentColor: store.plotColorsHard[index] }"
+                @change="emit('editScene', scene), store.triggerChange()" />
               <label for="">{{ plot.title }}</label>
             </div>
           </td>
@@ -233,13 +232,13 @@ watch(
         </div>
       </div>
       <div class="debug2 right-box">
-        <button :class="'hideButton' + (isHovered ? 'show' : '')"
-          @click="store.deleteScene(props.actIndex, props.sceneIndex)" style="margin-left: 0rem" v-if="editText">
-          🗑️
-        </button>
+        <Button :icon=icons.delete size="m" :class="'hideButton' + (isHovered ? 'show' : '')"
+          @click="store.deleteScene(props.actIndex, props.sceneIndex)" style="margin-left: 0rem" v-if="editText" tooltip="Delete Scene">
+          
+        </Button>
         <div class="create-snippet" :class="'hideButton' + (isHovered ? 'show' : '')" v-if="editText">
-          <button @click="store.insertScene('up', actIndex, props.sceneIndex)">&#8593</button>
-          <button @click="store.insertScene('down', actIndex, props.sceneIndex)">&#8595</button>
+          <Button tooltip="Insert Scene Up" :icon="icons.up" size="m" @click="store.insertScene('up', actIndex, props.sceneIndex)"></Button>
+          <Button  tooltip="Insert Scene Down":icon="icons.down" size="m" @click="store.insertScene('down', actIndex, props.sceneIndex)"></Button>
         </div>
       </div>
 
@@ -321,7 +320,7 @@ watch(
   justify-content: space-between;
   /*   margin: 0.5rem; */
   width: inherit;
-   min-width: 200px;
+  min-width: 200px;
 }
 
 .right-box {

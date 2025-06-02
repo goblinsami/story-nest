@@ -6,12 +6,18 @@ import PlotCreator from "./PlotCreator.vue";
 import Act from "./Act.vue";
 import CharacterCreator from "./CharacterCreator.vue";
 import FilterScenes from "./FilterScenes.vue";
-const draggable = VueDraggableNext;
 import { useLineChart } from "../composables/useLineChart";
 import EditorSettings from "./EditorSettings.vue";
 import { positionsConstants } from "../constants/positions";
+import { iconsNames } from "../constants/iconsNames";
+
+
 const positions = computed(() => {
-    return positionsConstants();
+  return positionsConstants();
+});
+
+const icons = computed(() => {
+  return iconsNames();
 });
 const { hideTooltips } = useLineChart(null, null, null, null);
 
@@ -67,12 +73,14 @@ const handleShowPlotEditor = () => {
 };
 
 const dettachWindow = () => {
-  console.log("Dettach window",window.innerHeight, window.innerWidth);
+  console.log("Dettach window", window.innerHeight, window.innerWidth);
   store.dettachWindow()
 };
 
 const handleMouseEnter = () => {
-  store.isToolTipHidden = false; // Oculta el tooltip al entrar al componente
+  console.log("Mouse enter");
+  store.isToolTipHidden = false;
+  store.hideSelection = true; // Oculta el tooltip al entrar al componente
 };
 const handleToggleCollapseActs = () => {
 
@@ -128,25 +136,35 @@ const buttonAdjustText = computed(() => {
     <div class="d-flex justify-between"
       style="width: 100%; position: sticky; top: 0; z-index: 10; flex-direction: column; background-color: var(--color-dark-bg);">
       <!-- <slot name="toolbar"> </slot> -->
+      <div class="d-flex justify-between toolbar">
+        <div>
+          <Button @click="moveToLeft()" :icon=icons.moveLeft :tooltip="'Move to Left'"></Button>
+          <Button @click="dettachWindow()" :icon=icons.dettach :tooltip="'Dettach editor'"></Button>
+        </div>
+        <Button @click="moveToRight()" :icon=icons.moveRight :tooltip="'Move to Right'"></Button>
+      </div>
       <div class="d-flex justify-between">
-        <button @click="store.moveToLeft" >⏮️</button>
-        <button @click="store.moveToRight">⏭️</button>
+
+        <Button @click="toggleShowEditorSettings()" :icon=icons.settings :tooltip="buttonAdjustText + ' settings'"
+          size="m"></Button>
+
+        <Button @click="handleToggleCollapseActs()" :icon=icons.collapse :tooltip="buttonText + ' Acts'"
+          size="m"></Button>
       </div>
 
-      <button @click="dettachWindow()" class="act-btn"> Dettach </button>
-      <button @click="toggleShowEditorSettings()" v-if="!isCarousel" class="act-btn">{{ buttonAdjustText }}
-        ajustes</button>
-      <button @click="handleToggleCollapseActs()" class="act-btn">{{ buttonText }} Acts</button>
     </div>
     <main class="acts-container">
+      <!--       <Button icon="material-symbols:add-box-outline" tooltip="Add act"></Button>
 
-<EditorSettings v-model="localData" :show="store.editorSettings.showSettings" />
+      <Button icon="material-symbols:delete-forever-outline" tooltip="Delete act"></Button> -->
 
-      <draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" handle=".drag-handle"
-        class="acts-container2">
+
+      <EditorSettings v-model="localData" :show="store.editorSettings.showSettings" />
+
+      <Draggable v-model="localData.acts" @start="onStart" @end="onEnd" group="acts" class="acts-container2">
 
         <Act v-for="(act, actIndex) in localData.acts" class="card no-select" :act="act" :actIndex="actIndex"></Act>
-      </draggable>
+      </Draggable>
     </main>
   </div>
 
@@ -154,9 +172,13 @@ const buttonAdjustText = computed(() => {
 </template>
 <style>
 .toolbar {
-  background-color: var(--color-dark-bg);
-  opacity: 0.8;
+/*   background-color: var(--color-dark-bg-extra) !important;
+ */  opacity: 0.8;
   position: sticky;
+}
+
+.drag-modal .toolbar {
+  cursor: grab;
 }
 
 .acts-container {
@@ -166,7 +188,8 @@ const buttonAdjustText = computed(() => {
 .acts-container2 {
   position: relative;
   width: inherit;
-  padding: 0 0.5rem
+  /*   padding: 0 0.5rem
+ */
 }
 
 .act-btn {

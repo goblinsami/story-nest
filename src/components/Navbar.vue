@@ -1,6 +1,12 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useSettingsStore } from "../stores/settings";
+import { iconsNames } from "../constants/iconsNames";
+
+
+const icons = computed(() => {
+    return iconsNames();
+});
 
 const store = useSettingsStore();
 
@@ -9,29 +15,23 @@ const store = useSettingsStore();
 </script>
 
 <template>
-    <div class="d-flex justify-center items-center settings">
-<!--         <button @click="store.toggleEditor()">
-            {{ store.showEditor ? "Hide" : "Show" }} Editor
-        </button>
-        <button @click="store.togglePlotChart()">
-            {{ store.showPlotChart ? "Hide" : "Show" }} Plot Chart
-        </button> -->
+    <div class="d-flex justify-end settings">
+        <!-- 
         <button @click="store.toggleShowChartSettings()">
             {{ store.showChartSettings ? "Hide" : "Show" }} Chart Settings
-        </button>
-<!--         <button @click="store.toggleShowCarousel()"> Carousel</button>
-        <button @click="store.toggleShowGrid()"> Grid</button>
-        <button @click="store.toggleDarkMode()"> Night</button> -->
-
-        <!--         <button @click="store.toggleExpandChart()">
-            {{ store.expandChart ? "Expand" : "Contract" }} Chart Settings
         </button> -->
-    </div>
-    <div>
-        <button @click="store.exportStoryAsJSON()">Exportar JSON</button>
-        <button class="custom-file-upload">
-            <label for="file-upload" class="custom-button">Importar json</label>
+
+
+        <button title="Import Json" class="custom-file-upload">
+            <label for="file-upload" class="custom-button">
+                <Icon :style="{ fontSize: '2rem' }" :icon="icons.import" />
+            </label>
+
             <input type="file" id="file-upload" @change="store.importJSON" accept=".json" />
         </button>
+        <Button :icon="icons.export" tooltip="Export Json" @click="store.exportStoryAsJSON()"></Button>
+
+
+
     </div>
 </template>
